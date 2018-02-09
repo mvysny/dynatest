@@ -34,3 +34,6 @@ fun DynaNodeGroup.calculatorBattery(range: IntRange) {
 }
 ```
 
+Running this in your IDE will produce:
+
+![DynaTest CalculatorTest screenshot](images/dynatest.png)
