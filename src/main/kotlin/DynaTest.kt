@@ -22,9 +22,13 @@ internal operator fun TestContext.plus(other: TestContext) = TestContext(beforeE
 
 sealed class DynaNode(protected val name: String, protected val ctx: TestContext) {
     internal abstract fun toDynamicNode(): DynamicNode
+    internal abstract fun runTests()
 }
 class DynaNodeTest internal constructor(name: String, ctx: TestContext, private val body: ()->Unit) : DynaNode(name, ctx) {
-    override fun toDynamicNode(): DynamicNode = DynamicTest.dynamicTest(name, { ctx.invoke(body) })
+    override fun toDynamicNode(): DynamicNode = DynamicTest.dynamicTest(name, { runTests() })
+    override fun runTests() {
+        ctx.invoke(body)
+    }
 }
 class DynaNodeGroup internal constructor(name: String, ctx: TestContext) : DynaNode(name, ctx) {
     internal val nodes = mutableListOf<DynaNode>()
@@ -45,6 +49,9 @@ class DynaNodeGroup internal constructor(name: String, ctx: TestContext) : DynaN
     fun afterEach(block: ()->Unit) {
         afterEach.add(block)
     }
+    override fun runTests() {
+        nodes.forEach { it.runTests() }
+    }
 }
 
 abstract class DynaTest(block: DynaNodeGroup.()->Unit) {
@@ -55,4 +62,10 @@ abstract class DynaTest(block: DynaNodeGroup.()->Unit) {
 
     @TestFactory
     fun tests(): List<DynamicNode> = root.nodes.map { it.toDynamicNode() }
+}
+
+fun runTests(block: DynaNodeGroup.()->Unit) {
+    val group = DynaNodeGroup("root", TestContext.EMPTY)
+    group.block()
+    group.runTests()
 }

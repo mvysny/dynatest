@@ -1,6 +1,6 @@
-# DynaTest Dynamic Testing Framework piggybacking on JUnit5 (experimental)
+# DynaTest Dynamic Testing Framework
 
-Experimental, unreleased, pretty much a playground. Code example:
+Kotlin-based piggybacking on JUnit5 dynamic test support. Experimental, unreleased, pretty much a playground. Code example:
 
 ```kotlin
 class Calculator {
