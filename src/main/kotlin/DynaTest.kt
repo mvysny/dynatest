@@ -5,20 +5,29 @@ import org.junit.jupiter.api.DynamicNode
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 
-internal data class TestContext(val beforeEach: List<()->Unit>, val afterEach: List<()->Unit>) {
-    fun invoke(block: ()->Unit) {
+internal class TestContext(val parent: TestContext? = null) {
+    val beforeEach = mutableListOf<()->Unit>()
+    val afterEach = mutableListOf<()->Unit>()
+    private fun invokeBefore() {
+        parent?.invokeBefore()
         beforeEach.forEach { it() }
+    }
+    private fun invokeAfter() {
+        afterEach.forEach { it() }
+        parent?.invokeAfter()
+    }
+    fun invoke(block: ()->Unit) {
+        invokeBefore()
         try {
             block()
         } finally {
-            afterEach.forEach { it() }
+            invokeAfter()
         }
     }
     companion object {
-        val EMPTY = TestContext(listOf(), listOf())
+        val EMPTY = TestContext(null)
     }
 }
-internal operator fun TestContext.plus(other: TestContext) = TestContext(beforeEach + other.beforeEach, other.afterEach + afterEach)
 
 sealed class DynaNode(protected val name: String, protected val ctx: TestContext) {
     internal abstract fun toDynamicNode(): DynamicNode
@@ -32,22 +41,20 @@ class DynaNodeTest internal constructor(name: String, ctx: TestContext, private 
 }
 class DynaNodeGroup internal constructor(name: String, ctx: TestContext) : DynaNode(name, ctx) {
     internal val nodes = mutableListOf<DynaNode>()
-    private val beforeEach = mutableListOf<()->Unit>()
-    private val afterEach = mutableListOf<()->Unit>()
     override fun toDynamicNode(): DynamicNode = DynamicContainer.dynamicContainer(name, nodes.map { it.toDynamicNode() })
     fun test(name: String, body: ()->Unit) {
-        nodes.add(DynaNodeTest(name, ctx + TestContext(beforeEach, afterEach), body))
+        nodes.add(DynaNodeTest(name, ctx, body))
     }
     fun group(name: String, block: DynaNodeGroup.()->Unit) {
-        val group = DynaNodeGroup(name, ctx + TestContext(beforeEach, afterEach))
+        val group = DynaNodeGroup(name, TestContext(ctx))
         group.block()
         nodes.add(group)
     }
     fun beforeEach(block: ()->Unit) {
-        beforeEach.add(block)
+        ctx.beforeEach.add(block)
     }
     fun afterEach(block: ()->Unit) {
-        afterEach.add(block)
+        ctx.afterEach.add(block)
     }
     override fun runTests() {
         nodes.forEach { it.runTests() }

@@ -1,17 +1,25 @@
 package com.github.mvysny.dynatest
 
-import org.junit.jupiter.api.Test
 import kotlin.test.expect
 
-class DynaTestTest {
-    @Test
-    fun simple() {
-        var ran = false
-        runTests {
-            test("simple") {
-                ran = true
+class DynaTestTest : DynaTest({
+    group("test the 'beforeEach' behavior") {
+        group("simple before-test") {
+            var called = false
+            test("check that 'beforeEach' ran") {
+                expect(true) { called }
             }
+            beforeEach { called = true }
         }
-        expect(true) { ran }
+
+        group("before-group") {
+            var called = false
+            group("artificial group") {
+                test("check that 'beforeEach' ran") {
+                    expect(true) { called }
+                }
+            }
+            beforeEach { called = true }
+        }
     }
-}
+})
