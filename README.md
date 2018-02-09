@@ -1,5 +1,7 @@
 # DynaTest Dynamic Testing Framework
 
+[![Build Status](https://travis-ci.org/mvysny/dynatest.svg?branch=master)](https://travis-ci.org/mvysny/dynatest)
+
 Kotlin-based piggybacking on JUnit5 dynamic test support. Experimental, unreleased, pretty much a playground. Code example:
 
 ```kotlin
