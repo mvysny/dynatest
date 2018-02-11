@@ -23,5 +23,28 @@ class TestUtilsTest : DynaTest({
                 }
             }
         }
+
+        group("AssertionError not handled specially") {
+            test("throwing expected exception succeeds") {
+                expectThrows(AssertionError::class) { throw AssertionError("Expected") }
+            }
+
+            test("fails if block completes successfully") {
+                try {
+                    expectThrows(AssertionError::class) {}
+                    throw RuntimeException("Should have failed")
+                } catch (e: AssertionError) { /*okay*/ }
+            }
+
+            test("fails if block throws something else") {
+                try {
+                    // this should fail with AssertionError since some other exception has been thrown
+                    expectThrows(AssertionError::class) {
+                        throw IOException("simulated")
+                    }
+                    throw RuntimeException("Should have failed")
+                } catch (e: AssertionError) { /*okay*/ }
+            }
+        }
     }
 })
