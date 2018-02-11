@@ -14,7 +14,7 @@ fun expectThrows(clazz: KClass<out Throwable>, block: ()->Unit) {
         block()
         completedSuccessfully = true
     } catch (t: Throwable) {
-        expect(true, "Expected to fail with $clazz but failed with $t") { clazz.java.isInstance(t) }
+        if (!clazz.java.isInstance(t)) throw AssertionError("Expected to fail with $clazz but failed with $t", t)
     }
     if (completedSuccessfully) fail("Expected to fail with $clazz but completed successfully")
 }
