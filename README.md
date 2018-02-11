@@ -83,8 +83,8 @@ Advantages:
 Drawbacks:
 
 * Weak IDE (Intellij) integration:
-  * `F4` navigation from the failed test to sources doesn't work
+  * `F4` navigation from the test in the "Run" window to test's sources doesn't work
   * "Rerun failed tests" always runs all tests
-  * Impossible to run just a single test (by right-clicking on the test)
+  * Impossible to run single test only (right-clicking on the test name doesn't offer such option)
   * [Spek](http://spekframework.org/) provides good IDE integration, but at the price
     of having a [Spek Plugin](https://plugins.jetbrains.com/plugin/8564-spek).
