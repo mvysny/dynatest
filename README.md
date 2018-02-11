@@ -1,4 +1,4 @@
-# DynaTest Dynamic Testing Framework
+# DynaTest Dynamic Testing API prototype
 
 [![Build Status](https://travis-ci.org/mvysny/dynatest.svg?branch=master)](https://travis-ci.org/mvysny/dynatest)
 
@@ -74,3 +74,17 @@ fun DynaNodeGroup.calculatorBattery(range: IntRange) {
 Running this in your IDE will produce:
 
 ![DynaTest CalculatorTest screenshot](images/dynatest.png)
+
+Advantages:
+
+* Support for test grouping
+* Create and launch a reusable test battery easily
+
+Drawbacks:
+
+* Weak IDE (Intellij) integration:
+  * `F4` navigation from the failed test to sources doesn't work
+  * "Rerun failed tests" always runs all tests
+  * Impossible to run just a single test (by right-clicking on the test)
+  * [Spek](http://spekframework.org/) provides good IDE integration, but at the price
+    of having a [Spek Plugin](https://plugins.jetbrains.com/plugin/8564-spek).
