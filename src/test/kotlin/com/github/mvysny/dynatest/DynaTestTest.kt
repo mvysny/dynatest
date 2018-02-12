@@ -78,7 +78,7 @@ class DynaTestTest : DynaTest({
                 test("dummy test2") {}
             }
 
-            test("check that 'afterEach' ran") {
+            test("check that 'afterAll' ran") {
                 expect(1) { called }
             }
         }
@@ -93,7 +93,7 @@ class DynaTestTest : DynaTest({
                 }
             }
 
-            test("check that 'afterEach' ran") {
+            test("check that 'afterAll' ran") {
                 expect(1) { called }
             }
         }
