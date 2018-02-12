@@ -22,4 +22,30 @@ class DynaTestTest : DynaTest({
             beforeEach { called = true }
         }
     }
+
+    group("test the 'afterEach' behavior") {
+        group("simple after-test") {
+            var called = false
+            afterEach { called = true }
+
+            test("dummy test which triggers 'afterEach'") {}
+
+            test("check that 'afterEach' ran") {
+                expect(true) { called }
+            }
+        }
+
+        group("after-group") {
+            var called = false
+            afterEach { called = true }
+
+            group("artificial group") {
+                test("dummy test which triggers 'afterEach'") {}
+            }
+
+            test("check that 'afterEach' ran") {
+                expect(true) { called }
+            }
+        }
+    }
 })
