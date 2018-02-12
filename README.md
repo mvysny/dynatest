@@ -114,3 +114,27 @@ Running this in your IDE will produce:
 * Weak IDE (Intellij) integration:
   * "Rerun failed tests" always runs all tests
   * Impossible to run single test only (right-clicking on the test name doesn't offer such option)
+
+## Using in your projects
+
+DynaTest sports its own TestEngine which ignores JUnit5 tests and only runs `DynaTest` tests.
+If you don't have any JUnit5 tests, you need to add a test dependency on this library:
+
+```groovy
+dependencies {
+    testCompile("com.github.mvysny.dynatest:dynatest:0.0.1")
+}
+```
+
+To run the tests you need to add the [junit5-gradle-consumer](https://github.com/junit-team/junit5-samples/tree/r5.0.3/junit5-gradle-consumer)
+plugin to your buildscript; see the plugin's documentation for details.
+
+If you have JUnit5 tests as well, you can run both DynaTest test engine along with JUnit5 Jupiter engine
+(which will only run JUnit5 tests and will ignore DynaTest tests):
+
+```groovy
+dependencies {
+    testCompile("com.github.mvysny.dynatest:dynatest:0.0.1")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.3")
+}
+```

@@ -16,7 +16,7 @@ fun runTests(block: DynaNodeGroup.()->Unit) {
     DynaTestEngine().execute(ExecutionRequest(testDescriptor, ThrowingExecutionListener, EmptyConfigParameters))
 }
 
-object ThrowingExecutionListener : EngineExecutionListener {
+internal object ThrowingExecutionListener : EngineExecutionListener {
     override fun executionFinished(testDescriptor: TestDescriptor, testExecutionResult: TestExecutionResult) {
         if (testExecutionResult.throwable.isPresent) throw testExecutionResult.throwable.get()
     }
@@ -31,7 +31,7 @@ object ThrowingExecutionListener : EngineExecutionListener {
     }
 }
 
-object EmptyConfigParameters : ConfigurationParameters {
+internal object EmptyConfigParameters : ConfigurationParameters {
     override fun getBoolean(key: String?): Optional<Boolean> = Optional.ofNullable(null)
     override fun size(): Int = 0
     override fun get(key: String?): Optional<String> = Optional.ofNullable(null)
