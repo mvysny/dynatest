@@ -1,9 +1,6 @@
 package com.github.mvysny.dynatest
 
-import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicNode
-import org.junit.jupiter.api.DynamicTest
-import org.junit.jupiter.api.TestFactory
 import org.junit.platform.commons.annotation.Testable
 import org.junit.platform.engine.TestSource
 import org.junit.platform.engine.support.descriptor.ClassSource
@@ -58,12 +55,6 @@ internal class TestContext(val parent: TestContext? = null) {
  */
 sealed class DynaNode(internal val name: String, protected val ctx: TestContext, internal val src: TestSource?) {
     /**
-     * Converts this node to JUnit5's [DynamicNode]. We will pass the list of these nodes to JUnit5 so that it can run the tests contained
-     * within those nodes.
-     */
-    internal abstract fun toDynamicNode(): DynamicNode
-
-    /**
      * Only used from the [runTests] functions when the tests are running outside of JUnit5. Typically not used.
      */
     internal abstract fun runTests()
@@ -75,7 +66,6 @@ sealed class DynaNode(internal val name: String, protected val ctx: TestContext,
  * To start writing tests, just extend [DynaTest]. See [DynaTest] for more details.
  */
 class DynaNodeTest internal constructor(name: String, context: TestContext, private val body: ()->Unit, src: TestSource?) : DynaNode(name, context, src) {
-    override fun toDynamicNode(): DynamicNode = DynamicTest.dynamicTest(name, { runTests() })
     override fun runTests() {
         ctx.runTest(body)
     }
@@ -88,7 +78,6 @@ class DynaNodeTest internal constructor(name: String, context: TestContext, priv
  */
 class DynaNodeGroup internal constructor(name: String, ctx: TestContext, src: TestSource?) : DynaNode(name, ctx, src) {
     internal val nodes = mutableListOf<DynaNode>()
-    override fun toDynamicNode(): DynamicNode = DynamicContainer.dynamicContainer(name, nodes.map { it.toDynamicNode() })
     /**
      * Generates a test case with given [name] and registers it within this group. Does not run the test case immediately -
      * the test is only registered for being run later on by JUnit5 runner (or by [runTests]).
@@ -142,10 +131,6 @@ abstract class DynaTest(block: DynaNodeGroup.()->Unit) {
     init {
         root.block()
     }
-
-    // don't remove this method, it is important for having a mixed set of both JUnit5 tests and DynaTests
-    @TestFactory
-    fun tests(): List<DynamicNode> = root.nodes.map { it.toDynamicNode() }
 }
 
 /**

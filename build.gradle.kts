@@ -29,4 +29,9 @@ dependencies {
     compile(kotlin("test"))
     compile("org.junit.jupiter:junit-jupiter-api:5.0.3")
     compile("org.junit.platform:junit-platform-engine:1.0.3")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.3")
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions.jvmTarget = "1.8"
 }
