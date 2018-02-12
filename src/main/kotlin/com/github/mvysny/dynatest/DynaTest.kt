@@ -4,6 +4,12 @@ import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicNode
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
+import org.junit.platform.commons.annotation.Testable
+import org.junit.platform.engine.TestSource
+import org.junit.platform.engine.support.descriptor.ClassSource
+import org.junit.platform.engine.support.descriptor.FilePosition
+import org.junit.platform.engine.support.descriptor.FileSource
+import java.io.File
 
 /**
  * The test execution context. In addition to running the test, it remembers what to run before every test, after every test, etc.
@@ -50,7 +56,7 @@ internal class TestContext(val parent: TestContext? = null) {
  * Every [DynaNodeGroup.test] and [DynaNodeGroup.group] call
  * creates this node which in turn can be converted to JUnit5's [DynamicNode] by the means of the [toDynamicNode] function.
  */
-sealed class DynaNode(protected val name: String, protected val ctx: TestContext) {
+sealed class DynaNode(internal val name: String, protected val ctx: TestContext, internal val src: TestSource?) {
     /**
      * Converts this node to JUnit5's [DynamicNode]. We will pass the list of these nodes to JUnit5 so that it can run the tests contained
      * within those nodes.
@@ -68,7 +74,7 @@ sealed class DynaNode(protected val name: String, protected val ctx: TestContext
  *
  * To start writing tests, just extend [DynaTest]. See [DynaTest] for more details.
  */
-class DynaNodeTest internal constructor(name: String, context: TestContext, private val body: ()->Unit) : DynaNode(name, context) {
+class DynaNodeTest internal constructor(name: String, context: TestContext, private val body: ()->Unit, src: TestSource?) : DynaNode(name, context, src) {
     override fun toDynamicNode(): DynamicNode = DynamicTest.dynamicTest(name, { runTests() })
     override fun runTests() {
         ctx.runTest(body)
@@ -80,7 +86,7 @@ class DynaNodeTest internal constructor(name: String, context: TestContext, priv
  *
  * To start writing tests, just extend [DynaTest]. See [DynaTest] for more details.
  */
-class DynaNodeGroup internal constructor(name: String, ctx: TestContext) : DynaNode(name, ctx) {
+class DynaNodeGroup internal constructor(name: String, ctx: TestContext, src: TestSource?) : DynaNode(name, ctx, src) {
     internal val nodes = mutableListOf<DynaNode>()
     override fun toDynamicNode(): DynamicNode = DynamicContainer.dynamicContainer(name, nodes.map { it.toDynamicNode() })
     /**
@@ -89,10 +95,12 @@ class DynaNodeGroup internal constructor(name: String, ctx: TestContext) : DynaN
      * @param body run when the test case is run
      */
     fun test(name: String, body: ()->Unit) {
-        nodes.add(DynaNodeTest(name, ctx, body))
+        val source = guessTestSource()
+        nodes.add(DynaNodeTest(name, ctx, body, source))
     }
     fun group(name: String, block: DynaNodeGroup.()->Unit) {
-        val group = DynaNodeGroup(name, TestContext(ctx))
+        val source = guessTestSource()
+        val group = DynaNodeGroup(name, TestContext(ctx), source)
         group.block()
         nodes.add(group)
     }
@@ -128,12 +136,14 @@ class DynaNodeGroup internal constructor(name: String, ctx: TestContext) : DynaN
  * })
  * ```
  */
+@Testable
 abstract class DynaTest(block: DynaNodeGroup.()->Unit) {
-    private val root = DynaNodeGroup(javaClass.simpleName, TestContext.EMPTY)
+    internal val root = DynaNodeGroup(javaClass.simpleName, TestContext.EMPTY, null)
     init {
         root.block()
     }
 
+    // don't remove this method, it is important for having a mixed set of both JUnit5 tests and DynaTests
     @TestFactory
     fun tests(): List<DynamicNode> = root.nodes.map { it.toDynamicNode() }
 }
@@ -144,7 +154,27 @@ abstract class DynaTest(block: DynaNodeGroup.()->Unit) {
  * [DynaNodeGroup] class - see the `CalculatorTest.kt` file for more details.
  */
 fun runTests(block: DynaNodeGroup.()->Unit) {
-    val group = DynaNodeGroup("root", TestContext.EMPTY)
+    val group = DynaNodeGroup("root", TestContext.EMPTY, null)
     group.block()
     group.runTests()
+}
+
+internal fun guessTestSource(): TestSource? {
+    val stackTrace = Thread.currentThread().stackTrace
+    if (stackTrace.size < 4) return null
+    val caller: StackTraceElement = stackTrace[3]
+    // normally we would just return ClassSource, but there are the following issues with that:
+    // 1. Intellij ignores FilePosition in ClassSource
+    // 2. If I try to remedy that by passing in the block class name (such as DynaTestTest$1$1$1$1), Intellij looks confused and won't perform any navigation
+    // 3. FileSource seems to work very well.
+
+    // Try to guess the absolute test file name from the file class. It should be located somewhere in src/main/kotlin or src/main/java
+    if (!caller.fileName.isNullOrBlank() && caller.fileName.endsWith(".kt")) {
+        val folders = listOf("java", "kotlin").map { File("src/test/$it").absoluteFile } .filter { it.exists() }
+        val pkg = caller.className.replace('.', '/').replaceAfterLast('/', "", "").trim('/')
+        val file: File? = folders.map { File(it, "$pkg/${caller.fileName}") } .firstOrNull { it.exists() }
+        if (file != null) return FileSource.from(file, FilePosition.from(caller.lineNumber))
+    }
+    // ClassSource doesn't work on classes named DynaTestTest$1$1$1$1 (with $ in them); strip that.
+    return ClassSource.from(caller.className.replaceAfter('$', "").trim('$'))
 }
