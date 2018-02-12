@@ -13,8 +13,8 @@ it also reduces the possibilities of how to structure test code and promotes bad
   in annotations, that restricts you from:
   * Having the parameters created dynamically or loaded from a file;
   * Using more complex types - you are restricted to String and primitives.
-* Annotations are weak - they don't have the full power of a programmatic language; overusing them for emulating
-  logic leads to horrible constructs and annotationmania.
+* Annotations are weak - they don't have the full power of a programming language. Overusing annotations in stead of 
+  an actual programming language leads to horrible constructs and annotationmania.
 * Reuse of test suites is only possible by the means of inheritance (having a base class with tests, and a bunch of classes
   extending that base class, parametrizing it with constructors). Typically componentization should be preferred over inheritance.
 * Even worse, it is possible to "reuse" test suites by the means of interface mixins. That's a whole new level
