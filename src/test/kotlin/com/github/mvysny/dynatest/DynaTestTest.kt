@@ -4,7 +4,7 @@ import kotlin.test.expect
 
 class DynaTestTest : DynaTest({
     group("test the 'beforeEach' behavior") {
-        group("simple before-test") {
+        group("test that beforeEach runs before every test") {
             var called = false
             test("check that 'beforeEach' ran") {
                 expect(true) { called }
@@ -12,8 +12,9 @@ class DynaTestTest : DynaTest({
             beforeEach { called = true }
         }
 
-        group("before-group") {
+        group("test that 'beforeEach' is also applied to tests nested inside a child group") {
             var called = false
+            // an artificial group, only for the purpose of nesting the test that checks whether the 'beforeEach' block ran
             group("artificial group") {
                 test("check that 'beforeEach' ran") {
                     expect(true) { called }
@@ -24,7 +25,7 @@ class DynaTestTest : DynaTest({
     }
 
     group("test the 'afterEach' behavior") {
-        group("simple after-test") {
+        group("test that 'afterEach' runs after every test") {
             var called = false
             afterEach { called = true }
 
@@ -35,10 +36,11 @@ class DynaTestTest : DynaTest({
             }
         }
 
-        group("after-group") {
+        group("test that 'afterEach' is also applied to tests nested inside a child group") {
             var called = 0
             afterEach { called++ }
 
+            // an artificial group, only for the purpose of nesting the test that checks whether the 'afterEach' block ran
             group("artificial group") {
                 test("dummy test which triggers 'afterEach'") {}
             }
