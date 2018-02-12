@@ -36,15 +36,65 @@ class DynaTestTest : DynaTest({
         }
 
         group("after-group") {
-            var called = false
-            afterEach { called = true }
+            var called = 0
+            afterEach { called++ }
 
             group("artificial group") {
                 test("dummy test which triggers 'afterEach'") {}
             }
 
             test("check that 'afterEach' ran") {
+                expect(1) { called }
+            }
+        }
+    }
+
+    group("test the 'beforeAll' behavior") {
+        group("simple before-test") {
+            var called = false
+            test("check that 'beforeAll' ran") {
                 expect(true) { called }
+            }
+            beforeAll { called = true }
+        }
+
+        group("before-group") {
+            var called = false
+            group("artificial group") {
+                test("check that 'beforeEach' ran") {
+                    expect(true) { called }
+                }
+            }
+            beforeAll { called = true }
+        }
+    }
+
+    group("test the 'afterAll' behavior") {
+        group("simple after-test") {
+            var called = 0
+            group("dummy") {
+                afterAll { called++ }
+                test("dummy test") {}
+                test("dummy test2") {}
+            }
+
+            test("check that 'afterEach' ran") {
+                expect(1) { called }
+            }
+        }
+
+        group("after-group") {
+            var called = 0
+            group("dummy") {
+                afterAll { called++ }
+
+                group("artificial group") {
+                    test("dummy test which triggers 'afterEach'") {}
+                }
+            }
+
+            test("check that 'afterEach' ran") {
+                expect(1) { called }
             }
         }
     }

@@ -32,7 +32,8 @@ Ideally, the testing framework should follow these items:
   and simply include that test suite anywhere you see fit.
 * Dissuade from abominable programming techniques like inheritance and annotationmania.
 * Allow creating tests dynamically, in a fucking `for` loop if necessary.
-* Put the programmer in charge
+* Put the programmer in charge and allow him to use the full palette of software practices, in order
+ to create well-maintainable test code.
 
 ## Example
 

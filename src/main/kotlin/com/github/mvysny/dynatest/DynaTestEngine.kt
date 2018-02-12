@@ -4,9 +4,8 @@ import org.junit.platform.commons.util.ReflectionUtils
 import org.junit.platform.engine.*
 import org.junit.platform.engine.discovery.*
 import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor
-import org.junit.platform.engine.support.descriptor.ClassSource
 import java.lang.reflect.Modifier
-import java.util.ArrayList
+import java.util.*
 import java.util.function.Predicate
 
 /**
@@ -49,18 +48,31 @@ class DynaTestEngine : TestEngine {
 
     override fun execute(request: ExecutionRequest) {
 
-        fun runtest(td: TestDescriptor) {
-            request.engineExecutionListener.executionStarted(td)
-            td.children.forEach { runtest(it) }
+        fun runTest(td: DynaNodeTestDescriptor, node: DynaNodeTest) {
+            td.runBeforeEach()
             try {
-                td.runTest()
+                node.body()
+            } finally {
+                td.runAfterEach()
+            }
+        }
+
+        fun runAllTests(td: TestDescriptor) {
+            request.engineExecutionListener.executionStarted(td)
+            (td as? DynaNodeTestDescriptor)?.runBeforeAll()
+            td.children.forEach { runAllTests(it) }
+            try {
+                if (td is DynaNodeTestDescriptor && td.node is DynaNodeTest) {
+                    runTest(td, td.node)
+                }
+                (td as? DynaNodeTestDescriptor)?.runAfterAll()
                 request.engineExecutionListener.executionFinished(td, TestExecutionResult.successful())
             } catch (t: Throwable) {
                 request.engineExecutionListener.executionFinished(td, TestExecutionResult.failed(t))
             }
         }
 
-        runtest(request.rootTestDescriptor)
+        runAllTests(request.rootTestDescriptor)
     }
 }
 
@@ -77,27 +89,46 @@ internal fun DynaNode.getId(parent: UniqueId): UniqueId {
 }
 
 internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNode) : AbstractTestDescriptor(node.getId(parentId), node.name, node.src) {
+    init {
+        if (node is DynaNodeGroup) {
+            node.children.forEach { addChild(DynaNodeTestDescriptor(uniqueId, it)) }
+        }
+    }
+
     override fun getType(): TestDescriptor.Type = when (node) {
         is DynaNodeGroup -> TestDescriptor.Type.CONTAINER
         is DynaNodeTest -> TestDescriptor.Type.TEST
     }
+
+    fun runBeforeAll() {
+        if (node is DynaNodeGroup) {
+            node.beforeAll.forEach { it() }
+        }
+    }
+
+    fun runAfterAll() {
+        if (node is DynaNodeGroup) {
+            node.afterAll.forEach { it() }
+        }
+    }
+
+    fun runBeforeEach() {
+        (parent.orElse(null) as? DynaNodeTestDescriptor)?.runBeforeEach()
+        if (node is DynaNodeGroup) {
+            node.beforeEach.forEach { it() }
+        }
+    }
+
+    fun runAfterEach() {
+        if (node is DynaNodeGroup) {
+            node.afterEach.forEach { it() }
+        }
+        (parent.orElse(null) as? DynaNodeTestDescriptor)?.runAfterEach()
+    }
 }
 
 internal fun DynaTest.toTestDescriptor(parentId: UniqueId): TestDescriptor =
-    root.toTestDescriptor(parentId)
-
-internal fun DynaNode.toTestDescriptor(parentId: UniqueId): TestDescriptor {
-    val result = DynaNodeTestDescriptor(parentId, this)
-    if (this is DynaNodeGroup) {
-        nodes.forEach { result.addChild(it.toTestDescriptor(result.uniqueId)) }
-    }
-    return result
-}
-
-internal fun TestDescriptor.runTest(): Unit = when {
-    this is DynaNodeTestDescriptor && node is DynaNodeTest -> node.runTests()
-    else -> Unit // do nothing
-}
+    DynaNodeTestDescriptor(parentId, root)
 
 val Class<*>.isPrivate: Boolean get() = Modifier.isPrivate(modifiers)
 val Class<*>.isAbstract: Boolean get() = Modifier.isAbstract(modifiers)
