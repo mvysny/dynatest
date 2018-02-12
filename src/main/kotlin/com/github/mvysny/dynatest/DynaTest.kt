@@ -131,6 +131,11 @@ abstract class DynaTest(block: DynaNodeGroup.()->Unit) {
     init {
         root.block()
     }
+
+    @Testable
+    fun blank() {
+        // must  be here, otherwise Intellij won't launch this class as a test (via rightclick).
+    }
 }
 
 /**
