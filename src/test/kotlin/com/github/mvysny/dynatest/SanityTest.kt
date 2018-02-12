@@ -1,5 +1,6 @@
 package com.github.mvysny.dynatest
 
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import kotlin.test.expect
 
@@ -42,5 +43,16 @@ class SanityTest {
             }
         }
         expect(true) { ran }
+    }
+
+    @Test
+    fun testProperlyRethrowsException() {
+        Assertions.assertThrows(RuntimeException::class.java) {
+            runTests {
+                test("always fail") {
+                    throw RuntimeException("Simulated failure")
+                }
+            }
+        }
     }
 }
