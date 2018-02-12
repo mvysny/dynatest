@@ -1,5 +1,18 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.junit.platform:junit-platform-gradle-plugin:1.0.3")
+    }
+}
+
+apply {
+    plugin("org.junit.platform.gradle.plugin")
+}
+
 plugins {
     kotlin("jvm") version "1.2.21"
 }
