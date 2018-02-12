@@ -138,7 +138,7 @@ class DynaNodeGroup internal constructor(name: String, ctx: TestContext, src: Te
  */
 @Testable
 abstract class DynaTest(block: DynaNodeGroup.()->Unit) {
-    internal val root = DynaNodeGroup(javaClass.simpleName, TestContext.EMPTY, null)
+    internal val root = DynaNodeGroup(javaClass.simpleName, TestContext.EMPTY, ClassSource.from(javaClass))
     init {
         root.block()
     }

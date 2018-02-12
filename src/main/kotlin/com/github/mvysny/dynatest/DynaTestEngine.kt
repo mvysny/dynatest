@@ -20,7 +20,6 @@ class DynaTestEngine : TestEngine {
 
         val result = ClassListTestDescriptor(uniqueId)
         tests.map { Class.forName(it).newInstance() as DynaTest } .forEach { result.addChild(it.toTestDescriptor(result.uniqueId)) }
-        println(result.children)
         return result
     }
 
@@ -55,7 +54,7 @@ internal fun DynaNode.getId(parent: UniqueId): UniqueId {
     return parent.append(segmentType, name)
 }
 
-internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNode, src: TestSource? = node.src) : AbstractTestDescriptor(node.getId(parentId), node.name, src) {
+internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNode) : AbstractTestDescriptor(node.getId(parentId), node.name, node.src) {
     override fun getType(): TestDescriptor.Type = when (node) {
         is DynaNodeGroup -> TestDescriptor.Type.CONTAINER
         is DynaNodeTest -> TestDescriptor.Type.TEST
@@ -63,10 +62,10 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNode, sr
 }
 
 internal fun DynaTest.toTestDescriptor(parentId: UniqueId): TestDescriptor =
-    root.toTestDescriptor(parentId, ClassSource.from(javaClass))
+    root.toTestDescriptor(parentId)
 
-internal fun DynaNode.toTestDescriptor(parentId: UniqueId, src: TestSource? = this.src): TestDescriptor {
-    val result = DynaNodeTestDescriptor(parentId, this, src)
+internal fun DynaNode.toTestDescriptor(parentId: UniqueId): TestDescriptor {
+    val result = DynaNodeTestDescriptor(parentId, this)
     if (this is DynaNodeGroup) {
         nodes.forEach { result.addChild(it.toTestDescriptor(result.uniqueId)) }
     }
