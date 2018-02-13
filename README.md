@@ -59,7 +59,7 @@ What this framework is not:
 
 ## Example
 
-Code example of the [CalculatorTest.kt](src/test/kotlin/CalculatorTest.kt):
+Code example of the [CalculatorTest.kt](src/test/kotlin/com/github/mvysny/dynatest/CalculatorTest.kt):
 
 ```kotlin
 class Calculator {
