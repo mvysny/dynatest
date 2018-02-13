@@ -140,7 +140,7 @@ Running this in your IDE will produce:
 ## Using in your projects
 
 DynaTest sports its own TestEngine which ignores JUnit5 tests and only runs `DynaTest` tests.
-If you don't have any JUnit5 tests, you need to add a test dependency on this library:
+If you don't have any JUnit5 tests in your project, you only need to add a test dependency on this library:
 
 ```groovy
 dependencies {
@@ -148,8 +148,9 @@ dependencies {
 }
 ```
 
-To run the tests you need to add the [junit5-gradle-consumer](https://github.com/junit-team/junit5-samples/tree/r5.0.3/junit5-gradle-consumer)
-plugin to your buildscript; see the plugin's documentation for details.
+Moreover you need to add the [junit5-gradle-consumer](https://github.com/junit-team/junit5-samples/tree/r5.0.3/junit5-gradle-consumer)
+plugin to your build script, to actually run the tests; see the plugin's documentation for details. This is required since
+Gradle doesn't have built-in support for running JUnit5 tests yet.
 
 If you have JUnit5 tests as well, you can run both DynaTest test engine along with JUnit5 Jupiter engine
 (which will only run JUnit5 tests and will ignore DynaTest tests):
