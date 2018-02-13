@@ -80,6 +80,7 @@ class CalculatorTest : DynaTest({
     }
 
     // you can have as many groups as you like, and you can nest them
+    // 'group' has no semantic definition, you are free to assign one as you need
     group("tests the plusOne() function") {
 
         // demo of the very simple test
