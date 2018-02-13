@@ -27,9 +27,9 @@ repositories {
 dependencies {
     compile(kotlin("stdlib-jdk8"))
     compile(kotlin("test"))
-    compile("org.junit.jupiter:junit-jupiter-api:5.0.3")
-    compile("org.junit.platform:junit-platform-engine:1.0.3")
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.3")
+    compile("org.junit.jupiter:junit-jupiter-api:5.1.0-RC1")
+    compile("org.junit.platform:junit-platform-engine:1.1.0-RC1")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.1.0-RC1")
 }
 
 tasks.withType<KotlinCompile> {
