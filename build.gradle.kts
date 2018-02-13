@@ -1,4 +1,16 @@
+import com.jfrog.bintray.gradle.BintrayExtension
+import groovy.lang.Closure
+import org.gradle.api.tasks.GradleBuild
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.*
+
+val local = Properties()
+if (project.rootProject.file("local.properties").exists()) {
+    project.rootProject.file("local.properties").inputStream().use { local.load(it) }
+}
+
+group = "com.github.mvysny.dynatest"
+version = "0.0.1-SNAPSHOT"
 
 buildscript {
     repositories {
@@ -15,6 +27,8 @@ apply {
 
 plugins {
     kotlin("jvm") version "1.2.21"
+    id("com.jfrog.bintray") version "1.7.3"
+    `maven-publish`
 }
 
 defaultTasks("clean", "build")
@@ -34,4 +48,49 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+val sourceJar = task("sourceJar", Jar::class) {
+    dependsOn(tasks.findByName("classes"))
+    classifier = "sources"
+    from(java.sourceSets["main"].allSource)
+}
+
+publishing {
+    publications {
+        create("mavenJava", MavenPublication::class.java).apply {
+            groupId = project.group.toString()
+            artifactId = "dynatest"
+            version = project.version.toString()
+            pom.withXml {
+                val root = asNode()
+                root.appendNode("description", "Simple Dynamic Testing Framework piggybacking on JUnit5")
+                root.appendNode("name", "DynaTest")
+                root.appendNode("url", "https://github.com/mvysny/dynatest")
+            }
+            from(components.findByName("java")!!)
+            artifact(sourceJar) {
+                classifier = "sources"
+            }
+        }
+    }
+}
+
+tasks.findByName("build")!!.dependsOn(tasks.findByName("publishToMavenLocal")!!)
+
+bintray {
+    user = local.getProperty("bintray.user")
+    key = local.getProperty("bintray.key")
+    pkg(closureOf<BintrayExtension.PackageConfig> {
+        this.repo = "com.github.mvysny.dynatest"
+        name = "com.github.mvysny.dynatest"
+        setLicenses("Apache-2.0")
+        vcsUrl = "https://github.com/mvysny/dynatest"
+        publish = true
+        setPublications("mavenJava")
+        version(closureOf<BintrayExtension.VersionConfig> {
+            this.name = project.version.toString()
+            released = Date().toString()
+        })
+    })
 }

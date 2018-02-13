@@ -3,3 +3,5 @@ build
 .gradle
 *.iml
 out
+local.properties
+
