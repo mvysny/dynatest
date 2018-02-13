@@ -138,6 +138,8 @@ Running this in your IDE will produce:
   * "Rerun failed tests" always runs all tests
   * Impossible to run single test only (right-clicking on the test name doesn't offer such option)
 
+There's a [IDEA-169198](https://youtrack.jetbrains.com/issue/IDEA-169198) bug report for Intellij, so let's see.
+
 ## Using in your projects
 
 DynaTest sports its own TestEngine which ignores JUnit5 tests and only runs `DynaTest` tests.
