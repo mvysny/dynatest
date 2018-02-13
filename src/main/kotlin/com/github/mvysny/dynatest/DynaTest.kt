@@ -123,7 +123,7 @@ internal fun guessTestSource(): TestSource? {
     if (stackTrace.size < 4) return null
     val caller: StackTraceElement = stackTrace[3]
     // normally we would just return ClassSource, but there are the following issues with that:
-    // 1. Intellij ignores FilePosition in ClassSource
+    // 1. Intellij ignores FilePosition in ClassSource; reported as https://youtrack.jetbrains.com/issue/IDEA-186581
     // 2. If I try to remedy that by passing in the block class name (such as DynaTestTest$1$1$1$1), Intellij looks confused and won't perform any navigation
     // 3. FileSource seems to work very well.
 
