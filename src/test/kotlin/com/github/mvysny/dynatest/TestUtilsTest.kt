@@ -47,4 +47,27 @@ class TestUtilsTest : DynaTest({
             }
         }
     }
+
+    group("tests for expectList") {
+        test("empty list") {
+            expectList() { listOf<Int>() }
+        }
+        test("trivial list") {
+            expectList(25) { listOf(25) }
+        }
+        test("simple list of strings") {
+            expectList("a", "b", "c") { listOf("a", "b", "c") }
+        }
+        test("comparison failure") {
+            expectThrows(AssertionError::class) {
+                expectList() { listOf("a", "b", "c") }
+            }
+            expectThrows(AssertionError::class) {
+                expectList(1, 2, 3) { listOf("a", "b", "c") }
+            }
+            expectThrows(AssertionError::class) {
+                expectList(1, 2, 3) { listOf() }
+            }
+        }
+    }
 })
