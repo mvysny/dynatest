@@ -1,6 +1,9 @@
 package com.github.mvysny.dynatest
 
 import java.io.IOException
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 
 class TestUtilsTest : DynaTest({
     group("tests for expectThrows()") {
@@ -51,6 +54,9 @@ class TestUtilsTest : DynaTest({
     group("tests for expectList") {
         test("empty list") {
             expectList() { listOf<Int>() }
+            expectList() { mutableListOf<Int>() }
+            expectList() { LinkedList<Int>() }
+            expectList() { CopyOnWriteArrayList<Int>() }
         }
         test("trivial list") {
             expectList(25) { listOf(25) }
@@ -67,6 +73,32 @@ class TestUtilsTest : DynaTest({
             }
             expectThrows(AssertionError::class) {
                 expectList(1, 2, 3) { listOf() }
+            }
+        }
+    }
+
+    group("tests for expectMap") {
+        test("empty map") {
+            expectMap() { mapOf<Int, Int>() }
+            expectMap() { mutableMapOf<Int, Int>() }
+            expectMap() { LinkedHashMap<String, Boolean>() }
+            expectMap() { ConcurrentHashMap<String, Boolean>() }
+        }
+        test("trivial map") {
+            expectMap(25 to "a") { mapOf(25 to "a") }
+        }
+        test("simple map of strings") {
+            expectMap("a" to 1, "b" to 2, "c" to 3) { mutableMapOf("a" to 1, "b" to 2, "c" to 3) }
+        }
+        test("comparison failure") {
+            expectThrows(AssertionError::class) {
+                expectMap() { mapOf("a" to 1, "b" to 2, "c" to 3) }
+            }
+            expectThrows(AssertionError::class) {
+                expectMap("a" to 1, "b" to 2, "c" to 3) { mapOf<Any, Any>(1 to "a", 2 to "b", 3 to "c") }
+            }
+            expectThrows(AssertionError::class) {
+                expectMap("a" to 1, "b" to 2, "c" to 3) { mapOf<Any, Any>() }
             }
         }
     }
