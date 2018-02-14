@@ -4,6 +4,7 @@ import java.io.IOException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.test.expect
 
 class TestUtilsTest : DynaTest({
     group("tests for expectThrows()") {
@@ -100,6 +101,14 @@ class TestUtilsTest : DynaTest({
             expectThrows(AssertionError::class) {
                 expectMap("a" to 1, "b" to 2, "c" to 3) { mapOf<Any, Any>() }
             }
+        }
+    }
+
+    group("cloneBySerialization") {
+        test("simple objects") {
+            expect("a") { "a".cloneBySerialization() }
+            expect("") { "".cloneBySerialization() }
+            expect(25) { 25.cloneBySerialization() }
         }
     }
 })
