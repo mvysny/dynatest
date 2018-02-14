@@ -10,7 +10,7 @@ if (project.rootProject.file("local.properties").exists()) {
 }
 
 group = "com.github.mvysny.dynatest"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.2-SNAPSHOT"
 
 buildscript {
     repositories {
@@ -82,7 +82,7 @@ bintray {
     user = local.getProperty("bintray.user")
     key = local.getProperty("bintray.key")
     pkg(closureOf<BintrayExtension.PackageConfig> {
-        this.repo = "com.github.mvysny.dynatest"
+        repo = "github"
         name = "com.github.mvysny.dynatest"
         setLicenses("Apache-2.0")
         vcsUrl = "https://github.com/mvysny/dynatest"
