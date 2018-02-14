@@ -10,7 +10,7 @@ if (project.rootProject.file("local.properties").exists()) {
 }
 
 group = "com.github.mvysny.dynatest"
-version = "0.2"
+version = "0.3-SNAPSHOT"
 
 buildscript {
     repositories {
