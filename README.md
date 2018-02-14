@@ -146,6 +146,9 @@ DynaTest sports its own TestEngine which ignores JUnit5 tests and only runs `Dyn
 If you don't have any JUnit5 tests in your project, you only need to add a test dependency on this library:
 
 ```groovy
+repositories {
+    maven { url "https://dl.bintray.com/mvysny/github" }
+}
 dependencies {
     testCompile("com.github.mvysny.dynatest:dynatest:0.0.1")
 }
