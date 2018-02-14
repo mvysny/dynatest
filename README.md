@@ -150,7 +150,7 @@ repositories {
     maven { url "https://dl.bintray.com/mvysny/github" }
 }
 dependencies {
-    testCompile("com.github.mvysny.dynatest:dynatest:0.0.1")
+    testCompile("com.github.mvysny.dynatest:dynatest:0.2")
 }
 ```
 
@@ -163,7 +163,6 @@ If you have JUnit5 tests as well, you can run both DynaTest test engine along wi
 
 ```groovy
 dependencies {
-    testCompile("com.github.mvysny.dynatest:dynatest:0.0.1")
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.3")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.1.0-RC1")
 }
 ```
