@@ -16,6 +16,9 @@ fun runTests(block: DynaNodeGroup.()->Unit) {
     DynaTestEngine().execute(ExecutionRequest(testDescriptor, ThrowingExecutionListener, EmptyConfigParameters))
 }
 
+/**
+ * An execution listener which immediately throws when an exception occurs. Used together with [runTests] to fail eagerly.
+ */
 internal object ThrowingExecutionListener : EngineExecutionListener {
     override fun executionFinished(testDescriptor: TestDescriptor, testExecutionResult: TestExecutionResult) {
         if (testExecutionResult.throwable.isPresent) throw testExecutionResult.throwable.get()

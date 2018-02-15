@@ -49,17 +49,22 @@ class DynaNodeGroup internal constructor(name: String, src: TestSource?) : DynaN
     internal val afterAll = mutableListOf<()->Unit>()
 
     /**
-     * Generates a test case with given [name] and registers it within this group. Does not run the test case immediately -
+     * Creates a new test case with given [name] and registers it within current group. Does not run the test closure immediately -
      * the test is only registered for being run later on by JUnit5 runner (or by [runTests]).
-     * @param body run when the test case is run
+     * @param body the implementation of the test; does not run immediately but only when the test case is run
      */
     fun test(name: String, body: ()->Unit) {
-        val source = guessTestSource()
+        val source = computeTestSource()
         children.add(DynaNodeTest(name, body, source))
     }
 
+    /**
+     * Creates a nested group with given [name] and runs given [block]. In the block, you can create both sub-groups and tests, and you can
+     * mix those freely as you like.
+     * @param block the block, runs immediately.
+     */
     fun group(name: String, block: DynaNodeGroup.()->Unit) {
-        val source = guessTestSource()
+        val source = computeTestSource()
         val group = DynaNodeGroup(name, source)
         group.block()
         children.add(group)
@@ -73,17 +78,27 @@ class DynaNodeGroup internal constructor(name: String, src: TestSource?) : DynaN
         beforeEach.add(block)
     }
 
+    /**
+     * Registers a block which will be run after every test registered to this group and to any nested groups.
+     * @param block the block to run. Any exceptions thrown by the block will make the test fail.
+     */
     fun afterEach(block: ()->Unit) {
         afterEach.add(block)
     }
 
     /**
-     * Registers a block which will be run once before any of the tests registered to this group and to any nested groups are run.
+     * Registers a block which will be run exactly once before any of the tests are run. Only the tests nested in this group and its subgroups are
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
      */
     fun beforeAll(block: ()->Unit) {
         beforeAll.add(block)
     }
+
+    /**
+     * Registers a block which will be run only once after all of the tests are run. Only the tests nested in this group and its subgroups are
+     * considered.
+     * @param block the block to run. Any exceptions thrown by the block will make the test fail.
+     */
     fun afterAll(block: ()->Unit) {
         afterAll.add(block)
     }
@@ -118,7 +133,11 @@ abstract class DynaTest(block: DynaNodeGroup.()->Unit) {
     }
 }
 
-internal fun guessTestSource(): TestSource? {
+/**
+ * Computes the pointer to the source of the test and returns it. Tries to compute at least inaccurate pointer.
+ * @return the pointer to the test source; returns null if the source can not be computed by any means.
+ */
+internal fun computeTestSource(): TestSource? {
     val stackTrace = Thread.currentThread().stackTrace
     if (stackTrace.size < 4) return null
     val caller: StackTraceElement = stackTrace[3]

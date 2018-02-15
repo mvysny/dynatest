@@ -9,7 +9,9 @@ import java.util.*
 import java.util.function.Predicate
 
 /**
- * Since dynamic tests suck, I'll implement my own Test Engine.
+ * Since JUnit5's dynamic tests lack the necessary features, I'll implement my own Test Engine. In particular, JUnit5's dynamic tests:
+ * * do not allow to reference the pointer to the source code of the test accurately: https://github.com/junit-team/junit5/issues/1293
+ * * do not support beforeAll/afterAll: https://github.com/junit-team/junit5/issues/1292
  */
 class DynaTestEngine : TestEngine {
 
