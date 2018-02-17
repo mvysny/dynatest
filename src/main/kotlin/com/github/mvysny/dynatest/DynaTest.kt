@@ -1,11 +1,6 @@
 package com.github.mvysny.dynatest
 
 import org.junit.platform.commons.annotation.Testable
-import org.junit.platform.engine.TestSource
-import org.junit.platform.engine.support.descriptor.ClassSource
-import org.junit.platform.engine.support.descriptor.FilePosition
-import org.junit.platform.engine.support.descriptor.FileSource
-import java.io.File
 
 /**
  * A definition of a test graph node, either a group or a concrete test. Since we can't run tests right when [DynaNodeGroup.test]
@@ -15,21 +10,21 @@ import java.io.File
  * Every [DynaNodeGroup.test] and [DynaNodeGroup.group] call
  * creates this node which in turn can be converted to JUnit5 structures eligible for execution.
  */
-sealed class DynaNode(internal val name: String, internal val src: TestSource?)
+sealed class DynaNode(internal val name: String, internal val src: StackTraceElement?)
 
 /**
  * Represents a single test with a [name], an execution [context] and the test's [body]. Created when you call [DynaNodeGroup.test].
  *
  * To start writing tests, just extend [DynaTest]. See [DynaTest] for more details.
  */
-class DynaNodeTest internal constructor(name: String, internal val body: ()->Unit, src: TestSource?) : DynaNode(name, src)
+class DynaNodeTest internal constructor(name: String, internal val body: ()->Unit, src: StackTraceElement?) : DynaNode(name, src)
 
 /**
  * Represents a single test group with a [name]. Created when you call [group].
  *
  * To start writing tests, just extend [DynaTest]. See [DynaTest] for more details.
  */
-class DynaNodeGroup internal constructor(name: String, src: TestSource?) : DynaNode(name, src) {
+class DynaNodeGroup internal constructor(name: String, src: StackTraceElement?) : DynaNode(name, src) {
     internal val children = mutableListOf<DynaNode>()
     /**
      * What to run before every test.
@@ -122,7 +117,7 @@ class DynaNodeGroup internal constructor(name: String, src: TestSource?) : DynaN
  */
 @Testable
 abstract class DynaTest(block: DynaNodeGroup.()->Unit) {
-    internal val root = DynaNodeGroup(javaClass.simpleName, ClassSource.from(javaClass))
+    internal val root = DynaNodeGroup(javaClass.simpleName, StackTraceElement(javaClass.name, "<init>", null, -1))
     init {
         root.block()
     }
@@ -134,25 +129,12 @@ abstract class DynaTest(block: DynaNodeGroup.()->Unit) {
 }
 
 /**
- * Computes the pointer to the source of the test and returns it. Tries to compute at least inaccurate pointer.
+ * Computes the pointer to the source of the test and returns it.
  * @return the pointer to the test source; returns null if the source can not be computed by any means.
  */
-internal fun computeTestSource(): TestSource? {
+internal fun computeTestSource(): StackTraceElement? {
     val stackTrace = Thread.currentThread().stackTrace
     if (stackTrace.size < 4) return null
     val caller: StackTraceElement = stackTrace[3]
-    // normally we would just return ClassSource, but there are the following issues with that:
-    // 1. Intellij ignores FilePosition in ClassSource; reported as https://youtrack.jetbrains.com/issue/IDEA-186581
-    // 2. If I try to remedy that by passing in the block class name (such as DynaTestTest$1$1$1$1), Intellij looks confused and won't perform any navigation
-    // 3. FileSource seems to work very well.
-
-    // Try to guess the absolute test file name from the file class. It should be located somewhere in src/main/kotlin or src/main/java
-    if (!caller.fileName.isNullOrBlank() && caller.fileName.endsWith(".kt")) {
-        val folders = listOf("java", "kotlin").map { File("src/test/$it").absoluteFile } .filter { it.exists() }
-        val pkg = caller.className.replace('.', '/').replaceAfterLast('/', "", "").trim('/')
-        val file: File? = folders.map { File(it, "$pkg/${caller.fileName}") } .firstOrNull { it.exists() }
-        if (file != null) return FileSource.from(file, FilePosition.from(caller.lineNumber))
-    }
-    // ClassSource doesn't work on classes named DynaTestTest$1$1$1$1 (with $ in them); strip that.
-    return ClassSource.from(caller.className.replaceAfter('$', "").trim('$'))
+    return caller
 }

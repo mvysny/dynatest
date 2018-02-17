@@ -4,6 +4,10 @@ import org.junit.platform.commons.util.ReflectionUtils
 import org.junit.platform.engine.*
 import org.junit.platform.engine.discovery.*
 import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor
+import org.junit.platform.engine.support.descriptor.ClassSource
+import org.junit.platform.engine.support.descriptor.FilePosition
+import org.junit.platform.engine.support.descriptor.FileSource
+import java.io.File
 import java.lang.reflect.Modifier
 import java.util.*
 import java.util.function.Predicate
@@ -92,7 +96,7 @@ internal fun DynaNode.getId(parent: UniqueId): UniqueId {
     return parent.append(segmentType, name)
 }
 
-internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNode) : AbstractTestDescriptor(node.getId(parentId), node.name, node.src) {
+internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNode) : AbstractTestDescriptor(node.getId(parentId), node.name, node.src?.toTestSource()) {
     init {
         if (node is DynaNodeGroup) {
             node.children.forEach { addChild(DynaNodeTestDescriptor(uniqueId, it)) }
@@ -137,3 +141,25 @@ internal fun DynaTest.toTestDescriptor(parentId: UniqueId): TestDescriptor =
 val Class<*>.isPrivate: Boolean get() = Modifier.isPrivate(modifiers)
 val Class<*>.isAbstract: Boolean get() = Modifier.isAbstract(modifiers)
 val Class<*>.isPublic: Boolean get() = Modifier.isPublic(modifiers)
+
+/**
+ * Computes the pointer to the source of the test and returns it. Tries to compute at least inaccurate pointer.
+ * @return the pointer to the test source; returns null if the source can not be computed by any means.
+ */
+private fun StackTraceElement.toTestSource(): TestSource {
+    val caller: StackTraceElement = this
+    // normally we would just return ClassSource, but there are the following issues with that:
+    // 1. Intellij ignores FilePosition in ClassSource; reported as https://youtrack.jetbrains.com/issue/IDEA-186581
+    // 2. If I try to remedy that by passing in the block class name (such as DynaTestTest$1$1$1$1), Intellij looks confused and won't perform any navigation
+    // 3. FileSource seems to work very well.
+
+    // Try to guess the absolute test file name from the file class. It should be located somewhere in src/main/kotlin or src/main/java
+    if (!caller.fileName.isNullOrBlank() && caller.fileName.endsWith(".kt")) {
+        val folders = listOf("java", "kotlin").map { File("src/test/$it").absoluteFile } .filter { it.exists() }
+        val pkg = caller.className.replace('.', '/').replaceAfterLast('/', "", "").trim('/')
+        val file: File? = folders.map { File(it, "$pkg/${caller.fileName}") } .firstOrNull { it.exists() }
+        if (file != null) return FileSource.from(file, FilePosition.from(caller.lineNumber))
+    }
+    // ClassSource doesn't work on classes named DynaTestTest$1$1$1$1 (with $ in them); strip that.
+    return ClassSource.from(caller.className.replaceAfter('$', "").trim('$'))
+}

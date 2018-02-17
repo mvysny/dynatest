@@ -12,19 +12,6 @@ if (project.rootProject.file("local.properties").exists()) {
 group = "com.github.mvysny.dynatest"
 version = "0.3-SNAPSHOT"
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.junit.platform:junit-platform-gradle-plugin:1.0.3")
-    }
-}
-
-apply {
-    plugin("org.junit.platform.gradle.plugin")
-}
-
 plugins {
     kotlin("jvm") version "1.2.21"
     id("com.jfrog.bintray") version "1.7.3"
@@ -38,12 +25,16 @@ repositories {
     jcenter()
 }
 
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
 dependencies {
     compile(kotlin("stdlib-jdk8"))
     compile(kotlin("test"))
     compile("org.junit.jupiter:junit-jupiter-api:5.1.0-RC1")
     compile("org.junit.platform:junit-platform-engine:1.1.0-RC1")
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.1.0-RC1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.1.0-RC1")
 }
 
 tasks.withType<KotlinCompile> {
