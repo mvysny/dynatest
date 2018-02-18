@@ -41,3 +41,14 @@ fun Serializable.serializeToBytes(): ByteArray = ByteArrayOutputStream().also { 
  * @return the clone of this
  */
 fun <T : Serializable> T.cloneBySerialization(): T = javaClass.cast(ObjectInputStream(ByteArrayInputStream(serializeToBytes())).readObject())
+
+/**
+ * Handy function to get a stack trace from receiver.
+ */
+fun Throwable.getStackTraceAsString(): String {
+    val sw = StringWriter()
+    val pw = PrintWriter(sw)
+    printStackTrace(pw)
+    pw.flush()
+    return sw.toString()
+}
