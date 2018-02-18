@@ -48,7 +48,12 @@ class DynaTestEngine : TestEngine {
         // todo filter based on UniqueIdSelector when https://youtrack.jetbrains.com/issue/IDEA-169198 is fixed
 
         val result = ClassListTestDescriptor(uniqueId)
-        classes.map { it.newInstance() as DynaTest } .forEach { result.addChild(it.toTestDescriptor(result.uniqueId)) }
+        // filter out non-DynaTest classes as per https://github.com/gradle/gradle/issues/4418
+        classes
+            .filter { DynaTest::class.java.isAssignableFrom(it) }
+            .map { it.newInstance() as DynaTest }
+            .map { it.toTestDescriptor(result.uniqueId) }
+            .forEach { result.addChild(it) }
         return result
     }
 
