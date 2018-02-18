@@ -150,7 +150,7 @@ repositories {
     maven { url "https://dl.bintray.com/mvysny/github" }
 }
 dependencies {
-    testCompile("com.github.mvysny.dynatest:dynatest:0.2")
+    testCompile("com.github.mvysny.dynatest:dynatest:0.3")
 }
 ```
 
