@@ -140,10 +140,10 @@ Running this in your IDE will produce:
 
 There's a [IDEA-169198](https://youtrack.jetbrains.com/issue/IDEA-169198) bug report for Intellij, so let's see.
 
-## Using in your projects
+## Using DynaTest in your projects
 
-DynaTest sports its own TestEngine which ignores JUnit5 tests and only runs `DynaTest` tests.
-If you don't have any JUnit5 tests in your project, you only need to add a test dependency on this library:
+DynaTest sports its own TestEngine which ignores any JUnit5 tests and only runs `DynaTest` tests. As a first step,
+add the test dependency on this library to your `build.gradle` file:
 
 ```groovy
 repositories {
@@ -154,11 +154,23 @@ dependencies {
 }
 ```
 
-Moreover you need to add the [junit5-gradle-consumer](https://github.com/junit-team/junit5-samples/tree/r5.0.3/junit5-gradle-consumer)
-plugin to your build script, to actually run the tests; see the plugin's documentation for details. This is required since
-Gradle doesn't have built-in support for running JUnit5 tests yet.
+DynaTest will transitively include JUnit5's core.
 
-If you have JUnit5 tests as well, you can run both DynaTest test engine along with JUnit5 Jupiter engine
+If you are using older Gradle 4.5.x or earlier which does not have native support for JUnit5, to actually
+run the tests you will need to add the [junit5-gradle-consumer](https://github.com/junit-team/junit5-samples/tree/r5.0.3/junit5-gradle-consumer)
+plugin to your build script. Please see the plugin's documentation for details.
+
+If you are using Gradle 4.6 or later, JUnit5 support is built-in; all you need to enable it is to insert this into your `build.gradle` file:
+
+```groovy
+test {
+    useJUnitPlatform()
+}
+```
+
+(more on Gradle's JUnit5 support here: [Gradle JUnit5 support](https://docs.gradle.org/4.6-rc-1/release-notes.html#junit-5-support))
+
+If you want to run JUnit5 tests along the DynaTest tests as well, you can run both DynaTest test engine along with JUnit5 Jupiter engine
 (which will only run JUnit5 tests and will ignore DynaTest tests):
 
 ```groovy
@@ -166,3 +178,11 @@ dependencies {
     testRuntime("org.junit.jupiter:junit-jupiter-engine:5.1.0-RC1")
 }
 ```
+
+## Troubleshooting
+
+#### My DynaTest tests are not run.
+
+It may be a bug in DynaTest TestEngine which may throw an exception, and that exception would then silently be ignored by Gradle.
+Just run gradle with `--debug` to verify that there is no DynaTest-related stacktrace. Please see [Gradle Issue #4418](https://github.com/gradle/gradle/issues/4418)
+for more details.
