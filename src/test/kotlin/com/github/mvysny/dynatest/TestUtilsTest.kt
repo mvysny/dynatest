@@ -14,7 +14,7 @@ class TestUtilsTest : DynaTest({
 
         test("fails if block completes successfully") {
             try {
-                expectThrows(RuntimeException::class) {}
+                expectThrows(RuntimeException::class) {} // expected to be failed with AssertionError
                 throw RuntimeException("Should have failed")
             } catch (e: AssertionError) { /*okay*/ }
         }

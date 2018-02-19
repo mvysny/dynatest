@@ -12,7 +12,7 @@ import kotlin.test.expect
  */
 class GeneralDynaTestEngineTest {
     /**
-     * The [TestEngine.discover] block must not fail even if the test discovery itself fails.
+     * The [TestEngine.discover] function must not fail even if the test discovery itself fails.
      */
     @Test
     fun failingTestSuiteMustNotFailInDiscover() {
@@ -50,7 +50,7 @@ class GeneralDynaTestEngineTest {
 /**
  * An execution listener which immediately throws when an exception occurs. Used together with [runTests] to fail eagerly.
  */
-internal object ThrowingExecutionListener : EngineExecutionListener {
+private object ThrowingExecutionListener : EngineExecutionListener {
     override fun executionFinished(testDescriptor: TestDescriptor, testExecutionResult: TestExecutionResult) {
         if (testExecutionResult.throwable.isPresent) throw testExecutionResult.throwable.get()
     }
@@ -81,6 +81,10 @@ private fun <T> withFail(block: ()->T): T {
     }
 }
 
+/**
+ * A dyna test which throws an exception when initialized. Used by [GeneralDynaTestEngineTest] to check that this failure won't make the
+ * [TestEngine.discover] function fail.
+ */
 class TestSuiteFailingInInit : DynaTest({
     if (fail) throw RuntimeException("Simulated")
 })
