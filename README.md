@@ -15,7 +15,7 @@ it also *reduces the possibilities* of how to structure test code and *promotes 
   * Having the parameters created dynamically or loaded from a file;
   * Using more complex types - you are restricted to String and primitives.
 * Annotations are weak - they don't have the full computative power of a proper imperative programming language; attempts to use annotations to
-  express any non-trivial logic leads to annotation overuse and that leads to horrible constructs and [annotationania](http://annotatiomania.com/).
+  express any non-trivial logic leads to annotation overuse and that leads to horrible constructs and [annotatiomania](http://annotatiomania.com/).
 * Reuse of test suites is only possible by the means of inheritance (having a base class with tests, and a bunch of classes
   extending that base class, parametrizing it with constructors). That leads to deep inheritance hierarchies, which typically lead to spaghetti code.
   Reusing code as components typically leads to much better separated code with clear boundaries.
@@ -47,7 +47,7 @@ Ideally, the testing framework should follow these items:
 
 * Promote component-oriented programming. You should be able to create a test suite as a component,
   and simply include that test suite anywhere you see fit.
-* Dissuade from abominable programming techniques like inheritance and annotationmania.
+* Dissuade from abominable programming techniques like inheritance and annotatiomania.
 * Allow creating tests dynamically, in a fucking `for` loop if necessary.
 * Put the programmer in charge and allow him to use the full palette of software practices, in order
   to create well-maintainable test code.
