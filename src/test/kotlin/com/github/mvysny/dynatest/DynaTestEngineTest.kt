@@ -30,24 +30,30 @@ class DynaTestEngineTest : DynaTest({
         }
 
         test("when beforeEach throws, the test is not called") {
-            expectThrows(RuntimeException::class) {
+            expectFailures({
                 runTests {
                     beforeEach { throw RuntimeException("expected") }
                     test("should not have been called") { kotlin.test.fail("should not have been called since beforeEach failed") }
                 }
+            }) {
+                expectStats(0, 1, 0)
+                expectFailure<RuntimeException>("should not have been called")
             }
         }
 
         test("when beforeEach throws, the afterEach is still called") {
-            expectThrows(RuntimeException::class) {
-                var called = false
+            var called = false
+            expectFailures({
                 runTests {
                     beforeEach { throw RuntimeException("expected") }
                     test("should not have been called") { kotlin.test.fail("should not have been called since beforeEach failed") }
                     afterEach { called = true }
                 }
-                expect(true) { called }
+            }) {
+                expectStats(0, 1, 0)
+                expectFailure<RuntimeException>("should not have been called")
             }
+            expect(true) { called }
         }
     }
 
@@ -76,51 +82,61 @@ class DynaTestEngineTest : DynaTest({
 
         test("when both beforeEach and afterEach throws, the afterEach's exception is added as suppressed") {
             var called = false
-            val ex = expectThrows(RuntimeException::class) {
+            expectFailures({
                 runTests {
                     beforeEach { throw RuntimeException("expected") }
                     test("should not have been called") { called = true; kotlin.test.fail("should not have been called since beforeEach failed") }
                     afterEach { throw IOException("simulated") }
                 }
+            }) {
+                expectStats(0, 1, 0)
+                expect<Class<out Throwable>>(IOException::class.java) { getFailure("should not have been called").suppressed[0].javaClass }
             }
-            expect<Class<out Throwable>>(IOException::class.java) { ex.suppressed[0].javaClass }
             expect(false) { called }
         }
 
         test("throwing in `afterEach` will make the test fail") {
-            expectThrows(IOException::class) {
+            expectFailures({
                 runTests {
                     test("dummy") {}
                     afterEach { throw IOException("simulated") }
                 }
+            }) {
+                expectStats(0, 1, 0)
+                expectFailure<IOException>("dummy")
             }
         }
 
         test("throwing in test should invoke all `afterEach`") {
-            val ex = expectThrows(RuntimeException::class) {
+            expectFailures({
                 runTests {
                     test("simulated failure") { throw RuntimeException("simulated") }
                     afterEach { throw IOException("simulated") }
                 }
+            }) {
+                expectStats(0, 1, 0)
+                expect<Class<out Throwable>>(IOException::class.java) { getFailure("simulated failure").suppressed[0].javaClass }
             }
-            expect<Class<out Throwable>>(IOException::class.java) { ex.suppressed[0].javaClass }
         }
 
         test("all `afterEach` should have been invoked even if some of them fail") {
             var called = false
-            expectThrows(RuntimeException::class) {
+            expectFailures({
                 runTests {
                     test("dummy") {}
                     afterEach { throw RuntimeException("simulated") }
                     afterEach { called = true }
                 }
+            }) {
+                expectStats(0, 1, 0)
+                expectFailure<RuntimeException>("dummy")
             }
             expect(true) { called }
         }
 
         test("if `beforeEach` fails, no `afterEach` in subgroup should be called") {
             var called = false
-            val ex = expectThrows(RuntimeException::class) {
+            expectFailures({
                 runTests {
                     beforeEach { throw RuntimeException("simulated") }
                     group("nested group") {
@@ -128,8 +144,11 @@ class DynaTestEngineTest : DynaTest({
                         afterEach { called = true; kotlin.test.fail("should not have been called") }
                     }
                 }
+            }) {
+                expectStats(0, 1, 0)
+                expectFailure<RuntimeException>("dummy")
+                expectList() { getFailure("dummy").suppressed.toList() }
             }
-            expectList() { ex.suppressed.toList() }
             expect(false) { called }
         }
     }

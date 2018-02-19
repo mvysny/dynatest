@@ -3,6 +3,7 @@ package com.github.mvysny.dynatest
 import org.junit.jupiter.api.Test
 import org.junit.platform.engine.*
 import org.junit.platform.engine.discovery.ClassSelector
+import org.junit.platform.engine.reporting.ReportEntry
 import kotlin.test.expect
 
 /**
@@ -43,6 +44,24 @@ class GeneralDynaTestEngineTest {
         expectThrows(RuntimeException::class) {
             engine.execute(ExecutionRequest(tests, ThrowingExecutionListener, EmptyConfigParameters))
         }
+    }
+}
+
+/**
+ * An execution listener which immediately throws when an exception occurs. Used together with [runTests] to fail eagerly.
+ */
+internal object ThrowingExecutionListener : EngineExecutionListener {
+    override fun executionFinished(testDescriptor: TestDescriptor, testExecutionResult: TestExecutionResult) {
+        if (testExecutionResult.throwable.isPresent) throw testExecutionResult.throwable.get()
+    }
+
+    override fun reportingEntryPublished(testDescriptor: TestDescriptor, entry: ReportEntry) {}
+    override fun executionSkipped(testDescriptor: TestDescriptor, reason: String) {
+        throw RuntimeException("Unexpected")
+    }
+    override fun executionStarted(testDescriptor: TestDescriptor) {}
+    override fun dynamicTestRegistered(testDescriptor: TestDescriptor) {
+        throw RuntimeException("Unexpected")
     }
 }
 

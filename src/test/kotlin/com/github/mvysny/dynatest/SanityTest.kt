@@ -47,7 +47,7 @@ class SanityTest {
 
     @Test
     fun testProperlyRethrowsException() {
-        Assertions.assertThrows(RuntimeException::class.java) {
+        Assertions.assertThrows(TestFailedException::class.java) {
             runTests {
                 test("always fail") {
                     throw RuntimeException("Simulated failure")
