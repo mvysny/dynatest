@@ -77,12 +77,14 @@ class DynaTestEngine : TestEngine {
     override fun execute(request: ExecutionRequest) {
 
         fun runTest(td: DynaNodeTestDescriptor, node: DynaNodeTest) {
-            td.runBeforeEach()
             try {
+                td.runBeforeEach()
                 node.body()
-            } finally {
-                td.runAfterEach()
+            } catch (t: Throwable) {
+                td.runAfterEach(t)
+                throw t
             }
+            td.runAfterEach(null)
         }
 
         fun runAllTests(td: TestDescriptor) {
@@ -152,11 +154,22 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNode) : 
         }
     }
 
-    fun runAfterEach() {
+    /**
+     * Run all [DynaNodeGroup.afterEach] blocks, in proper ordering.
+     */
+    fun runAfterEach(testFailure: Throwable?) {
+        var tf = testFailure
         if (node is DynaNodeGroup) {
-            node.afterEach.forEach { it() }
+            node.afterEach.forEach {
+                try {
+                    it()
+                } catch (t: Throwable) {
+                    if (tf == null) tf = t else tf!!.addSuppressed(t)
+                }
+            }
         }
-        (parent.orElse(null) as? DynaNodeTestDescriptor)?.runAfterEach()
+        (parent.orElse(null) as? DynaNodeTestDescriptor)?.runAfterEach(tf)
+        if (testFailure == null && tf != null) throw tf!!
     }
 }
 

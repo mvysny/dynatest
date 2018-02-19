@@ -1,56 +1,169 @@
 package com.github.mvysny.dynatest
 
-import org.junit.jupiter.api.Test
-import org.junit.platform.engine.*
-import org.junit.platform.engine.discovery.ClassSelector
+import java.io.IOException
 import kotlin.test.expect
 
-class DynaTestEngineTest {
-    @Test
-    fun failingTestSuiteMustNotFailInDiscover() {
-        val engine = DynaTestEngine()
-        withFail {
-            engine.discover2(TestSuiteFailingInInit::class.java)
+class DynaTestEngineTest : DynaTest({
+    group("test the 'beforeEach' behavior") {
+
+        test("test that beforeEach runs before every test") {
+            runTests {
+                var called = false
+                test("check that 'beforeEach' ran") {
+                    expect(true) { called }
+                }
+                beforeEach { called = true }
+            }
+        }
+
+        test("test that 'beforeEach' is also applied to tests nested inside a child group") {
+            runTests {
+                var called = false
+                // an artificial group, only for the purpose of nesting the test that checks whether the 'beforeEach' block ran
+                group("artificial group") {
+                    test("check that 'beforeEach' ran") {
+                        expect(true) { called }
+                    }
+                }
+                beforeEach { called = true }
+            }
+        }
+
+        test("when beforeEach throws, the test is not called") {
+            expectThrows(RuntimeException::class) {
+                runTests {
+                    beforeEach { throw RuntimeException("expected") }
+                    test("should not have been called") { kotlin.test.fail("should not have been called since beforeEach failed") }
+                }
+            }
+        }
+
+        test("when beforeEach throws, the afterEach is still called") {
+            expectThrows(RuntimeException::class) {
+                var called = false
+                runTests {
+                    beforeEach { throw RuntimeException("expected") }
+                    test("should not have been called") { kotlin.test.fail("should not have been called since beforeEach failed") }
+                    afterEach { called = true }
+                }
+                expect(true) { called }
+            }
         }
     }
 
-    private fun DynaTestEngine.discover2(vararg testClasses: Class<*>): TestDescriptor {
-        require (testClasses.isNotEmpty())
-        return discover(object : EngineDiscoveryRequest {
-            override fun getConfigurationParameters(): ConfigurationParameters = EmptyConfigParameters
-            override fun <T : DiscoveryFilter<*>?> getFiltersByType(filterType: Class<T>?): MutableList<T> = mutableListOf()
-            override fun <T : DiscoverySelector> getSelectorsByType(selectorType: Class<T>): MutableList<T> =
-                testClasses.map { it.toSelector() } .filterIsInstance(selectorType) .toMutableList()
-        }, UniqueId.forEngine(id))
-    }
+    group("test the 'afterEach' behavior") {
+        test("test that 'afterEach' runs after every test") {
+            var called = false
+            runTests {
+                afterEach { called = true }
+                test("dummy test which triggers 'afterEach'") {}
+            }
+            expect(true) { called }
+        }
 
-    @Test
-    fun failingTestSuiteMustFailInExecute() {
-        val engine = DynaTestEngine()
-        val tests: TestDescriptor = withFail { engine.discover2(TestSuiteFailingInInit::class.java) }
-        expect<Class<*>>(InitFailedTestDescriptor::class.java) { tests.children.first().javaClass }
-        expectThrows(RuntimeException::class) {
-            engine.execute(ExecutionRequest(tests, ThrowingExecutionListener, EmptyConfigParameters))
+        test("test that 'afterEach' is also applied to tests nested inside a child group") {
+            var called = 0
+            runTests {
+                afterEach { called++ }
+
+                // an artificial group, only for the purpose of nesting the test that checks whether the 'afterEach' block ran
+                group("artificial group") {
+                    test("dummy test which triggers 'afterEach'") {}
+                }
+            }
+            expect(1) { called }
+        }
+
+        test("when both beforeEach and afterEach throws, the afterEach's exception is added as suppressed") {
+            val ex = expectThrows(RuntimeException::class) {
+                runTests {
+                    beforeEach { throw RuntimeException("expected") }
+                    test("should not have been called") { kotlin.test.fail("should not have been called since beforeEach failed") }
+                    afterEach { throw IOException("simulated") }
+                }
+            }
+            expect<Class<out Throwable>>(IOException::class.java) { ex.suppressed[0].javaClass }
+        }
+
+        test("throwing in `afterEach` will make the test fail") {
+            expectThrows(IOException::class) {
+                runTests {
+                    test("dummy") {}
+                    afterEach { throw IOException("simulated") }
+                }
+            }
+        }
+
+        test("throwing in test should invoke all `afterEach`") {
+            val ex = expectThrows(RuntimeException::class) {
+                runTests {
+                    test("simulated failure") { throw RuntimeException("simulated") }
+                    afterEach { throw IOException("simulated") }
+                }
+            }
+            expect<Class<out Throwable>>(IOException::class.java) { ex.suppressed[0].javaClass }
+        }
+
+        test("all `afterEach` should have been invoked even if some of them fail") {
+            var called = false
+            expectThrows(RuntimeException::class) {
+                runTests {
+                    test("dummy") {}
+                    afterEach { throw RuntimeException("simulated") }
+                    afterEach { called = true }
+                }
+            }
+            expect(true) { called }
         }
     }
-}
 
-private fun Class<*>.toSelector(): ClassSelector {
-    val c = ClassSelector::class.java.declaredConstructors.first { it.parameterTypes[0] == Class::class.java }
-    c.isAccessible = true
-    return c.newInstance(this) as ClassSelector
-}
+    group("test the 'beforeAll' behavior") {
+        group("simple before-test") {
+            var called = false
+            test("check that 'beforeAll' ran") {
+                expect(true) { called }
+            }
+            beforeAll { called = true }
+        }
 
-private var fail = false
-private fun <T> withFail(block: ()->T): T {
-    fail = true
-    try {
-        return block()
-    } finally {
-        fail = false
+        group("before-group") {
+            var called = false
+            group("artificial group") {
+                test("check that 'beforeEach' ran") {
+                    expect(true) { called }
+                }
+            }
+            beforeAll { called = true }
+        }
     }
-}
 
-class TestSuiteFailingInInit : DynaTest({
-    if (fail) throw RuntimeException("Simulated")
+    group("test the 'afterAll' behavior") {
+        group("simple after-test") {
+            var called = 0
+            group("dummy") {
+                afterAll { called++ }
+                test("dummy test") {}
+                test("dummy test2") {}
+            }
+
+            test("check that 'afterAll' ran") {
+                expect(1) { called }
+            }
+        }
+
+        group("after-group") {
+            var called = 0
+            group("dummy") {
+                afterAll { called++ }
+
+                group("artificial group") {
+                    test("dummy test which triggers 'afterEach'") {}
+                }
+            }
+
+            test("check that 'afterAll' ran") {
+                expect(1) { called }
+            }
+        }
+    }
 })
