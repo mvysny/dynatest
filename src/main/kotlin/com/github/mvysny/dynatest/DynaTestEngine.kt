@@ -22,6 +22,9 @@ class DynaTestEngine : TestEngine {
     private val classFilter: Predicate<Class<*>> = Predicate { it.isPublic && !it.isAbstract && DynaTest::class.java.isAssignableFrom(it) }
 
     override fun discover(request: EngineDiscoveryRequest, uniqueId: UniqueId): TestDescriptor {
+        // this function must never fail, otherwise JUnit5 will silently ignore this TestEngine and the user will never know.
+        // that's why we will wrap any exception thrown by this method into a specialized, always failing TestDescriptor.
+        // see https://github.com/gradle/gradle/issues/4418 for more details.
 
         fun buildClassNamePredicate(request: EngineDiscoveryRequest): Predicate<String> {
             val filters = ArrayList<DiscoveryFilter<String>>()
@@ -30,31 +33,43 @@ class DynaTestEngine : TestEngine {
             return Filter.composeFilters<String>(filters).toPredicate()
         }
 
-        val classNamePredicate = buildClassNamePredicate(request)
-        val classes = mutableSetOf<Class<*>>()
+        try {
+            val classNamePredicate = buildClassNamePredicate(request)
+            val classes = mutableSetOf<Class<*>>()
 
-        request.getSelectorsByType(ClasspathRootSelector::class.java).forEach { selector ->
-            ReflectionUtils.findAllClassesInClasspathRoot(
-                selector.classpathRoot, classFilter,
-                classNamePredicate
-            ).forEach { classes.add(it) }
+            request.getSelectorsByType(ClasspathRootSelector::class.java).forEach { selector ->
+                ReflectionUtils.findAllClassesInClasspathRoot(
+                    selector.classpathRoot, classFilter,
+                    classNamePredicate
+                ).forEach { classes.add(it) }
+            }
+            request.getSelectorsByType(PackageSelector::class.java).forEach { selector ->
+                ReflectionUtils.findAllClassesInPackage(selector.packageName, classFilter, classNamePredicate)
+                    .forEach { classes.add(it) }
+            }
+            request.getSelectorsByType(ClassSelector::class.java).forEach { selector -> classes.add(selector.javaClass) }
+
+            // todo filter based on UniqueIdSelector when https://youtrack.jetbrains.com/issue/IDEA-169198 is fixed
+
+            val result = ClassListTestDescriptor(uniqueId)
+
+            // filter out non-DynaTest classes as per https://github.com/gradle/gradle/issues/4418
+            classes
+                .filter { DynaTest::class.java.isAssignableFrom(it) }
+                .forEach {
+                    try {
+                        val test = it.newInstance() as DynaTest
+                        val td = test.toTestDescriptor(result.uniqueId)
+                        result.addChild(td)
+                    } catch (t: Throwable) {
+                        result.addChild(InitFailedTestDescriptor(result.uniqueId, it, t))
+                    }
+                }
+            return result
+
+        } catch (t: Throwable) {
+            return InitFailedTestDescriptor(uniqueId, DynaTestEngine::class.java, t)
         }
-        request.getSelectorsByType(PackageSelector::class.java).forEach { selector ->
-            ReflectionUtils.findAllClassesInPackage(selector.packageName, classFilter, classNamePredicate)
-                .forEach { classes.add(it) }
-        }
-        request.getSelectorsByType(ClassSelector::class.java).forEach { selector -> classes.add(selector.javaClass) }
-
-        // todo filter based on UniqueIdSelector when https://youtrack.jetbrains.com/issue/IDEA-169198 is fixed
-
-        val result = ClassListTestDescriptor(uniqueId)
-        // filter out non-DynaTest classes as per https://github.com/gradle/gradle/issues/4418
-        classes
-            .filter { DynaTest::class.java.isAssignableFrom(it) }
-            .map { it.newInstance() as DynaTest }
-            .map { it.toTestDescriptor(result.uniqueId) }
-            .forEach { result.addChild(it) }
-        return result
     }
 
     override fun getId() = "DynaTest"
@@ -77,6 +92,8 @@ class DynaTestEngine : TestEngine {
             try {
                 if (td is DynaNodeTestDescriptor && td.node is DynaNodeTest) {
                     runTest(td, td.node)
+                } else if (td is InitFailedTestDescriptor) {
+                    throw RuntimeException(td.failure)
                 }
                 (td as? DynaNodeTestDescriptor)?.runAfterAll()
                 request.engineExecutionListener.executionFinished(td, TestExecutionResult.successful())
@@ -89,6 +106,9 @@ class DynaTestEngine : TestEngine {
     }
 }
 
+/**
+ * A container which hosts all DynaTest test classes.
+ */
 internal class ClassListTestDescriptor(uniqueId: UniqueId) : AbstractTestDescriptor(uniqueId, "DynaTest") {
     override fun getType(): TestDescriptor.Type = TestDescriptor.Type.CONTAINER
 }
@@ -167,4 +187,10 @@ private fun StackTraceElement.toTestSource(): TestSource {
     }
     // ClassSource doesn't work on classes named DynaTestTest$1$1$1$1 (with $ in them); strip that.
     return ClassSource.from(caller.className.replaceAfter('$', "").trim('$'))
+}
+
+internal class InitFailedTestDescriptor(parentId: UniqueId, val clazz: Class<*>, val failure: Throwable) :
+    AbstractTestDescriptor(parentId.append("class", clazz.simpleName), clazz.simpleName, ClassSource.from(clazz)) {
+
+    override fun getType(): TestDescriptor.Type = TestDescriptor.Type.TEST
 }
