@@ -29,6 +29,7 @@ and embrace testing structures created programmatically.
 **Note**: I've seen horrendous Gradle scripts with complicated logic which caused me to long for Maven. That's definitely a despicable practice.
 A good test suite should strive for the test structure to be clearly visible in the test file, with bits of logic here and there, mostly for
 computing parameters for a reusable test battery and for disabling tests according to the environment.
+Dynamically generating tests via a sequence is most probably a very bad idea.
 
 ## Disadvantages
 
