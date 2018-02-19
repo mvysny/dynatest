@@ -13,8 +13,11 @@ import kotlin.test.fail
  * @throws TestFailedException if any of the test failed. To expect this, nest call to this function into the [expectFailures] function.
  */
 internal fun runTests(block: DynaNodeGroup.()->Unit): TestResults {
+    // obtain the test definitions
     val group = DynaNodeGroup("root", null)
     group.block()
+
+    // run the tests using the DynaTestEngine
     val testDescriptor = DynaNodeTestDescriptor(UniqueId.forEngine("dynatest"), group)
     val result = TestResults()
     DynaTestEngine().execute(ExecutionRequest(testDescriptor, TestResultBuilder(result), EmptyConfigParameters))
@@ -25,7 +28,7 @@ internal fun runTests(block: DynaNodeGroup.()->Unit): TestResults {
 private class TestResultBuilder(val results: TestResults) : EngineExecutionListener {
     override fun executionFinished(testDescriptor: TestDescriptor, testExecutionResult: TestExecutionResult) {
         if (testDescriptor is DynaNodeTestDescriptor && testDescriptor.isContainer && testExecutionResult.status == TestExecutionResult.Status.SUCCESSFUL) {
-            // don't register group as successful
+            // don't register group as successful, since that would count also groups towards the TestResults.successful count which is confusing.
         } else {
             results.testsRan[testDescriptor.uniqueId] = testExecutionResult
         }
@@ -64,7 +67,13 @@ internal fun expectFailures(block: ()->Unit, results: TestResults.()->Unit) {
 internal data class TestResults(val testsRan: MutableMap<UniqueId, TestExecutionResult> = mutableMapOf(),
                                 val testsSkipped: MutableMap<UniqueId, String> = mutableMapOf()) {
 
+    /**
+     * Number of failed tests and/or groups.
+     */
     val failures: Int get() = testsRan.values.count { it.status == TestExecutionResult.Status.FAILED }
+    /**
+     * Number of successful tests.
+     */
     val successful: Int get() = testsRan.values.count { it.status == TestExecutionResult.Status.SUCCESSFUL }
     val aborted: Int get() = testsRan.values.count { it.status == TestExecutionResult.Status.ABORTED }
     val isSuccess: Boolean get() = failures == 0 && aborted == 0
