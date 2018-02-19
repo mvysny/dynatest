@@ -68,7 +68,9 @@ class DynaNodeGroup internal constructor(name: String, src: StackTraceElement?) 
     /**
      * Registers a block which will be run before every test registered to this group and to any nested groups.
      * `beforeEach` blocks registered by a parent/ancestor group runs before `beforeEach` blocks registered by this group.
-     * If any `beforeEach` block fails, no further `beforeEach` blocks are executed; furthermore the test itself is not executed as well.
+     *
+     * If any of the `beforeEach` blocks fails, no further `beforeEach` blocks are executed; furthermore the test itself is not executed as well.
+     * However, all of the [afterEach] blocks for the corresponding group and all parent groups still *are* executed.
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
      */
     fun beforeEach(block: ()->Unit) {
@@ -83,7 +85,8 @@ class DynaNodeGroup internal constructor(name: String, src: StackTraceElement?) 
      * group and all ancestor groups are called.
      *
      * If the `afterEach` blocks throws an exception, those exceptions are added as [Throwable.getSuppressed] to the main exception (as thrown
-     * by the `beforeEach` block or the test itself); or just rethrown if there is no main exception.
+     * by the `beforeEach` block or the test itself); or just rethrown if there is no main exception. Any exception thrown by the `afterEach`
+     * block will cause the test to fail.
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
      */
     fun afterEach(block: ()->Unit) {
