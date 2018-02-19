@@ -58,8 +58,8 @@ class DynaTestEngine : TestEngine {
                 .filter { DynaTest::class.java.isAssignableFrom(it) }
                 .forEach {
                     try {
-                        val test = it.newInstance() as DynaTest
-                        val td = test.toTestDescriptor(result.uniqueId)
+                        val test: DynaTest = it.newInstance() as DynaTest
+                        val td = DynaNodeTestDescriptor(result.uniqueId, test.root)
                         result.addChild(td)
                     } catch (t: Throwable) {
                         result.addChild(InitFailedTestDescriptor(result.uniqueId, it, t))
@@ -102,21 +102,26 @@ class DynaTestEngine : TestEngine {
 }
 
 /**
- * A container which hosts all DynaTest test classes.
+ * A container which hosts all DynaTest test classes wrapped in [DynaNodeTestDescriptor]s - they then in turn host individual groups and tests.
+ * Returned by [DynaTestEngine.discover].
  */
 internal class ClassListTestDescriptor(uniqueId: UniqueId) : AbstractTestDescriptor(uniqueId, "DynaTest") {
     override fun getType(): TestDescriptor.Type = TestDescriptor.Type.CONTAINER
 }
 
-internal fun DynaNode.getId(parent: UniqueId): UniqueId {
-    val segmentType = when(this) {
+/**
+ * Computes [UniqueId] for given [node], from the ID of the parent.
+ * @receiver the parent ID.
+ */
+private fun UniqueId.append(node: DynaNode): UniqueId {
+    val segmentType = when(node) {
         is DynaNodeTest -> "test"
         is DynaNodeGroup -> "group"
     }
-    return parent.append(segmentType, name)
+    return append(segmentType, node.name)
 }
 
-internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNode) : AbstractTestDescriptor(node.getId(parentId), node.name, node.src?.toTestSource()) {
+internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNode) : AbstractTestDescriptor(parentId.append(node), node.name, node.src?.toTestSource()) {
     init {
         if (node is DynaNodeGroup) {
             node.children.forEach { addChild(DynaNodeTestDescriptor(uniqueId, it)) }
@@ -186,9 +191,6 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNode) : 
     }
 }
 
-internal fun DynaTest.toTestDescriptor(parentId: UniqueId): TestDescriptor =
-    DynaNodeTestDescriptor(parentId, root)
-
 val Class<*>.isPrivate: Boolean get() = Modifier.isPrivate(modifiers)
 val Class<*>.isAbstract: Boolean get() = Modifier.isAbstract(modifiers)
 val Class<*>.isPublic: Boolean get() = Modifier.isPublic(modifiers)
@@ -215,7 +217,13 @@ private fun StackTraceElement.toTestSource(): TestSource {
     return ClassSource.from(caller.className.replaceAfter('$', "").trim('$'))
 }
 
-internal class InitFailedTestDescriptor(parentId: UniqueId, val clazz: Class<*>, val failure: Throwable) :
+/**
+ * When the [DynaTest]'s block fails to run properly and produce tests, [DynaTestEngine.discover] will return this test descriptor to mark
+ * the whole DynaTest as failed. Even more, the whole [DynaTestEngine.discover] method is wrapped in try-catch which will produce this test
+ * descriptor on failure. This way, the [DynaTestEngine.discover] method never fails (which is very important: see https://github.com/gradle/gradle/issues/4418
+ * for more details).
+ */
+internal class InitFailedTestDescriptor(parentId: UniqueId, clazz: Class<*>, val failure: Throwable) :
     AbstractTestDescriptor(parentId.append("class", clazz.simpleName), clazz.simpleName, ClassSource.from(clazz)) {
 
     override fun getType(): TestDescriptor.Type = TestDescriptor.Type.TEST

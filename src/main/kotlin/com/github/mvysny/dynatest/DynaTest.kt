@@ -126,9 +126,13 @@ class DynaNodeGroup internal constructor(name: String, src: StackTraceElement?) 
  *   ...
  * })
  * ```
+ * @param block add groups and tests within this block, to register them to a test suite.
  */
 @Testable
 abstract class DynaTest(block: DynaNodeGroup.()->Unit) {
+    /**
+     * The "root" group which will nest all groups and tests produced by the initialization block.
+     */
     internal val root = DynaNodeGroup(javaClass.simpleName, StackTraceElement(javaClass.name, "<init>", null, -1))
     init {
         root.block()
