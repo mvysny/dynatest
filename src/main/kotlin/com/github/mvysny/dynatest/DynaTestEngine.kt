@@ -77,14 +77,7 @@ class DynaTestEngine : TestEngine {
     override fun execute(request: ExecutionRequest) {
 
         fun runTest(td: DynaNodeTestDescriptor, node: DynaNodeTest) {
-            try {
-                td.runBeforeEach()
-                node.body()
-            } catch (t: Throwable) {
-                td.runAfterEach(t)
-                throw t
-            }
-            td.runAfterEach(null)
+            td.runBlock { node.body() }
         }
 
         fun runAllTests(td: TestDescriptor) {
@@ -147,17 +140,37 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNode) : 
         }
     }
 
-    fun runBeforeEach() {
-        (parent.orElse(null) as? DynaNodeTestDescriptor)?.runBeforeEach()
-        if (node is DynaNodeGroup) {
-            node.beforeEach.forEach { it() }
+    /**
+     * Runs given [block], properly prefixed with calls to `beforeEach` blocks and postfixed with calls to `afterEach` blocks.
+     * If any of those fails, does a proper cleanup and then throws the exception.
+     */
+    fun runBlock(block: () -> Unit) {
+        var lastNodeWithBeforeEachRan: DynaNodeTestDescriptor? = null
+        try {
+            getPathFromRoot().forEach {
+                lastNodeWithBeforeEachRan = it
+                if (it.node is DynaNodeGroup) {
+                    it.node.beforeEach.forEach { it() }
+                }
+            }
+            block()
+        } catch(t: Throwable) {
+            lastNodeWithBeforeEachRan?.runAfterEach(t)
+            throw t
         }
+        lastNodeWithBeforeEachRan?.runAfterEach(null)
     }
 
     /**
-     * Run all [DynaNodeGroup.afterEach] blocks, in proper ordering.
+     * Computes the path of dyna nodes from the root group towards this one.
      */
-    fun runAfterEach(testFailure: Throwable?) {
+    private fun getPathFromRoot(): List<DynaNodeTestDescriptor> =
+        generateSequence(this, { it -> it.parent.orElse(null) as? DynaNodeTestDescriptor }).toList().reversed()
+
+    /**
+     * Runs all `afterEach` blocks recursively, from this node all the way up to the root node. Properly propagates exceptions.
+     */
+    private fun runAfterEach(testFailure: Throwable?) {
         var tf = testFailure
         if (node is DynaNodeGroup) {
             node.afterEach.forEach {

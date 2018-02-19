@@ -75,14 +75,16 @@ class DynaTestEngineTest : DynaTest({
         }
 
         test("when both beforeEach and afterEach throws, the afterEach's exception is added as suppressed") {
+            var called = false
             val ex = expectThrows(RuntimeException::class) {
                 runTests {
                     beforeEach { throw RuntimeException("expected") }
-                    test("should not have been called") { kotlin.test.fail("should not have been called since beforeEach failed") }
+                    test("should not have been called") { called = true; kotlin.test.fail("should not have been called since beforeEach failed") }
                     afterEach { throw IOException("simulated") }
                 }
             }
             expect<Class<out Throwable>>(IOException::class.java) { ex.suppressed[0].javaClass }
+            expect(false) { called }
         }
 
         test("throwing in `afterEach` will make the test fail") {
@@ -114,6 +116,20 @@ class DynaTestEngineTest : DynaTest({
                 }
             }
             expect(true) { called }
+        }
+
+        test("if `beforeEach` fails, no `afterEach` in subgroup should be called") {
+            var called = false
+            expectThrows(RuntimeException::class) {
+                runTests {
+                    beforeEach { throw RuntimeException("simulated") }
+                    group("nested group") {
+                        test("dummy") { called = true; kotlin.test.fail("should not have been called") }
+                        afterEach { called = true; kotlin.test.fail("should not have been called") }
+                    }
+                }
+            }
+            expect(false) { called }
         }
     }
 
