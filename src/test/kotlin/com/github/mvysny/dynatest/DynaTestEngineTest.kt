@@ -118,22 +118,28 @@ class DynaTestEngineTest : DynaTest({
     }
 
     group("test the 'beforeAll' behavior") {
-        group("simple before-test") {
+        test("simple before-test") {
             var called = false
-            test("check that 'beforeAll' ran") {
-                expect(true) { called }
+            runTests {
+                test("check that 'beforeAll' ran") {
+                    expect(true) { called }
+                }
+                beforeAll { called = true }
             }
-            beforeAll { called = true }
+            expect(true) { called }
         }
 
         group("before-group") {
             var called = false
-            group("artificial group") {
-                test("check that 'beforeEach' ran") {
-                    expect(true) { called }
+            runTests {
+                group("artificial group") {
+                    test("check that 'beforeEach' ran") {
+                        expect(true) { called }
+                    }
                 }
+                beforeAll { called = true }
             }
-            beforeAll { called = true }
+            expect(true) { called }
         }
     }
 
