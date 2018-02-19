@@ -120,7 +120,7 @@ class DynaTestEngineTest : DynaTest({
 
         test("if `beforeEach` fails, no `afterEach` in subgroup should be called") {
             var called = false
-            expectThrows(RuntimeException::class) {
+            val ex = expectThrows(RuntimeException::class) {
                 runTests {
                     beforeEach { throw RuntimeException("simulated") }
                     group("nested group") {
@@ -129,6 +129,7 @@ class DynaTestEngineTest : DynaTest({
                     }
                 }
             }
+            expectList() { ex.suppressed.toList() }
             expect(false) { called }
         }
     }

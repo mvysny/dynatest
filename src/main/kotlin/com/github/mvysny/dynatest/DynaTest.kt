@@ -81,6 +81,9 @@ class DynaNodeGroup internal constructor(name: String, src: StackTraceElement?) 
      *
      * The `afterEach` blocks are called even if the test fails. If the `beforeEach` block fails, only the `afterEach` blocks in the corresponding
      * group and all ancestor groups are called.
+     *
+     * If the `afterEach` blocks throws an exception, those exceptions are added as [Throwable.getSuppressed] to the main exception (as thrown
+     * by the `beforeEach` block or the test itself); or just rethrown if there is no main exception.
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
      */
     fun afterEach(block: ()->Unit) {
