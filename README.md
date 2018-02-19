@@ -175,7 +175,7 @@ If you want to run JUnit5 tests along the DynaTest tests as well, you can run bo
 
 ```groovy
 dependencies {
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.1.0-RC1")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.1.0")
 }
 ```
 
