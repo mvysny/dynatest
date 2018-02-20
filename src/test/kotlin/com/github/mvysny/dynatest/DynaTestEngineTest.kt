@@ -2,6 +2,7 @@ package com.github.mvysny.dynatest
 
 import java.io.IOException
 import kotlin.test.expect
+import kotlin.test.fail
 
 class DynaTestEngineTest : DynaTest({
     group("test the 'beforeEach' behavior") {
@@ -33,7 +34,7 @@ class DynaTestEngineTest : DynaTest({
             expectFailures({
                 runTests {
                     beforeEach { throw RuntimeException("expected") }
-                    test("should not have been called") { kotlin.test.fail("should not have been called since beforeEach failed") }
+                    test("should not have been called") { fail("should not have been called since beforeEach failed") }
                 }
             }) {
                 expectStats(0, 1, 0)
@@ -46,7 +47,7 @@ class DynaTestEngineTest : DynaTest({
             expectFailures({
                 runTests {
                     beforeEach { throw RuntimeException("expected") }
-                    test("should not have been called") { kotlin.test.fail("should not have been called since beforeEach failed") }
+                    test("should not have been called") { fail("should not have been called since beforeEach failed") }
                     afterEach { called = true }
                 }
             }) {
@@ -85,7 +86,7 @@ class DynaTestEngineTest : DynaTest({
             expectFailures({
                 runTests {
                     beforeEach { throw RuntimeException("expected") }
-                    test("should not have been called") { called = true; kotlin.test.fail("should not have been called since beforeEach failed") }
+                    test("should not have been called") { called = true; fail("should not have been called since beforeEach failed") }
                     afterEach { throw IOException("simulated") }
                 }
             }) {
@@ -140,8 +141,8 @@ class DynaTestEngineTest : DynaTest({
                 runTests {
                     beforeEach { throw RuntimeException("simulated") }
                     group("nested group") {
-                        test("dummy") { called = true; kotlin.test.fail("should not have been called") }
-                        afterEach { called = true; kotlin.test.fail("should not have been called") }
+                        test("dummy") { called = true; fail("should not have been called") }
+                        afterEach { called = true; fail("should not have been called") }
                     }
                 }
             }) {
@@ -177,6 +178,24 @@ class DynaTestEngineTest : DynaTest({
             }
             expect(true) { called }
         }
+
+        group("test when `beforeAll` fails") {
+            test("`beforeEach`, `test`, `afterEach`, `afterAll` deosn't get called when `beforeAll` fails") {
+                var called = false
+                expectFailures({
+                    runTests {
+                        beforeAll { throw RuntimeException("Simulated") }
+                        beforeEach { called = true; fail("shouldn't be called") }
+                        test("shouldn't be called") { called = true; fail("shouldn't be called") }
+                        afterEach { called = true; fail("shouldn't be called") }
+                    }
+                }) {
+                    expectStats(0, 1, 0)
+                    expectFailure<RuntimeException>("root")
+                }
+                expect(false) { called }
+            }
+        }
     }
 
     group("test the 'afterAll' behavior") {
@@ -190,7 +209,7 @@ class DynaTestEngineTest : DynaTest({
             expect(1) { called }
         }
 
-        group("after-group") {
+        test("`afterAll` is called only once even when there are nested groups") {
             var called = 0
             runTests {
                 afterAll { called++ }
@@ -198,6 +217,19 @@ class DynaTestEngineTest : DynaTest({
                 group("artificial group") {
                     test("dummy test which triggers 'afterEach'") {}
                 }
+            }
+            expect(1) { called }
+        }
+
+        test("`afterAll` is called even if `beforeAll` fails") {
+            var called = 0
+            expectFailures({
+                runTests {
+                    beforeAll { throw RuntimeException("Simulated") }
+                    afterAll { called++ }
+                }
+            }) {
+                expectStats(0, 1, 0)
             }
             expect(1) { called }
         }

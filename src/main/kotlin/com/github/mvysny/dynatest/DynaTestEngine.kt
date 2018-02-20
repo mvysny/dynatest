@@ -81,8 +81,22 @@ class DynaTestEngine : TestEngine {
         }
 
         fun runAllTests(td: TestDescriptor) {
+            // mark test started
             request.engineExecutionListener.executionStarted(td)
-            (td as? DynaNodeTestDescriptor)?.runBeforeAll()
+
+            // if this test descriptor denotes a DynaNodeGroup, run all `beforeAll` blocks.
+            try {
+                (td as? DynaNodeTestDescriptor)?.runBeforeAll()
+            } catch (t: Throwable) {
+                // one of the `beforeAll` failed; do not run anything in this group (but still run all afterAll blocks in this group)
+                // mark the group as failed.
+                (td as? DynaNodeTestDescriptor)?.runAfterAll(t)
+                request.engineExecutionListener.executionFinished(td, TestExecutionResult.failed(t))
+                // bail out, we're done.
+                return
+            }
+
+            // beforeAll ran successfully, continue with the normal test execution.
             td.children.forEach { runAllTests(it) }
             try {
                 if (td is DynaNodeTestDescriptor && td.node is DynaNodeTest) {
@@ -90,7 +104,7 @@ class DynaTestEngine : TestEngine {
                 } else if (td is InitFailedTestDescriptor) {
                     throw RuntimeException(td.failure)
                 }
-                (td as? DynaNodeTestDescriptor)?.runAfterAll()
+                (td as? DynaNodeTestDescriptor)?.runAfterAll(null)
                 request.engineExecutionListener.executionFinished(td, TestExecutionResult.successful())
             } catch (t: Throwable) {
                 request.engineExecutionListener.executionFinished(td, TestExecutionResult.failed(t))
@@ -139,10 +153,18 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNode) : 
         }
     }
 
-    fun runAfterAll() {
+    fun runAfterAll(t: Throwable?) {
+        var tf = t
         if (node is DynaNodeGroup) {
-            node.afterAll.forEach { it() }
+            node.afterAll.forEach {
+                try {
+                    it()
+                } catch (ex: Throwable) {
+                    if (tf == null) tf = ex else tf!!.addSuppressed(ex)
+                }
+            }
         }
+        if (tf != null && t == null) throw tf!!
     }
 
     /**
