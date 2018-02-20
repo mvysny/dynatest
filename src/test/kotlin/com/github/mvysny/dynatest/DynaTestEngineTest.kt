@@ -236,7 +236,7 @@ class DynaTestEngineTest : DynaTest({
                 expect(1) { called }
             }
 
-            test("Exceptions thrown from `beforeAll` are attached as suppressed by the exception thrown by `beforeAll`") {
+            test("Exceptions thrown in `afterAll` are attached as suppressed to the exception thrown in `beforeAll`") {
                 expectFailures({
                     runTests {
                         beforeAll { throw RuntimeException("Simulated") }
@@ -279,6 +279,33 @@ class DynaTestEngineTest : DynaTest({
                     }
                 }) {
                     expectStats(1, 1, 0)
+                }
+                expect(true) { called }
+            }
+
+            test("Failure in a test won't prevent `afterAll` from being called") {
+                var called = false
+                expectFailures({
+                    runTests {
+                        test("failing") { fail("simulated") }
+                        afterAll { called = true }
+                    }
+                }) {
+                    expectStats(0, 1, 0)
+                }
+                expect(true) { called }
+            }
+
+            test("Failure in a `afterEach` won't prevent `afterAll` from being called") {
+                var called = false
+                expectFailures({
+                    runTests {
+                        test("dummy") {}
+                        afterEach { throw RuntimeException("Simulated") }
+                        afterAll { called = true }
+                    }
+                }) {
+                    expectStats(0, 1, 0)
                 }
                 expect(true) { called }
             }
