@@ -266,6 +266,22 @@ class DynaTestEngineTest : DynaTest({
                 }
                 expect(true) { called }
             }
+
+            test("Failure in `afterAll` won't prevent `afterAll` from being called in the parent group") {
+                var called = false
+                expectFailures({
+                    runTests {
+                        group("Failing group") {
+                            test("dummy") {}
+                            afterAll { throw RuntimeException("Simulated") }
+                        }
+                        afterAll { called = true }
+                    }
+                }) {
+                    expectStats(1, 1, 0)
+                }
+                expect(true) { called }
+            }
         }
     }
 })
