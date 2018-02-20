@@ -180,7 +180,7 @@ class DynaTestEngineTest : DynaTest({
         }
 
         group("test when `beforeAll` fails") {
-            test("`beforeEach`, `test`, `afterEach`, `afterAll` deosn't get called when `beforeAll` fails") {
+            test("`beforeEach`, `test`, `afterEach`, `afterAll` doesn't get called when `beforeAll` fails") {
                 var called = false
                 expectFailures({
                     runTests {
@@ -192,6 +192,7 @@ class DynaTestEngineTest : DynaTest({
                 }) {
                     expectStats(0, 1, 0)
                     expectFailure<RuntimeException>("root")
+                    expect(0) { getFailure("root").suppressed.size }
                 }
                 expect(false) { called }
             }
@@ -221,17 +222,50 @@ class DynaTestEngineTest : DynaTest({
             expect(1) { called }
         }
 
-        test("`afterAll` is called even if `beforeAll` fails") {
-            var called = 0
-            expectFailures({
-                runTests {
-                    beforeAll { throw RuntimeException("Simulated") }
-                    afterAll { called++ }
+        group("exceptions") {
+            test("`afterAll` is called even if `beforeAll` fails") {
+                var called = 0
+                expectFailures({
+                    runTests {
+                        beforeAll { throw RuntimeException("Simulated") }
+                        afterAll { called++ }
+                    }
+                }) {
+                    expectStats(0, 1, 0)
                 }
-            }) {
-                expectStats(0, 1, 0)
+                expect(1) { called }
             }
-            expect(1) { called }
+
+            test("Exceptions thrown from `beforeAll` are attached as suppressed by the exception thrown by `beforeAll`") {
+                expectFailures({
+                    runTests {
+                        beforeAll { throw RuntimeException("Simulated") }
+                        afterAll { throw IOException("Simulated") }
+                    }
+                }) {
+                    expectStats(0, 1, 0)
+                    expectFailure<RuntimeException>("root")
+                    expect<Class<out Throwable>>(IOException::class.java) { getFailure("root").suppressed[0].javaClass }
+                }
+            }
+
+            test("Exceptions thrown from `beforeAll` do not prevent other groups from running") {
+                var called = false
+                expectFailures({
+                    runTests {
+                        group("failing group") {
+                            beforeAll { throw RuntimeException("Simulated") }
+                        }
+                        group("successful group") {
+                            test("test") { called = true }
+                        }
+                    }
+                }) {
+                    expectStats(1, 1, 0)
+                    expectFailure<RuntimeException>("failing group")
+                }
+                expect(true) { called }
+            }
         }
     }
 })
