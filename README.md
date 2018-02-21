@@ -184,10 +184,124 @@ dependencies {
 }
 ```
 
-## Troubleshooting
+## Patterns
 
-#### My DynaTest tests are not run.
+#### Conditional tests
 
-It may be a bug in DynaTest TestEngine which may throw an exception, and that exception would then silently be ignored by Gradle.
-Just run gradle with `--debug` to verify that there is no DynaTest-related stacktrace. Please see [Gradle Issue #4418](https://github.com/gradle/gradle/issues/4418)
-for more details.
+Simply call the `test()` function only when the condition applies. For example:
+
+```kotlin
+class NativesTest : DynaTest({
+    if (OS.isLinux()) {
+        test("linux-based test") {
+            // run tests only on Linux.
+        }
+    }
+})
+```
+
+#### Reusable test battery
+
+You can simply create a (possibly parametrized) function which runs in the context of the
+`DynaNodeGroup`. That allows the function to create test groups and tests as necessary:
+
+```kotlin
+fun DynaNodeGroup.layoutTestBattery(clazz: Class<out ComponentContainer>) {
+    group("tests for ${clazz.simpleName}") {
+        lateinit var layout: ComponentContainer
+        beforeEach { layout = clazz.newInstance() }
+        test("Adding a component will make the count go to 1") {
+            layout.addComponent(Label("Hello World"))
+            expect(1) { layout.getComponentCount() }
+        }
+    }
+}
+
+class LayoutTest : DynaTest({
+    layoutTestBattery(VerticalLayout::class.java)
+    layoutTestBattery(HorizontalLayout::class.java)
+    layoutTestBattery(CssLayout::class.java)
+    layoutTestBattery(FlexLayout::class.java)
+})
+```
+
+#### Plugging in into the test life-cycle
+
+Say that you want to mock the database and clean it before and after every test. Very easy:
+
+```kotlin
+fun DynaNodeGroup.usingDatabase() {
+
+    beforeGroup {
+        VaadinOnKotlin.dataSourceConfig.apply {
+            minimumIdle = 0
+            maximumPoolSize = 30
+            this.jdbcUrl = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
+            this.username = "sa"
+            this.password = ""
+        }
+        Sql2oVOKPlugin().init()
+        db {
+            con.createQuery("""create table if not exists Test (
+                id bigint primary key auto_increment,
+                name varchar not null,
+                age integer not null,
+                dateOfBirth date,
+                created timestamp,
+                alive boolean,
+                maritalStatus varchar
+                 )""").executeUpdate()
+        }
+    }
+
+    afterGroup {
+        Sql2oVOKPlugin().destroy()
+    }
+
+    fun clearDatabase() = Person.deleteAll()
+    beforeEach { clearDatabase() }
+    afterEach { clearDatabase() }
+}
+
+class EntityDataProviderTest : DynaTest({
+
+    usingDatabase()
+
+    test("noEntitiesTest") {
+        val ds = Person.dataProvider
+        expect(0) { ds.size(Query()) }
+        expect(false) { ds.isInMemory }
+        expectList() { ds.getAll() }
+    }
+})
+
+class SomeOtherEntityTest : DynaTest({
+
+    usingDatabase()
+    
+    test("calculating average age") {
+        // etc etc
+    }
+})
+
+```
+
+This sample is taken from Vaadin-on-Kotlin [EntityDataProviderTest.kt](https://github.com/mvysny/vaadin-on-kotlin/blob/master/vok-framework-sql2o/src/test/kotlin/com/github/vok/framework/sql2o/vaadin/EntityDataProviderTest.kt) file,
+which is somewhat complex.
+
+A testing bootstrap in your application will be a lot simpler. See the following example taken from
+the [Vaadin Kotlin PWA Demo](https://github.com/mvysny/vaadin-kotlin-pwa):
+
+```kotlin
+class MainViewTest: DynaTest({
+    beforeGroup { Bootstrap().contextInitialized(null) }
+    afterGroup { Bootstrap().contextDestroyed(null) }
+    beforeEach { MockVaadin.setup(autoDiscoverViews("com.vaadin.pwademo")) }
+
+    test("test greeting") {
+        _get<Button> { caption = "Click me" } ._click()
+        expect("Clicked!") { _get<Label>().text }
+    }
+})
+```
+
