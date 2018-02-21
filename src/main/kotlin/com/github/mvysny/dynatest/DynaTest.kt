@@ -14,7 +14,7 @@ sealed class DynaNode(internal val name: String, internal val src: StackTraceEle
     protected var inDesignPhase: Boolean = true
     internal abstract fun onDesignPhaseEnd()
     protected fun checkInDesignPhase(funName: String) {
-        check(inDesignPhase) { "It appears that you are attempting to call $funName from a test{} block. You should create tests only from the group{} blocks" }
+        check(inDesignPhase) { "It appears that you are attempting to call $funName from a test{} block. You should create tests only from the group{} blocks since they run at design time (and not at run time, like the test{} blocks)" }
     }
 
     /**
@@ -69,7 +69,7 @@ sealed class DynaNode(internal val name: String, internal val src: StackTraceEle
  */
 class DynaNodeTest internal constructor(name: String, internal val body: DynaNodeTest.()->Unit, src: StackTraceElement?) : DynaNode(name, src) {
     private fun fail(funName: String): Nothing =
-        throw IllegalStateException("It appears that you are attempting to call $funName from a test{} block. You should create tests only from the group{} blocks")
+        throw IllegalStateException("It appears that you are attempting to call $funName from a test{} block. You should create tests only from the group{} blocks since they run at design time (and not at run time, like the test{} blocks)")
 
     /**
      * You should create tests only from the group{} blocks.
