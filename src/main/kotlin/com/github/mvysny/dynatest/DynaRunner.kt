@@ -16,6 +16,7 @@ internal fun runTests(block: DynaNodeGroup.()->Unit): TestResults {
     // obtain the test definitions
     val group = DynaNodeGroup("root", null)
     group.block()
+    group.onDesignPhaseEnd()
 
     // run the tests using the DynaTestEngine
     val testDescriptor = DynaNodeTestDescriptor(UniqueId.forEngine("dynatest"), group)

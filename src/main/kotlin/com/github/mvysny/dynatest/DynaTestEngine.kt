@@ -61,6 +61,7 @@ class DynaTestEngine : TestEngine {
                         val test: DynaTest = it.newInstance() as DynaTest
                         val td = DynaNodeTestDescriptor(result.uniqueId, test.root)
                         result.addChild(td)
+                        test.root.onDesignPhaseEnd()
                     } catch (t: Throwable) {
                         result.addChild(InitFailedTestDescriptor(result.uniqueId, it, t))
                     }
@@ -77,7 +78,7 @@ class DynaTestEngine : TestEngine {
     override fun execute(request: ExecutionRequest) {
 
         fun runTest(td: DynaNodeTestDescriptor, node: DynaNodeTest) {
-            td.runBlock { node.body() }
+            td.runBlock { node.body(node) }
         }
 
         fun runAllTests(td: TestDescriptor) {

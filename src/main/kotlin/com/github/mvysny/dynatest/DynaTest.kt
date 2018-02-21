@@ -10,14 +10,101 @@ import org.junit.platform.commons.annotation.Testable
  * Every [DynaNodeGroup.test] and [DynaNodeGroup.group] call
  * creates this node which in turn can be converted to JUnit5 structures eligible for execution.
  */
-sealed class DynaNode(internal val name: String, internal val src: StackTraceElement?)
+sealed class DynaNode(internal val name: String, internal val src: StackTraceElement?) {
+    protected var inDesignPhase: Boolean = true
+    internal abstract fun onDesignPhaseEnd()
+    protected fun checkInDesignPhase(funName: String) {
+        check(inDesignPhase) { "It appears that you are attempting to call $funName from a test{} block. You should create tests only from the group{} blocks" }
+    }
+
+    /**
+     * Creates a new test case with given [name] and registers it within current group. Does not run the test closure immediately -
+     * the test is only registered for being run later on by JUnit5 runner (or by [runTests]).
+     * @param body the implementation of the test; does not run immediately but only when the test case is run
+     */
+    abstract fun test(name: String, body: DynaNodeTest.()->Unit)
+
+    /**
+     * Registers a block which will be run exactly once before any of the tests are run. Only the tests nested in this group and its subgroups are
+     * @param block the block to run. Any exceptions thrown by the block will make the test fail.
+     */
+    abstract fun beforeAll(block: ()->Unit)
+
+    /**
+     * Registers a block which will be run before every test registered to this group and to any nested groups.
+     * `beforeEach` blocks registered by a parent/ancestor group runs before `beforeEach` blocks registered by this group.
+     *
+     * If any of the `beforeEach` blocks fails, no further `beforeEach` blocks are executed; furthermore the test itself is not executed as well.
+     * However, all of the [afterEach] blocks for the corresponding group and all parent groups still *are* executed.
+     * @param block the block to run. Any exceptions thrown by the block will make the test fail.
+     */
+    abstract fun beforeEach(block: ()->Unit)
+
+    /**
+     * Registers a block which will be run after every test registered to this group and to any nested groups.
+     * `afterEach` blocks registered by a parent/ancestor group runs after `afterEach` blocks registered by this group.
+     *
+     * The `afterEach` blocks are called even if the test fails. If the `beforeEach` block fails, only the `afterEach` blocks in the corresponding
+     * group and all ancestor groups are called.
+     *
+     * If the `afterEach` blocks throws an exception, those exceptions are added as [Throwable.getSuppressed] to the main exception (as thrown
+     * by the `beforeEach` block or the test itself); or just rethrown if there is no main exception. Any exception thrown by the `afterEach`
+     * block will cause the test to fail.
+     * @param block the block to run. Any exceptions thrown by the block will make the test fail.
+     */
+    abstract fun afterEach(block: ()->Unit)
+
+    /**
+     * Registers a block which will be run only once after all of the tests are run. Only the tests nested in this group and its subgroups are
+     * considered.
+     * @param block the block to run. Any exceptions thrown by the block will make the test fail.
+     */
+    abstract fun afterAll(block: ()->Unit)
+}
 
 /**
  * Represents a single test with a [name], an execution [context] and the test's [body]. Created when you call [DynaNodeGroup.test].
  *
  * To start writing tests, just extend [DynaTest]. See [DynaTest] for more details.
  */
-class DynaNodeTest internal constructor(name: String, internal val body: ()->Unit, src: StackTraceElement?) : DynaNode(name, src)
+class DynaNodeTest internal constructor(name: String, internal val body: DynaNodeTest.()->Unit, src: StackTraceElement?) : DynaNode(name, src) {
+    private fun fail(funName: String): Nothing =
+        throw IllegalStateException("It appears that you are attempting to call $funName from a test{} block. You should create tests only from the group{} blocks")
+
+    /**
+     * You should create tests only from the group{} blocks.
+     */
+    @Deprecated("You should create tests only from the group{} blocks", level = DeprecationLevel.ERROR)
+    override fun test(name: String, body: DynaNodeTest.() -> Unit): Nothing = fail("test")
+
+    override fun onDesignPhaseEnd() {
+        inDesignPhase = false
+    }
+
+    /**
+     * You should create tests only from the group{} blocks.
+     */
+    @Deprecated("You should create tests only from the group{} blocks", level = DeprecationLevel.ERROR)
+    override fun beforeAll(block: () -> Unit): Nothing = fail("beforeAll")
+
+    /**
+     * You should create tests only from the group{} blocks.
+     */
+    @Deprecated("You should create tests only from the group{} blocks", level = DeprecationLevel.ERROR)
+    override fun afterEach(block: () -> Unit): Nothing = fail("afterEach")
+
+    /**
+     * You should create tests only from the group{} blocks.
+     */
+    @Deprecated("You should create tests only from the group{} blocks", level = DeprecationLevel.ERROR)
+    override fun beforeEach(block: () -> Unit): Nothing = fail("beforeEach")
+
+    /**
+     * You should create tests only from the group{} blocks.
+     */
+    @Deprecated("You should create tests only from the group{} blocks", level = DeprecationLevel.ERROR)
+    override fun afterAll(block: () -> Unit): Nothing = fail("afterAll")
+}
 
 /**
  * Represents a single test group with a [name]. Created when you call [group].
@@ -43,12 +130,13 @@ class DynaNodeGroup internal constructor(name: String, src: StackTraceElement?) 
      */
     internal val afterAll = mutableListOf<()->Unit>()
 
-    /**
-     * Creates a new test case with given [name] and registers it within current group. Does not run the test closure immediately -
-     * the test is only registered for being run later on by JUnit5 runner (or by [runTests]).
-     * @param body the implementation of the test; does not run immediately but only when the test case is run
-     */
-    fun test(name: String, body: ()->Unit) {
+    override fun onDesignPhaseEnd() {
+        inDesignPhase = false
+        children.forEach { it.onDesignPhaseEnd() }
+    }
+
+    override fun test(name: String, body: DynaNodeTest.()->Unit) {
+        checkInDesignPhase("test")
         val source = computeTestSource()
         children.add(DynaNodeTest(name, body, source))
     }
@@ -59,54 +147,30 @@ class DynaNodeGroup internal constructor(name: String, src: StackTraceElement?) 
      * @param block the block, runs immediately.
      */
     fun group(name: String, block: DynaNodeGroup.()->Unit) {
+        checkInDesignPhase("group")
         val source = computeTestSource()
         val group = DynaNodeGroup(name, source)
         group.block()
         children.add(group)
     }
 
-    /**
-     * Registers a block which will be run before every test registered to this group and to any nested groups.
-     * `beforeEach` blocks registered by a parent/ancestor group runs before `beforeEach` blocks registered by this group.
-     *
-     * If any of the `beforeEach` blocks fails, no further `beforeEach` blocks are executed; furthermore the test itself is not executed as well.
-     * However, all of the [afterEach] blocks for the corresponding group and all parent groups still *are* executed.
-     * @param block the block to run. Any exceptions thrown by the block will make the test fail.
-     */
-    fun beforeEach(block: ()->Unit) {
+    override fun beforeEach(block: ()->Unit) {
+        checkInDesignPhase("beforeEach")
         beforeEach.add(block)
     }
 
-    /**
-     * Registers a block which will be run after every test registered to this group and to any nested groups.
-     * `afterEach` blocks registered by a parent/ancestor group runs after `afterEach` blocks registered by this group.
-     *
-     * The `afterEach` blocks are called even if the test fails. If the `beforeEach` block fails, only the `afterEach` blocks in the corresponding
-     * group and all ancestor groups are called.
-     *
-     * If the `afterEach` blocks throws an exception, those exceptions are added as [Throwable.getSuppressed] to the main exception (as thrown
-     * by the `beforeEach` block or the test itself); or just rethrown if there is no main exception. Any exception thrown by the `afterEach`
-     * block will cause the test to fail.
-     * @param block the block to run. Any exceptions thrown by the block will make the test fail.
-     */
-    fun afterEach(block: ()->Unit) {
+    override fun afterEach(block: ()->Unit) {
+        checkInDesignPhase("afterEach")
         afterEach.add(block)
     }
 
-    /**
-     * Registers a block which will be run exactly once before any of the tests are run. Only the tests nested in this group and its subgroups are
-     * @param block the block to run. Any exceptions thrown by the block will make the test fail.
-     */
-    fun beforeAll(block: ()->Unit) {
+    override fun beforeAll(block: ()->Unit) {
+        checkInDesignPhase("beforeAll")
         beforeAll.add(block)
     }
 
-    /**
-     * Registers a block which will be run only once after all of the tests are run. Only the tests nested in this group and its subgroups are
-     * considered.
-     * @param block the block to run. Any exceptions thrown by the block will make the test fail.
-     */
-    fun afterAll(block: ()->Unit) {
+    override fun afterAll(block: ()->Unit) {
+        checkInDesignPhase("afterAll")
         afterAll.add(block)
     }
 }

@@ -311,4 +311,81 @@ class DynaTestEngineTest : DynaTest({
             }
         }
     }
+
+    group("nesting DynaTest inside a test block is forbidden") {
+        test("calling test") {
+            var called = false
+            expectFailures({
+                runTests {
+                    test("should fail") {
+                        this@runTests.test("can't define a test inside a test") { called = true }
+                    }
+                }
+            }) {
+                expectStats(0, 1, 0)
+                expectFailure<IllegalStateException>("should fail")
+            }
+            expect(false) { called }
+        }
+
+        test("calling beforeAll") {
+            var called = false
+            expectFailures({
+                runTests {
+                    test("should fail") {
+                        this@runTests.beforeAll { called = true }
+                    }
+                }
+            }) {
+                expectStats(0, 1, 0)
+                expectFailure<IllegalStateException>("should fail")
+            }
+            expect(false) { called }
+        }
+
+        test("calling beforeEach") {
+            var called = false
+            expectFailures({
+                runTests {
+                    test("should fail") {
+                        this@runTests.beforeEach { called = true }
+                    }
+                }
+            }) {
+                expectStats(0, 1, 0)
+                expectFailure<IllegalStateException>("should fail")
+            }
+            expect(false) { called }
+        }
+
+        test("calling afterEach") {
+            var called = false
+            expectFailures({
+                runTests {
+                    test("should fail") {
+                        this@runTests.afterEach { called = true }
+                    }
+                }
+            }) {
+                expectStats(0, 1, 0)
+                expectFailure<IllegalStateException>("should fail")
+            }
+            expect(false) { called }
+        }
+
+        test("calling afterAll") {
+            var called = false
+            expectFailures({
+                runTests {
+                    test("should fail") {
+                        this@runTests.afterAll { called = true }
+                    }
+                }
+            }) {
+                expectStats(0, 1, 0)
+                expectFailure<IllegalStateException>("should fail")
+            }
+            expect(false) { called }
+        }
+    }
 })
