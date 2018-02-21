@@ -25,10 +25,11 @@ sealed class DynaNode(internal val name: String, internal val src: StackTraceEle
     abstract fun test(name: String, body: DynaNodeTest.()->Unit)
 
     /**
-     * Registers a block which will be run exactly once before any of the tests are run. Only the tests nested in this group and its subgroups are
+     * Registers a block which will be run exactly once before any of the tests in the current group are run. Only the tests nested in this group and its subgroups are
+     * considered.
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
      */
-    abstract fun beforeAll(block: ()->Unit)
+    abstract fun beforeGroup(block: ()->Unit)
 
     /**
      * Registers a block which will be run before every test registered to this group and to any nested groups.
@@ -55,11 +56,11 @@ sealed class DynaNode(internal val name: String, internal val src: StackTraceEle
     abstract fun afterEach(block: ()->Unit)
 
     /**
-     * Registers a block which will be run only once after all of the tests are run. Only the tests nested in this group and its subgroups are
+     * Registers a block which will be run only once after all of the tests are run in the current group. Only the tests nested in this group and its subgroups are
      * considered.
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
      */
-    abstract fun afterAll(block: ()->Unit)
+    abstract fun afterGroup(block: ()->Unit)
 }
 
 /**
@@ -85,7 +86,7 @@ class DynaNodeTest internal constructor(name: String, internal val body: DynaNod
      * You should create tests only from the group{} blocks.
      */
     @Deprecated("You should create tests only from the group{} blocks", level = DeprecationLevel.ERROR)
-    override fun beforeAll(block: () -> Unit): Nothing = fail("beforeAll")
+    override fun beforeGroup(block: () -> Unit): Nothing = fail("beforeGroup")
 
     /**
      * You should create tests only from the group{} blocks.
@@ -103,7 +104,7 @@ class DynaNodeTest internal constructor(name: String, internal val body: DynaNod
      * You should create tests only from the group{} blocks.
      */
     @Deprecated("You should create tests only from the group{} blocks", level = DeprecationLevel.ERROR)
-    override fun afterAll(block: () -> Unit): Nothing = fail("afterAll")
+    override fun afterGroup(block: () -> Unit): Nothing = fail("afterGroup")
 }
 
 /**
@@ -124,11 +125,11 @@ class DynaNodeGroup internal constructor(name: String, src: StackTraceElement?) 
     /**
      * What to run before any of the test is started in this group.
      */
-    internal val beforeAll = mutableListOf<()->Unit>()
+    internal val beforeGroup = mutableListOf<()->Unit>()
     /**
      * What to run after all tests are done in this group.
      */
-    internal val afterAll = mutableListOf<()->Unit>()
+    internal val afterGroup = mutableListOf<()->Unit>()
 
     override fun onDesignPhaseEnd() {
         inDesignPhase = false
@@ -164,14 +165,14 @@ class DynaNodeGroup internal constructor(name: String, src: StackTraceElement?) 
         afterEach.add(block)
     }
 
-    override fun beforeAll(block: ()->Unit) {
-        checkInDesignPhase("beforeAll")
-        beforeAll.add(block)
+    override fun beforeGroup(block: ()->Unit) {
+        checkInDesignPhase("beforeGroup")
+        beforeGroup.add(block)
     }
 
-    override fun afterAll(block: ()->Unit) {
-        checkInDesignPhase("afterAll")
-        afterAll.add(block)
+    override fun afterGroup(block: ()->Unit) {
+        checkInDesignPhase("afterGroup")
+        afterGroup.add(block)
     }
 }
 
@@ -180,7 +181,7 @@ class DynaNodeGroup internal constructor(name: String, src: StackTraceElement?) 
  * ```
  * class PhotoListTest : DynaTest({
  *   lateinit var photoList: PhotoList
- *   beforeAll { photoList = PhotoList() }
+ *   beforeGroup { photoList = PhotoList() }
  *
  *   group("tests of the `list()` method") {
  *     test("initially the list must be empty") {

@@ -15,7 +15,7 @@ import java.util.function.Predicate
 /**
  * Since JUnit5's dynamic tests lack the necessary features, I'll implement my own Test Engine. In particular, JUnit5's dynamic tests:
  * * do not allow to reference the pointer to the source code of the test accurately: https://github.com/junit-team/junit5/issues/1293
- * * do not support beforeAll/afterAll: https://github.com/junit-team/junit5/issues/1292
+ * * do not support beforeGroup/afterGroup: https://github.com/junit-team/junit5/issues/1292
  */
 class DynaTestEngine : TestEngine {
 
@@ -85,19 +85,19 @@ class DynaTestEngine : TestEngine {
             // mark test started
             request.engineExecutionListener.executionStarted(td)
 
-            // if this test descriptor denotes a DynaNodeGroup, run all `beforeAll` blocks.
+            // if this test descriptor denotes a DynaNodeGroup, run all `beforeGroup` blocks.
             try {
-                (td as? DynaNodeTestDescriptor)?.runBeforeAll()
+                (td as? DynaNodeTestDescriptor)?.runbeforeGroup()
             } catch (t: Throwable) {
-                // one of the `beforeAll` failed; do not run anything in this group (but still run all afterAll blocks in this group)
+                // one of the `beforeGroup` failed; do not run anything in this group (but still run all afterGroup blocks in this group)
                 // mark the group as failed.
-                (td as? DynaNodeTestDescriptor)?.runAfterAll(t)
+                (td as? DynaNodeTestDescriptor)?.runafterGroup(t)
                 request.engineExecutionListener.executionFinished(td, TestExecutionResult.failed(t))
                 // bail out, we're done.
                 return
             }
 
-            // beforeAll ran successfully, continue with the normal test execution.
+            // beforeGroup ran successfully, continue with the normal test execution.
             td.children.forEach { runAllTests(it) }
             try {
                 if (td is DynaNodeTestDescriptor && td.node is DynaNodeTest) {
@@ -105,7 +105,7 @@ class DynaTestEngine : TestEngine {
                 } else if (td is InitFailedTestDescriptor) {
                     throw RuntimeException(td.failure)
                 }
-                (td as? DynaNodeTestDescriptor)?.runAfterAll(null)
+                (td as? DynaNodeTestDescriptor)?.runafterGroup(null)
                 request.engineExecutionListener.executionFinished(td, TestExecutionResult.successful())
             } catch (t: Throwable) {
                 request.engineExecutionListener.executionFinished(td, TestExecutionResult.failed(t))
@@ -148,16 +148,16 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNode) : 
         is DynaNodeTest -> TestDescriptor.Type.TEST
     }
 
-    fun runBeforeAll() {
+    fun runbeforeGroup() {
         if (node is DynaNodeGroup) {
-            node.beforeAll.forEach { it() }
+            node.beforeGroup.forEach { it() }
         }
     }
 
-    fun runAfterAll(t: Throwable?) {
+    fun runafterGroup(t: Throwable?) {
         var tf = t
         if (node is DynaNodeGroup) {
-            node.afterAll.forEach {
+            node.afterGroup.forEach {
                 try {
                     it()
                 } catch (ex: Throwable) {

@@ -62,7 +62,7 @@ internal fun expectFailures(block: ()->Unit, results: TestResults.()->Unit) {
 
 /**
  * The test results, captured by the [runTests] function.
- * @property testsRan all tests that were ran, either successfully or unsuccessfully. Only counts in groups when their `beforeAll` failed.
+ * @property testsRan all tests that were ran, either successfully or unsuccessfully. Only counts in groups when their `beforeGroup` failed.
  * @property testsSkipped typically empty since there is no means to skip a test in DynaTest.
  */
 internal data class TestResults(val testsRan: MutableMap<UniqueId, TestExecutionResult> = mutableMapOf(),

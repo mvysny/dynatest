@@ -154,14 +154,14 @@ class DynaTestEngineTest : DynaTest({
         }
     }
 
-    group("test the 'beforeAll' behavior") {
+    group("test the 'beforeGroup' behavior") {
         test("simple before-test") {
             var called = false
             runTests {
-                test("check that 'beforeAll' ran") {
+                test("check that 'beforeGroup' ran") {
                     expect(true) { called }
                 }
-                beforeAll { called = true }
+                beforeGroup { called = true }
             }
             expect(true) { called }
         }
@@ -174,17 +174,17 @@ class DynaTestEngineTest : DynaTest({
                         expect(true) { called }
                     }
                 }
-                beforeAll { called = true }
+                beforeGroup { called = true }
             }
             expect(true) { called }
         }
 
-        group("test when `beforeAll` fails") {
-            test("`beforeEach`, `test`, `afterEach`, `afterAll` doesn't get called when `beforeAll` fails") {
+        group("test when `beforeGroup` fails") {
+            test("`beforeEach`, `test`, `afterEach`, `afterGroup` doesn't get called when `beforeGroup` fails") {
                 var called = false
                 expectFailures({
                     runTests {
-                        beforeAll { throw RuntimeException("Simulated") }
+                        beforeGroup { throw RuntimeException("Simulated") }
                         beforeEach { called = true; fail("shouldn't be called") }
                         test("shouldn't be called") { called = true; fail("shouldn't be called") }
                         afterEach { called = true; fail("shouldn't be called") }
@@ -199,21 +199,21 @@ class DynaTestEngineTest : DynaTest({
         }
     }
 
-    group("test the 'afterAll' behavior") {
+    group("test the 'afterGroup' behavior") {
         test("simple after-test") {
             var called = 0
             runTests {
-                afterAll { called++ }
+                afterGroup { called++ }
                 test("dummy test") {}
                 test("dummy test2") {}
             }
             expect(1) { called }
         }
 
-        test("`afterAll` is called only once even when there are nested groups") {
+        test("`afterGroup` is called only once even when there are nested groups") {
             var called = 0
             runTests {
-                afterAll { called++ }
+                afterGroup { called++ }
 
                 group("artificial group") {
                     test("dummy test which triggers 'afterEach'") {}
@@ -223,12 +223,12 @@ class DynaTestEngineTest : DynaTest({
         }
 
         group("exceptions") {
-            test("`afterAll` is called even if `beforeAll` fails") {
+            test("`afterGroup` is called even if `beforeGroup` fails") {
                 var called = 0
                 expectFailures({
                     runTests {
-                        beforeAll { throw RuntimeException("Simulated") }
-                        afterAll { called++ }
+                        beforeGroup { throw RuntimeException("Simulated") }
+                        afterGroup { called++ }
                     }
                 }) {
                     expectStats(0, 1, 0)
@@ -236,11 +236,11 @@ class DynaTestEngineTest : DynaTest({
                 expect(1) { called }
             }
 
-            test("Exceptions thrown in `afterAll` are attached as suppressed to the exception thrown in `beforeAll`") {
+            test("Exceptions thrown in `afterGroup` are attached as suppressed to the exception thrown in `beforeGroup`") {
                 expectFailures({
                     runTests {
-                        beforeAll { throw RuntimeException("Simulated") }
-                        afterAll { throw IOException("Simulated") }
+                        beforeGroup { throw RuntimeException("Simulated") }
+                        afterGroup { throw IOException("Simulated") }
                     }
                 }) {
                     expectStats(0, 1, 0)
@@ -249,12 +249,12 @@ class DynaTestEngineTest : DynaTest({
                 }
             }
 
-            test("Exceptions thrown from `beforeAll` do not prevent other groups from running") {
+            test("Exceptions thrown from `beforeGroup` do not prevent other groups from running") {
                 var called = false
                 expectFailures({
                     runTests {
                         group("failing group") {
-                            beforeAll { throw RuntimeException("Simulated") }
+                            beforeGroup { throw RuntimeException("Simulated") }
                         }
                         group("successful group") {
                             test("test") { called = true }
@@ -267,15 +267,15 @@ class DynaTestEngineTest : DynaTest({
                 expect(true) { called }
             }
 
-            test("Failure in `afterAll` won't prevent `afterAll` from being called in the parent group") {
+            test("Failure in `afterGroup` won't prevent `afterGroup` from being called in the parent group") {
                 var called = false
                 expectFailures({
                     runTests {
                         group("Failing group") {
                             test("dummy") {}
-                            afterAll { throw RuntimeException("Simulated") }
+                            afterGroup { throw RuntimeException("Simulated") }
                         }
-                        afterAll { called = true }
+                        afterGroup { called = true }
                     }
                 }) {
                     expectStats(1, 1, 0)
@@ -283,12 +283,12 @@ class DynaTestEngineTest : DynaTest({
                 expect(true) { called }
             }
 
-            test("Failure in a test won't prevent `afterAll` from being called") {
+            test("Failure in a test won't prevent `afterGroup` from being called") {
                 var called = false
                 expectFailures({
                     runTests {
                         test("failing") { fail("simulated") }
-                        afterAll { called = true }
+                        afterGroup { called = true }
                     }
                 }) {
                     expectStats(0, 1, 0)
@@ -296,13 +296,13 @@ class DynaTestEngineTest : DynaTest({
                 expect(true) { called }
             }
 
-            test("Failure in a `afterEach` won't prevent `afterAll` from being called") {
+            test("Failure in a `afterEach` won't prevent `afterGroup` from being called") {
                 var called = false
                 expectFailures({
                     runTests {
                         test("dummy") {}
                         afterEach { throw RuntimeException("Simulated") }
-                        afterAll { called = true }
+                        afterGroup { called = true }
                     }
                 }) {
                     expectStats(0, 1, 0)
@@ -328,12 +328,12 @@ class DynaTestEngineTest : DynaTest({
             expect(false) { called }
         }
 
-        test("calling beforeAll") {
+        test("calling beforeGroup") {
             var called = false
             expectFailures({
                 runTests {
                     test("should fail") {
-                        this@runTests.beforeAll { called = true }
+                        this@runTests.beforeGroup { called = true }
                     }
                 }
             }) {
@@ -373,12 +373,12 @@ class DynaTestEngineTest : DynaTest({
             expect(false) { called }
         }
 
-        test("calling afterAll") {
+        test("calling afterGroup") {
             var called = false
             expectFailures({
                 runTests {
                     test("should fail") {
-                        this@runTests.afterAll { called = true }
+                        this@runTests.afterGroup { called = true }
                     }
                 }
             }) {
