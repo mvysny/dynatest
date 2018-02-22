@@ -34,13 +34,15 @@ fun <K, V> expectMap(vararg expected: Pair<K, V>, actual: ()->Map<K, V>) = expec
  * Serializes the object to a byte array
  * @return the byte array containing this object serialized form.
  */
-fun Serializable.serializeToBytes(): ByteArray = ByteArrayOutputStream().also { ObjectOutputStream(it).writeObject(this) }.toByteArray()
+fun Serializable?.serializeToBytes(): ByteArray = ByteArrayOutputStream().also { ObjectOutputStream(it).writeObject(this) }.toByteArray()
+
+inline fun <reified T: Serializable> ByteArray.deserialize(): T? = T::class.java.cast(ObjectInputStream(inputStream()).readObject())
 
 /**
  * Clones this object by serialization and returns the deserialized clone.
  * @return the clone of this
  */
-fun <T : Serializable> T.cloneBySerialization(): T = javaClass.cast(ObjectInputStream(ByteArrayInputStream(serializeToBytes())).readObject())
+fun <T : Serializable> T.cloneBySerialization(): T = javaClass.cast(serializeToBytes().deserialize())
 
 /**
  * Handy function to get a stack trace from receiver.
