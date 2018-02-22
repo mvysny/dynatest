@@ -274,20 +274,28 @@ class EntityDataProviderTest : DynaTest({
         expectList() { ds.getAll() }
     }
 })
+```
 
+This sample is taken from Vaadin-on-Kotlin [EntityDataProviderTest.kt](https://github.com/mvysny/vaadin-on-kotlin/blob/master/vok-framework-sql2o/src/test/kotlin/com/github/vok/framework/sql2o/vaadin/EntityDataProviderTest.kt) file,
+which is somewhat complex.
+
+Your typical test will look like this:
+
+```kotlin
 class SomeOtherEntityTest : DynaTest({
 
     usingDatabase()
     
     test("calculating average age") {
-        // etc etc
+        db { 
+            for (i in 0..10) { Person(age = i).save() }
+        }
+        expect(5) { Person.averageAge() }
     }
 })
-
 ```
 
-This sample is taken from Vaadin-on-Kotlin [EntityDataProviderTest.kt](https://github.com/mvysny/vaadin-on-kotlin/blob/master/vok-framework-sql2o/src/test/kotlin/com/github/vok/framework/sql2o/vaadin/EntityDataProviderTest.kt) file,
-which is somewhat complex.
+Head to [Vaadin-on-Kotlin](http://www.vaadinonkotlin.eu/) on how to use the database in this fashion from your web app.
 
 ### Real-world Web App Example
 
