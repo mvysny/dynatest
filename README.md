@@ -186,7 +186,7 @@ dependencies {
 
 ## Patterns
 
-#### Conditional tests
+### Conditional tests
 
 Simply call the `test()` function only when the condition applies. For example:
 
@@ -200,7 +200,7 @@ class NativesTest : DynaTest({
 })
 ```
 
-#### Reusable test battery
+### Reusable test battery
 
 You can simply create a (possibly parametrized) function which runs in the context of the
 `DynaNodeGroup`. That allows the function to create test groups and tests as necessary:
@@ -225,7 +225,7 @@ class LayoutTest : DynaTest({
 })
 ```
 
-#### Plugging in into the test life-cycle
+### Plugging in into the test life-cycle
 
 Say that you want to mock the database and clean it before and after every test. Very easy:
 
@@ -289,6 +289,8 @@ class SomeOtherEntityTest : DynaTest({
 This sample is taken from Vaadin-on-Kotlin [EntityDataProviderTest.kt](https://github.com/mvysny/vaadin-on-kotlin/blob/master/vok-framework-sql2o/src/test/kotlin/com/github/vok/framework/sql2o/vaadin/EntityDataProviderTest.kt) file,
 which is somewhat complex.
 
+### Real-world Web App Example
+
 A testing bootstrap in your application will be a lot simpler. See the following example taken from
 the [Vaadin Kotlin PWA Demo](https://github.com/mvysny/vaadin-kotlin-pwa):
 
@@ -297,10 +299,15 @@ class MainViewTest: DynaTest({
     beforeGroup { Bootstrap().contextInitialized(null) }
     afterGroup { Bootstrap().contextDestroyed(null) }
     beforeEach { MockVaadin.setup(autoDiscoverViews("com.vaadin.pwademo")) }
+    beforeEach { Task.deleteAll() }
+    afterEach { Task.deleteAll() }
 
-    test("test greeting") {
-        _get<Button> { caption = "Click me" } ._click()
-        expect("Clicked!") { _get<Label>().text }
+    test("add a task") {
+        UI.getCurrent().navigateTo("")
+        _get<TextField> { caption = "Title:" } .value = "New Task"
+        _get<Button> { caption = "Add" } ._click()
+        expectList("New Task") { Task.findAll().map { it.title } }
+        expect(1) { _get<Grid<*>>().dataProvider._size() }
     }
 })
 ```
