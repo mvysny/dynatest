@@ -295,7 +295,7 @@ class SomeOtherEntityTest : DynaTest({
 })
 ```
 
-Head to [Vaadin-on-Kotlin](http://www.vaadinonkotlin.eu/) on how to use the database in this fashion from your web app.
+Head to [vok-orm](https://github.com/mvysny/vok-orm) on how to use the database in this fashion from your app.
 
 ### Real-world Web App Example
 
