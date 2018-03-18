@@ -49,6 +49,9 @@ class DynaTestEngine : TestEngine {
             }
             request.getSelectorsByType(ClassSelector::class.java).forEach { selector -> classes.add(selector.javaClass) }
 
+            println("Selector: ${request.getSelectorsByType(DiscoverySelector::class.java)}")
+            println("Filter: ${request.getFiltersByType(DiscoveryFilter::class.java)}")
+
             // todo filter based on UniqueIdSelector when https://youtrack.jetbrains.com/issue/IDEA-169198 is fixed
 
             val result = ClassListTestDescriptor(uniqueId)

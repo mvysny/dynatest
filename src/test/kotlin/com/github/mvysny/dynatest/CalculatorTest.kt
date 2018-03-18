@@ -23,7 +23,7 @@ class CalculatorTest : DynaTest({
 
         // demo of the very simple test
         test("one plusOne") {
-            expect(2) { Calculator().plusOne(1) }
+            expect(3) { Calculator().plusOne(1) }
         }
 
         // nested group
