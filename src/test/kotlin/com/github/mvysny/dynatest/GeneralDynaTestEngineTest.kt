@@ -45,7 +45,37 @@ class GeneralDynaTestEngineTest {
             engine.execute(ExecutionRequest(tests, ThrowingExecutionListener, EmptyConfigParameters))
         }
     }
+
+    @Test
+    fun checkUniqueIDsGeneratedByTheEngine() {
+        operator fun TestDescriptor.get(index: Int) = children.toList()[index]
+
+        val engine = DynaTestEngine()
+        var td = engine.discover2(_UniqueIdCheckupClass::class.java)
+        expect("[engine:DynaTest]") { td.uniqueId.toString() }
+        expect("[engine:DynaTest]/[group:_UniqueIdCheckupClass]") { td[0].uniqueId.toString() }
+        td = td[0]
+        expect("[engine:DynaTest]/[group:_UniqueIdCheckupClass]/[test:root test]") { td[0].uniqueId.toString() }
+        expect("[engine:DynaTest]/[group:_UniqueIdCheckupClass]/[group:root group]") { td[1].uniqueId.toString() }
+        expect("[engine:DynaTest]/[group:_UniqueIdCheckupClass]/[group:root group]/[test:nested]") { td[1][0].uniqueId.toString() }
+        expect("[engine:DynaTest]/[group:_UniqueIdCheckupClass]/[group:root group]/[group:nested group]") { td[1][1].uniqueId.toString() }
+        expect("[engine:DynaTest]/[group:_UniqueIdCheckupClass]/[group:root group]/[group:nested group]/[test:nested nested]") { td[1][1][0].uniqueId.toString() }
+        expect("[engine:DynaTest]/[group:_UniqueIdCheckupClass]/[group:root group]/[test:nested2]") { td[1][2].uniqueId.toString() }
+        expect("[engine:DynaTest]/[group:_UniqueIdCheckupClass]/[test:root test 2]") { td[2].uniqueId.toString() }
+    }
 }
+
+class _UniqueIdCheckupClass : DynaTest({
+    test("root test") {}
+    group("root group") {
+        test("nested") {}
+        group("nested group") {
+            test("nested nested") {}
+        }
+        test("nested2") {}
+    }
+    test("root test 2") {}
+})
 
 /**
  * An execution listener which immediately throws when an exception occurs. Used together with [runTests] to fail eagerly.
