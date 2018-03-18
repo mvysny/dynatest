@@ -229,9 +229,16 @@ private fun StackTraceElement.toTestSource(): TestSource {
     // 2. If I try to remedy that by passing in the block class name (such as DynaTestTest$1$1$1$1), Intellij looks confused and won't perform any navigation
     // 3. FileSource seems to work very well.
 
-    // Try to guess the absolute test file name from the file class. It should be located somewhere in src/main/kotlin or src/main/java
+    // Try to guess the absolute test file name from the file class. It should be located somewhere in src/test/kotlin or src/test/java
     if (!caller.fileName.isNullOrBlank() && caller.fileName.endsWith(".kt") && caller.lineNumber > 0) {
-        val folders = listOf("java", "kotlin").map { File("src/test/$it").absoluteFile } .filter { it.exists() }
+        // workaround for https://youtrack.jetbrains.com/issue/IDEA-188466
+        var moduleDir = File("").absoluteFile
+        if (moduleDir.endsWith(".idea/modules")) {
+            moduleDir = moduleDir.parentFile.parentFile
+        }
+
+        // discover the file
+        val folders = listOf("java", "kotlin").map { File(moduleDir, "src/test/$it") } .filter { it.exists() }
         val pkg = caller.className.replace('.', '/').replaceAfterLast('/', "", "").trim('/')
         val file: File? = folders.map { File(it, "$pkg/${caller.fileName}") } .firstOrNull { it.exists() }
         if (file != null) return FileSource.from(file, caller.filePosition)
