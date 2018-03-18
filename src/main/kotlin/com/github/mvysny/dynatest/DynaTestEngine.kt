@@ -230,15 +230,18 @@ private fun StackTraceElement.toTestSource(): TestSource {
     // 3. FileSource seems to work very well.
 
     // Try to guess the absolute test file name from the file class. It should be located somewhere in src/main/kotlin or src/main/java
-    if (!caller.fileName.isNullOrBlank() && caller.fileName.endsWith(".kt")) {
+    if (!caller.fileName.isNullOrBlank() && caller.fileName.endsWith(".kt") && caller.lineNumber > 0) {
         val folders = listOf("java", "kotlin").map { File("src/test/$it").absoluteFile } .filter { it.exists() }
         val pkg = caller.className.replace('.', '/').replaceAfterLast('/', "", "").trim('/')
         val file: File? = folders.map { File(it, "$pkg/${caller.fileName}") } .firstOrNull { it.exists() }
-        if (file != null) return FileSource.from(file, FilePosition.from(caller.lineNumber))
+        if (file != null) return FileSource.from(file, caller.filePosition)
     }
     // ClassSource doesn't work on classes named DynaTestTest$1$1$1$1 (with $ in them); strip that.
-    return ClassSource.from(caller.className.replaceAfter('$', "").trim('$'))
+    // Intellij ignores the file position: https://youtrack.jetbrains.com/issue/IDEA-186581
+    return ClassSource.from(caller.className.replaceAfter('$', "").trim('$'), caller.filePosition)
 }
+
+private val StackTraceElement.filePosition: FilePosition? get() = if (lineNumber > 0) FilePosition.from(lineNumber) else null
 
 /**
  * When the [DynaTest]'s block fails to run properly and produce tests, [DynaTestEngine.discover] will return this test descriptor to mark
