@@ -9,7 +9,7 @@ import kotlin.test.expect
 class TestUtilsTest : DynaTest({
     group("tests for expectThrows()") {
         test("throwing expected exception succeeds") {
-            expectThrows(RuntimeException::class) { throw RuntimeException("Expected") }
+            throw RuntimeException("This will not print stacktrace")
         }
 
         test("fails if block completes successfully") {

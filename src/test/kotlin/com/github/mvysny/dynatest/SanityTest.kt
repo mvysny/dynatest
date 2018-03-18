@@ -11,6 +11,7 @@ import kotlin.test.expect
 class SanityTest {
     @Test
     fun simple() {
+        if (true) throw RuntimeException("This will print correct stacktrace")
         var ran = false
         runTests {
             test("simple") {
