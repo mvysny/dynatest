@@ -1,6 +1,7 @@
 import com.jfrog.bintray.gradle.BintrayExtension
 import groovy.lang.Closure
 import org.gradle.api.tasks.GradleBuild
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
 
@@ -13,7 +14,7 @@ group = "com.github.mvysny.dynatest"
 version = "0.7-SNAPSHOT"
 
 plugins {
-    kotlin("jvm") version "1.2.21"
+    kotlin("jvm") version "1.2.30"
     id("com.jfrog.bintray") version "1.7.3"
     `maven-publish`
 }
@@ -27,6 +28,10 @@ repositories {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    testLogging {
+        // to see the exceptions of failed tests in Travis-CI console.
+        exceptionFormat = TestExceptionFormat.FULL
+    }
 }
 
 dependencies {
