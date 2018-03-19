@@ -9,11 +9,8 @@ the possibilities to create tests dynamically (e.g. creating a reusable test sui
 useless in modern programming,
 it also *reduces the possibilities* of how to structure test code and *promotes bad practices*:
 
-* You simply can't create a parametrized test suite class as a component, instantiating it with various parameters and running it as needed
-* The support for parametrized tests with JUnit5 is quite limited: the parameters need to be known upfront and stored
-  in annotations, that restricts you from:
-  * Having the parameters created dynamically or loaded from a file;
-  * Using more complex types - you are restricted to String and primitives.
+* You simply can't create a parametrized test suite class as a component, instantiating it with various parameters and running it as needed,
+  with parameters supplied in the call site.
 * Annotations are weak - they don't have the full computative power of a proper imperative programming language; attempts to use annotations to
   express any non-trivial logic leads to annotation overuse and that leads to horrible constructs and [annotatiomania](http://annotatiomania.com/).
 * Reuse of test suites is only possible by the means of inheritance (having a base class with tests, and a bunch of classes
