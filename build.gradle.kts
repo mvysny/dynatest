@@ -14,7 +14,7 @@ group = "com.github.mvysny.dynatest"
 version = "0.7-SNAPSHOT"
 
 plugins {
-    kotlin("jvm") version "1.2.30"
+    kotlin("jvm") version "1.2.31"
     id("com.jfrog.bintray") version "1.7.3"
     `maven-publish`
 }
