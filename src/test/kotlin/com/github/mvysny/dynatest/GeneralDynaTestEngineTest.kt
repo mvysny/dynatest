@@ -41,7 +41,7 @@ class GeneralDynaTestEngineTest {
         val engine = DynaTestEngine()
         val tests: TestDescriptor = withFail { engine.discover2(TestSuiteFailingInInit::class.java) }
         expect<Class<*>>(InitFailedTestDescriptor::class.java) { tests.children.first().javaClass }
-        expectThrows(RuntimeException::class) {
+        expectThrows(RuntimeException::class, "Simulated") {
             engine.execute(ExecutionRequest(tests, ThrowingExecutionListener, EmptyConfigParameters))
         }
     }

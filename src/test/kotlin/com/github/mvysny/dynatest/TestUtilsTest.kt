@@ -49,6 +49,16 @@ class TestUtilsTest : DynaTest({
                     throw RuntimeException("Should have failed")
                 } catch (e: AssertionError) { /*okay*/ }
             }
+
+            test("fails on unexpected message") {
+                try {
+                    // this should fail with AssertionError since some other exception has been thrown
+                    expectThrows(IOException::class, "expected") {
+                        throw IOException("simulated")
+                    }
+                    throw RuntimeException("Should have failed")
+                } catch (e: AssertionError) { /*okay*/ }
+            }
         }
     }
 

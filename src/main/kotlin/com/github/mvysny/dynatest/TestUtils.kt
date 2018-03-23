@@ -7,14 +7,16 @@ import kotlin.test.fail
 
 /**
  * Expects that given block fails with an exception of given [clazz] (or its subtype).
+ * @param message optional substring which the exception message must contain.
  * @throws AssertionError if the block completed successfully or threw some other exception.
  */
-fun <T: Throwable> expectThrows(clazz: KClass<out T>, block: ()->Unit): T {
+fun <T: Throwable> expectThrows(clazz: KClass<out T>, message: String = "", block: ()->Unit): T {
     val ex: T? = try {
         block()
         null
     } catch (t: Throwable) {
         if (!clazz.java.isInstance(t)) throw AssertionError("Expected to fail with $clazz but failed with $t", t)
+        expect(true, "Expected: $message but was ${t.message}") { (t.message ?: "").contains(message) }
         clazz.java.cast(t)
     }
     return ex ?: fail("Expected to fail with $clazz but completed successfully")
