@@ -1,6 +1,7 @@
 # DynaTest Dynamic Testing
 
 [![Build Status](https://travis-ci.org/mvysny/dynatest.svg?branch=master)](https://travis-ci.org/mvysny/dynatest)
+[![GitHub tag](https://img.shields.io/github/tag/mvysny/dynatest.svg)](https://github.com/mvysny/dynatest/tags)
 
 Traditional JUnit/TestNG approach is to have a bunch of test classes with `@Test`-annotated methods. That's not bad per se,
 but it would seem as if the ultimate JUnit's goal was that the test collection must be *pre-known* - computable by static-analyzing class files alone,
@@ -152,9 +153,11 @@ repositories {
     maven { url "https://dl.bintray.com/mvysny/github" }
 }
 dependencies {
-    testCompile("com.github.mvysny.dynatest:dynatest:0.6")
+    testCompile("com.github.mvysny.dynatest:dynatest:x.y")
 }
 ```
+
+> Note: check the tag number on the top for the newest version
 
 DynaTest will transitively include JUnit5's core.
 
