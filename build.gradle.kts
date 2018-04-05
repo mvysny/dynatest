@@ -11,7 +11,7 @@ if (project.rootProject.file("local.properties").exists()) {
 }
 
 group = "com.github.mvysny.dynatest"
-version = "0.8-SNAPSHOT"
+version = "0.8"
 
 plugins {
     kotlin("jvm") version "1.2.31"
