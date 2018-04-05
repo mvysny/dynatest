@@ -232,7 +232,7 @@ private fun StackTraceElement.toTestSource(): TestSource {
     // Try to guess the absolute test file name from the file class. It should be located somewhere in src/test/kotlin or src/test/java
     if (!caller.fileName.isNullOrBlank() && caller.fileName.endsWith(".kt") && caller.lineNumber > 0) {
         // workaround for https://youtrack.jetbrains.com/issue/IDEA-188466
-        // the thing is that IDEA will suddenly and out-of-nowhere set CWD to, say, karibu-testing/.idea/modules/karibu-testing-v8
+        // the thing is that when using $MODULE_DIR$, IDEA will set CWD to, say, karibu-testing/.idea/modules/karibu-testing-v8
         // we need to revert that back to karibu-testing/karibu-testing-v8
         var moduleDir = File("").absoluteFile
         if (moduleDir.absolutePath.contains("/.idea/modules")) {
