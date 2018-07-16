@@ -14,7 +14,7 @@ group = "com.github.mvysny.dynatest"
 version = "0.9-SNAPSHOT"
 
 plugins {
-    kotlin("jvm") version "1.2.50"
+    kotlin("jvm") version "1.2.51"
     id("com.jfrog.bintray") version "1.8.1"
     `maven-publish`
 }
@@ -35,7 +35,7 @@ tasks.withType<Test> {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
+    compile(kotlin("stdlib"))  // don't depend on stdlib-jdk8 to stay compatible with Android
     compile(kotlin("test"))
     compile("org.junit.jupiter:junit-jupiter-api:5.1.0")
     compile("org.junit.platform:junit-platform-engine:1.1.0")
@@ -71,8 +71,6 @@ publishing {
         }
     }
 }
-
-tasks.findByName("build")!!.dependsOn(tasks.findByName("publishToMavenLocal")!!)
 
 bintray {
     user = local.getProperty("bintray.user")
