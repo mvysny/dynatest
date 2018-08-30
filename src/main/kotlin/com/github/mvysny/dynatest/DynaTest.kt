@@ -69,14 +69,15 @@ sealed class DynaNode(internal val name: String, internal val src: StackTraceEle
  * To start writing tests, just extend [DynaTest]. See [DynaTest] for more details.
  */
 class DynaNodeTest internal constructor(name: String, internal val body: DynaNodeTest.()->Unit, src: StackTraceElement?) : DynaNode(name, src) {
-    private fun fail(funName: String): Nothing =
+    // renamed to _fail to avoid collision with JUnit's fail() global method.
+    private fun _fail(funName: String): Nothing =
         throw IllegalStateException("It appears that you are attempting to call $funName from a test{} block. You should create tests only from the group{} blocks since they run at design time (and not at run time, like the test{} blocks)")
 
     /**
      * You should create tests only from the group{} blocks.
      */
     @Deprecated("You should create tests only from the group{} blocks", level = DeprecationLevel.ERROR)
-    override fun test(name: String, body: DynaNodeTest.() -> Unit): Nothing = fail("test")
+    override fun test(name: String, body: DynaNodeTest.() -> Unit): Nothing = _fail("test")
 
     override fun onDesignPhaseEnd() {
         inDesignPhase = false
@@ -86,25 +87,25 @@ class DynaNodeTest internal constructor(name: String, internal val body: DynaNod
      * You should create tests only from the group{} blocks.
      */
     @Deprecated("You should create tests only from the group{} blocks", level = DeprecationLevel.ERROR)
-    override fun beforeGroup(block: () -> Unit): Nothing = fail("beforeGroup")
+    override fun beforeGroup(block: () -> Unit): Nothing = _fail("beforeGroup")
 
     /**
      * You should create tests only from the group{} blocks.
      */
     @Deprecated("You should create tests only from the group{} blocks", level = DeprecationLevel.ERROR)
-    override fun afterEach(block: () -> Unit): Nothing = fail("afterEach")
+    override fun afterEach(block: () -> Unit): Nothing = _fail("afterEach")
 
     /**
      * You should create tests only from the group{} blocks.
      */
     @Deprecated("You should create tests only from the group{} blocks", level = DeprecationLevel.ERROR)
-    override fun beforeEach(block: () -> Unit): Nothing = fail("beforeEach")
+    override fun beforeEach(block: () -> Unit): Nothing = _fail("beforeEach")
 
     /**
      * You should create tests only from the group{} blocks.
      */
     @Deprecated("You should create tests only from the group{} blocks", level = DeprecationLevel.ERROR)
-    override fun afterGroup(block: () -> Unit): Nothing = fail("afterGroup")
+    override fun afterGroup(block: () -> Unit): Nothing = _fail("afterGroup")
 }
 
 /**
