@@ -14,7 +14,7 @@ group = "com.github.mvysny.dynatest"
 version = "0.9-SNAPSHOT"
 
 plugins {
-    kotlin("jvm") version "1.2.51"
+    kotlin("jvm") version "1.2.61"
     id("com.jfrog.bintray") version "1.8.1"
     `maven-publish`
 }
@@ -37,9 +37,9 @@ tasks.withType<Test> {
 dependencies {
     compile(kotlin("stdlib"))  // don't depend on stdlib-jdk8 to stay compatible with Android
     compile(kotlin("test"))
-    compile("org.junit.jupiter:junit-jupiter-api:5.1.0")
-    compile("org.junit.platform:junit-platform-engine:1.1.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.1.0")
+    compile("org.junit.jupiter:junit-jupiter-api:5.2.0")
+    compile("org.junit.platform:junit-platform-engine:1.2.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.2.0")
 }
 
 tasks.withType<KotlinCompile> {
