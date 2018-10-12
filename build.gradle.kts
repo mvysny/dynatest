@@ -22,7 +22,6 @@ plugins {
 defaultTasks("clean", "build")
 
 repositories {
-    mavenCentral()
     jcenter()
 }
 

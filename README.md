@@ -150,7 +150,7 @@ add the test dependency on this library to your `build.gradle` file:
 
 ```groovy
 repositories {
-    maven { url "https://dl.bintray.com/mvysny/github" }
+    jcenter()
 }
 dependencies {
     testCompile("com.github.mvysny.dynatest:dynatest:x.y")
