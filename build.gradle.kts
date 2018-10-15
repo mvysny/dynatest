@@ -14,7 +14,7 @@ group = "com.github.mvysny.dynatest"
 version = "0.10-SNAPSHOT"
 
 plugins {
-    kotlin("jvm") version "1.2.61"
+    kotlin("jvm") version "1.2.71"
     id("com.jfrog.bintray") version "1.8.1"
     `maven-publish`
 }
@@ -45,10 +45,13 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
 
+val org.gradle.api.Project.java2: org.gradle.api.plugins.JavaPluginConvention get() =
+    convention.getPluginByName("java")
+
 val sourceJar = task("sourceJar", Jar::class) {
     dependsOn(tasks.findByName("classes"))
     classifier = "sources"
-    from(java.sourceSets["main"].allSource)
+    from(java2.sourceSets["main"].allSource)
 }
 
 publishing {
