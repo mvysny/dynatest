@@ -84,27 +84,27 @@ class DynaNodeTest internal constructor(name: String, internal val body: DynaNod
     }
 
     /**
-     * You should create tests only from the group{} blocks.
+     * You should setup beforeGroup blocks only from the group{} blocks
      */
-    @Deprecated("You should create tests only from the group{} blocks", level = DeprecationLevel.ERROR)
+    @Deprecated("You should setup beforeGroup{} blocks only from the group{} blocks", level = DeprecationLevel.ERROR)
     override fun beforeGroup(block: () -> Unit): Nothing = _fail("beforeGroup")
 
     /**
-     * You should create tests only from the group{} blocks.
+     * You should setup afterEach{} blocks only from the group{} blocks
      */
-    @Deprecated("You should create tests only from the group{} blocks", level = DeprecationLevel.ERROR)
+    @Deprecated("You should setup afterEach{} blocks only from the group{} blocks", level = DeprecationLevel.ERROR)
     override fun afterEach(block: () -> Unit): Nothing = _fail("afterEach")
 
     /**
-     * You should create tests only from the group{} blocks.
+     * You should setup beforeEach{} only from the group{} blocks
      */
-    @Deprecated("You should create tests only from the group{} blocks", level = DeprecationLevel.ERROR)
+    @Deprecated("You should setup beforeEach{} only from the group{} blocks", level = DeprecationLevel.ERROR)
     override fun beforeEach(block: () -> Unit): Nothing = _fail("beforeEach")
 
     /**
-     * You should create tests only from the group{} blocks.
+     * You should setup afterGroup{} only from the group{} blocks
      */
-    @Deprecated("You should create tests only from the group{} blocks", level = DeprecationLevel.ERROR)
+    @Deprecated("You should setup afterGroup{} only from the group{} blocks", level = DeprecationLevel.ERROR)
     override fun afterGroup(block: () -> Unit): Nothing = _fail("afterGroup")
 }
 
