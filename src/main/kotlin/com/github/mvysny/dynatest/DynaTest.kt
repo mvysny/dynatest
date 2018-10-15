@@ -19,7 +19,7 @@ sealed class DynaNode(internal val name: String, internal val src: StackTraceEle
 
     /**
      * Creates a new test case with given [name] and registers it within current group. Does not run the test closure immediately -
-     * the test is only registered for being run later on by JUnit5 runner (or by [runTests]).
+     * the test is only registered for being run later on by JUnit5 runner.
      * @param body the implementation of the test; does not run immediately but only when the test case is run
      */
     abstract fun test(name: String, body: DynaNodeTest.()->Unit)

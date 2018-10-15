@@ -21,7 +21,10 @@ internal fun runTests(block: DynaNodeGroup.()->Unit): TestResults {
     // run the tests using the DynaTestEngine
     val testDescriptor = DynaNodeTestDescriptor(UniqueId.forEngine("dynatest"), group)
     val result = TestResults()
-    DynaTestEngine().execute(ExecutionRequest(testDescriptor, TestResultBuilder(result), EmptyConfigParameters))
+    DynaTestEngine().execute(ExecutionRequest(testDescriptor,
+        TestResultBuilder(result),
+        EmptyConfigParameters
+    ))
     if (!result.isSuccess) throw TestFailedException(result)
     return result
 }
