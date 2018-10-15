@@ -84,7 +84,7 @@ class DynaNodeTest internal constructor(name: String, internal val body: DynaNod
     }
 
     /**
-     * You should setup beforeGroup blocks only from the group{} blocks
+     * You should setup beforeGroup{} blocks only from the group{} blocks
      */
     @Deprecated("You should setup beforeGroup{} blocks only from the group{} blocks", level = DeprecationLevel.ERROR)
     override fun beforeGroup(block: () -> Unit): Nothing = _fail("beforeGroup")
