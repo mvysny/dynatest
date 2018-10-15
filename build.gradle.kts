@@ -6,8 +6,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
 
 val local = Properties()
-if (project.rootProject.file("local.properties").exists()) {
-    project.rootProject.file("local.properties").inputStream().use { local.load(it) }
+val localProperties: File = project.rootProject.file("local.properties")
+if (localProperties.exists()) {
+    localProperties.inputStream().use { local.load(it) }
 }
 
 group = "com.github.mvysny.dynatest"

@@ -175,10 +175,10 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNode) : 
     fun runBlock(block: () -> Unit) {
         var lastNodeWithBeforeEachRan: DynaNodeTestDescriptor? = null
         try {
-            getPathFromRoot().forEach {
-                lastNodeWithBeforeEachRan = it
-                if (it.node is DynaNodeGroup) {
-                    it.node.beforeEach.forEach { it() }
+            getPathFromRoot().forEach { descriptor ->
+                lastNodeWithBeforeEachRan = descriptor
+                if (descriptor.node is DynaNodeGroup) {
+                    descriptor.node.beforeEach.forEach { it() }
                 }
             }
             block()
