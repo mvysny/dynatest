@@ -64,7 +64,7 @@ sealed class DynaNode(internal val name: String, internal val src: StackTraceEle
 }
 
 /**
- * Represents a single test with a [name], an execution [context] and the test's [body]. Created when you call [DynaNodeGroup.test].
+ * Represents a single test with a [name] and the test's [body]. Created when you call [DynaNodeGroup.test].
  *
  * To start writing tests, just extend [DynaTest]. See [DynaTest] for more details.
  */
