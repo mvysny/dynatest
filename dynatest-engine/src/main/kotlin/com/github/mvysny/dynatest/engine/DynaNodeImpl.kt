@@ -95,7 +95,7 @@ internal class DynaNodeGroupImpl internal constructor(name: String, src: StackTr
          * Computes the pointer to the source of the test and returns it.
          * @return the pointer to the test source; returns null if the source can not be computed by any means.
          */
-        private fun computeTestSource(): StackTraceElement? {
+        internal fun computeTestSource(): StackTraceElement? {
             val stackTrace = Thread.currentThread().stackTrace
             // find first stack trace which doesn't point to this package and is not Thread.getStackTrace()
             // That's going to be the caller of the test/group method.

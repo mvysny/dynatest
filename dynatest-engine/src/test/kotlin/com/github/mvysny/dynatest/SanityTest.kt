@@ -1,5 +1,6 @@
 package com.github.mvysny.dynatest
 
+import com.github.mvysny.dynatest.engine.DynaNodeGroupImpl
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import kotlin.test.expect
@@ -9,6 +10,13 @@ import kotlin.test.expect
  * incorrect results and should be ignored.
  */
 class SanityTest {
+    @Test
+    fun testComputeTestSource() {
+        val e = DynaNodeGroupImpl.computeTestSource()!!
+        expect(SanityTest::class.java.name) { e.className }
+        expect("testComputeTestSource") { e.methodName }
+    }
+
     @Test
     fun simple() {
         var ran = false
