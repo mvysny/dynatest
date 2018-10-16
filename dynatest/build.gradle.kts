@@ -14,3 +14,19 @@ dependencies {
 
 val configureBintray = ext["configureBintray"] as (artifactId: String) -> Unit
 configureBintray("dynatest")
+
+this.getTasksByName("test", false).first().doLast {
+    // verify that Gradle ran tests for all test classes and didn't ignore DynaTests
+    val expectedTests = file("src/test/kotlin/com/github/mvysny/dynatest")
+        .list()
+        .filter { it.endsWith("Test.kt") }
+        .map { "TEST-com.github.mvysny.dynatest.${it.removeSuffix(".kt")}.xml" }
+        .sorted()
+    val actualTests = file("build/test-results/test")
+        .list()
+        .filter { it.endsWith(".xml") && !it.contains("_UniqueIdCheckupClass") }
+        .sorted()
+    if (expectedTests != actualTests) {
+        throw RuntimeException("Expected tests to run: $expectedTests got $actualTests")
+    }
+}

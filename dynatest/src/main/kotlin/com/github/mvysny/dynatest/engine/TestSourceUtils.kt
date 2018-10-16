@@ -52,7 +52,7 @@ internal fun StackTraceElement.toTestSource(): TestSource? {
     // Returning mixed FileSource will make Gradle freeze: https://github.com/gradle/gradle/issues/5737
     if (isRunningInsideGradle) {
         // return null  // WARNING THIS WILL MAKE GRADLE SKIP TESTS!!!!!
-        throw RuntimeException("Unsupported")
+//        throw RuntimeException("Unsupported")   // THIS WILL MAKE GRADLE FREEZE!!! Retarded.
     }
 
     return ClassSource.from(bareClassName, caller.filePosition)
@@ -60,6 +60,10 @@ internal fun StackTraceElement.toTestSource(): TestSource? {
 
 private val StackTraceElement.filePosition: FilePosition? get() = if (lineNumber > 0) FilePosition.from(lineNumber) else null
 
+/**
+ * Guesses source file for given class. For Intellij it is able to discover sources also in another module,
+ * for Gradle it only discovers sources in this module.
+ */
 internal fun Class<*>.guessSourceFileName(fileNameFromStackTraceElement: String): File? {
     val resource = `package`.name.replace('.', '/') + "/" + simpleName + ".class"
     val url = Thread.currentThread().contextClassLoader.getResource(resource) ?: return null
@@ -75,9 +79,15 @@ internal fun Class<*>.guessSourceFileName(fileNameFromStackTraceElement: String)
     val classpathEntry = classpath.firstOrNull { url.toString().startsWith(it.toString()) } ?: return null
     val classOutputDir = classpathEntry.toFile() ?: return null
 
-    // step out of classOutputDir, but only 3 folders tops, so that we don't end up searching user's filesystem
+    // step out of classOutputDir, but only 4 folders tops, so that we don't end up searching user's filesystem
+    // Intellij outputs to out/production/classes
+    // Gradle outputs to build/classes/java/test
+
+    // Doesn't work with Gradle! It will include dependent modules as jars, e.g.
+    // file:/home/mavi/work/my/dynatest/dynatest-api/build/libs/dynatest-api-0.11-SNAPSHOT.jar
+    // With Gradle, this will only resolve sources in current project.
     var potentialModuleDir = classOutputDir
-    for (i in 0..3) {
+    repeat(5) {
 
         val fileName = `package`.name.replace('.', '/') + "/" + fileNameFromStackTraceElement
         val potentialFiles = listOf("src/main/java", "src/main/kotlin", "src/test/java", "src/test/kotlin").map {
@@ -85,6 +95,7 @@ internal fun Class<*>.guessSourceFileName(fileNameFromStackTraceElement: String)
         }
 
         val resolvedFileName = potentialFiles.firstOrNull { File(it).exists() }
+
         if (resolvedFileName != null) {
             return File(resolvedFileName)
         }
