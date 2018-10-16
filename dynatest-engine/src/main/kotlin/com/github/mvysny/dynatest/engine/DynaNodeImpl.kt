@@ -12,24 +12,14 @@ import com.github.mvysny.dynatest.DynaTest
  * Every [DynaNodeGroup.test] and [DynaNodeGroup.group] call
  * creates this node which in turn can be converted to JUnit5 structures eligible for execution.
  */
-internal sealed class DynaNodeImpl(internal val name: String, internal val src: StackTraceElement?) {
-    protected var inDesignPhase: Boolean = true
-    internal abstract fun onDesignPhaseEnd()
-    protected fun checkInDesignPhase(funName: String) {
-        check(inDesignPhase) { "It appears that you are attempting to call $funName from a test{} block. You should create tests only from the group{} blocks since they run at design time (and not at run time, like the test{} blocks)" }
-    }
-}
+internal sealed class DynaNodeImpl(internal val name: String, internal val src: StackTraceElement?)
 
 /**
  * Represents a single test with a [name] and the test's [body]. Created when you call [DynaNodeGroup.test].
  *
  * To start writing tests, just extend [DynaTest]. See [DynaTest] for more details.
  */
-internal class DynaNodeTestImpl internal constructor(name: String, internal val body: DynaNodeTest.()->Unit, src: StackTraceElement?) : DynaNodeImpl(name, src), DynaNodeTest {
-    override fun onDesignPhaseEnd() {
-        inDesignPhase = false
-    }
-}
+internal class DynaNodeTestImpl internal constructor(name: String, internal val body: DynaNodeTest.()->Unit, src: StackTraceElement?) : DynaNodeImpl(name, src), DynaNodeTest
 
 /**
  * Represents a single test group with a [name]. Created when you call [group].
@@ -37,6 +27,11 @@ internal class DynaNodeTestImpl internal constructor(name: String, internal val 
  * To start writing tests, just extend [DynaTest]. See [DynaTest] for more details.
  */
 internal class DynaNodeGroupImpl internal constructor(name: String, src: StackTraceElement?) : DynaNodeImpl(name, src), DynaNodeGroup {
+    private var inDesignPhase: Boolean = true
+    private fun checkInDesignPhase(funName: String) {
+        check(inDesignPhase) { "It appears that you are attempting to call $funName from a test{} block. You should create tests only from the group{} blocks since they run at design time (and not at run time, like the test{} blocks)" }
+    }
+
     internal val children = mutableListOf<DynaNodeImpl>()
     /**
      * What to run before every test.
@@ -55,9 +50,9 @@ internal class DynaNodeGroupImpl internal constructor(name: String, src: StackTr
      */
     internal val afterGroup = mutableListOf<()->Unit>()
 
-    override fun onDesignPhaseEnd() {
+    internal fun onDesignPhaseEnd() {
         inDesignPhase = false
-        children.forEach { it.onDesignPhaseEnd() }
+        children.forEach { (it as? DynaNodeGroupImpl)?.onDesignPhaseEnd() }
     }
 
     override fun test(name: String, body: DynaNodeTest.()->Unit) {
@@ -93,15 +88,23 @@ internal class DynaNodeGroupImpl internal constructor(name: String, src: StackTr
         checkInDesignPhase("afterGroup")
         afterGroup.add(block)
     }
-}
 
-/**
- * Computes the pointer to the source of the test and returns it.
- * @return the pointer to the test source; returns null if the source can not be computed by any means.
- */
-internal fun computeTestSource(): StackTraceElement? {
-    val stackTrace = Thread.currentThread().stackTrace
-    if (stackTrace.size < 4) return null
-    val caller: StackTraceElement = stackTrace[3]
-    return caller
+    companion object {
+        private val pkg = DynaNodeGroupImpl::class.java.`package`.name
+        /**
+         * Computes the pointer to the source of the test and returns it.
+         * @return the pointer to the test source; returns null if the source can not be computed by any means.
+         */
+        private fun computeTestSource(): StackTraceElement? {
+            val stackTrace = Thread.currentThread().stackTrace
+            // find first stack trace which doesn't point to this package and is not Thread.getStackTrace()
+            // That's going to be the caller of the test/group method.
+            val element = stackTrace.asSequence()
+                .filter { !it.className.startsWith(pkg) && it.className != Thread::class.java.name }
+                .firstOrNull()
+            println(stackTrace.joinToString())
+            println(element)
+            return element
+        }
+    }
 }

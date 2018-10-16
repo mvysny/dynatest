@@ -17,7 +17,6 @@ val sourceJar = task("sourceJar", Jar::class) {
 dependencies {
     compile(kotlin("stdlib"))  // don't depend on stdlib-jdk8 to stay compatible with Android
     compile(kotlin("test"))
-    compile("org.junit.jupiter:junit-jupiter-api:5.3.0")
 }
 
 publishing {

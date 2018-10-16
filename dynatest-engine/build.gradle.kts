@@ -7,6 +7,7 @@ import java.util.*
 
 dependencies {
     compile(project(":dynatest-api"))
+    compile("org.junit.jupiter:junit-jupiter-api:5.3.0")
     compile("org.junit.platform:junit-platform-engine:1.3.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.3.0")
 }
