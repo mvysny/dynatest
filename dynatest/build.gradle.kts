@@ -13,4 +13,4 @@ dependencies {
 }
 
 val configureBintray = ext["configureBintray"] as (artifactId: String) -> Unit
-configureBintray("dynatest")  // don't call this dynatest-engine for backward compatibility with people depending on dynatest
+configureBintray("dynatest")
