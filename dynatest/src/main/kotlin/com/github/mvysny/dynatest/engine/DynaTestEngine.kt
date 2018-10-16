@@ -12,6 +12,10 @@ import org.junit.platform.engine.support.descriptor.FilePosition
 import org.junit.platform.engine.support.descriptor.FileSource
 import java.io.File
 import java.lang.reflect.Modifier
+import java.net.URI
+import java.net.URL
+import java.nio.file.FileSystemNotFoundException
+import java.nio.file.Paths
 import java.util.*
 import java.util.function.Predicate
 
@@ -225,40 +229,6 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
 val Class<*>.isPrivate: Boolean get() = Modifier.isPrivate(modifiers)
 val Class<*>.isAbstract: Boolean get() = Modifier.isAbstract(modifiers)
 val Class<*>.isPublic: Boolean get() = Modifier.isPublic(modifiers)
-
-/**
- * Computes the pointer to the source of the test and returns it. Tries to compute at least inaccurate pointer.
- * @return the pointer to the test source; returns null if the source can not be computed by any means.
- */
-internal fun StackTraceElement.toTestSource(): TestSource {
-    val caller: StackTraceElement = this
-    // normally we would just return ClassSource, but there are the following issues with that:
-    // 1. Intellij ignores FilePosition in ClassSource; reported as https://youtrack.jetbrains.com/issue/IDEA-186581
-    // 2. If I try to remedy that by passing in the block class name (such as DynaTestTest$1$1$1$1), Intellij looks confused and won't perform any navigation
-    // 3. FileSource seems to work very well.
-
-    // Try to guess the absolute test file name from the file class. It should be located somewhere in src/test/kotlin or src/test/java
-    if (!caller.fileName.isNullOrBlank() && caller.fileName.endsWith(".kt") && caller.lineNumber > 0) {
-        // workaround for https://youtrack.jetbrains.com/issue/IDEA-188466
-        // the thing is that when using $MODULE_DIR$, IDEA will set CWD to, say, karibu-testing/.idea/modules/karibu-testing-v8
-        // we need to revert that back to karibu-testing/karibu-testing-v8
-        var moduleDir = File("").absoluteFile
-        if (moduleDir.absolutePath.contains("/.idea/modules")) {
-            moduleDir = File(moduleDir.absolutePath.replace("/.idea/modules", ""))
-        }
-
-        // discover the file
-        val folders = listOf("java", "kotlin").map { File(moduleDir, "src/test/$it") } .filter { it.exists() }
-        val pkg = caller.className.replace('.', '/').replaceAfterLast('/', "", "").trim('/')
-        val file: File? = folders.map { File(it, "$pkg/${caller.fileName}") } .firstOrNull { it.exists() }
-        if (file != null) return FileSource.from(file, caller.filePosition)
-    }
-    // ClassSource doesn't work on classes named DynaTestTest$1$1$1$1 (with $ in them); strip that.
-    // Intellij ignores the file position: https://youtrack.jetbrains.com/issue/IDEA-186581
-    return ClassSource.from(caller.className.replaceAfter('$', "").trim('$'), caller.filePosition)
-}
-
-private val StackTraceElement.filePosition: FilePosition? get() = if (lineNumber > 0) FilePosition.from(lineNumber) else null
 
 /**
  * When the [DynaTest]'s block fails to run properly and produce tests, [DynaTestEngine.discover] will return this test descriptor to mark

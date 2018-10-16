@@ -1,8 +1,5 @@
 package com.github.mvysny.dynatest
 
-import com.github.mvysny.dynatest.engine.DynaNodeGroupImpl
-import com.github.mvysny.dynatest.engine.toTestSource
-import org.junit.platform.engine.support.descriptor.FileSource
 import java.io.IOException
 import kotlin.test.expect
 import kotlin.test.fail
@@ -390,20 +387,5 @@ class DynaTestEngineTest : DynaTest({
             }
             expect(false) { called }
         }
-    }
-
-    group("tests for StackTraceElement.toTestSource()") {
-        test("this class resolves to FileSource") {
-            val e = DynaNodeGroupImpl.computeTestSource()!!
-            val src = e.toTestSource() as FileSource
-            expect(true, src.file.absolutePath) { src.file.absolutePath.endsWith("src/test/kotlin/com/github/mvysny/dynatest/DynaTestEngineTest.kt") }
-            expect(e.lineNumber) { src.position.get().line }
-        }
-    }
-
-    // A nasty test. This test will make Gradle freeze after last test.
-    // A Test for https://github.com/gradle/gradle/issues/5737
-    group("test Gradle freeze") {
-        calculatorBattery(0..10)
     }
 })
