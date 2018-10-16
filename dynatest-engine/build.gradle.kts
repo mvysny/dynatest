@@ -13,7 +13,7 @@ dependencies {
 }
 
 val configureBintray = ext["configureBintray"] as (artifactId: String) -> Unit
-configureBintray("dynatest")
+configureBintray("dynatest-engine")
 
 fun String.countSubstrings(substring: String) =
     indices.count { substring(it).startsWith(substring) }
