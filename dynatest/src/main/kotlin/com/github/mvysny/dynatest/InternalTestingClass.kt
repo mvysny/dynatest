@@ -10,18 +10,20 @@ import org.junit.platform.engine.support.descriptor.FileSource
  */
 
 
-/**
- * A nasty test. This test will make Gradle freeze after last test.
- * A Test for https://github.com/gradle/gradle/issues/5737
- */
-internal fun DynaNodeGroup.gradleFreezingTest() {
-    test("nothing") {}
-}
 internal fun internalTestingClassGetTestSourceOfThis(): FileSource = DynaNodeGroupImpl.computeTestSource()!!.toTestSource() as FileSource
 
-internal class VerySpecialClassThatResolvesToClassSource {
+internal class InternalTestingClass {
     companion object {
         @JvmStatic
         internal fun getTestSourceOfThis(): ClassSource = DynaNodeGroupImpl.computeTestSource()!!.toTestSource() as ClassSource
+
+        /**
+         * A nasty test. This test will make Gradle freeze after last test.
+         * A Test for https://github.com/gradle/gradle/issues/5737
+         */
+        @JvmStatic
+        internal fun gradleFreezingTest(g: DynaNodeGroup) {
+            g.test("because ") {}
+        }
     }
 }

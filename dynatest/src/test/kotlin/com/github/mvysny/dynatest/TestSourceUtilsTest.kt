@@ -18,19 +18,19 @@ class TestSourceUtilsTest: DynaTest({
         test("InternalTestingClass resolves to FileSource") {
             val src = internalTestingClassGetTestSourceOfThis()
             expect(true, src.file.absolutePath) { src.file.absolutePath.endsWith("src/main/kotlin/com/github/mvysny/dynatest/InternalTestingClass.kt") }
-            expect(10) { src.position.get().line }
+            expect(13) { src.position.get().line }
         }
 
         // a preparation test for gradleFreezingTest(). Generally Gradle freezes if it sees a mixture of FileSource and ClassSource.
         // see the gradleFreezingTest() for more info.
-        test("VerySpecialClassThatResolvesToClassSource") {
-            expect(VerySpecialClassThatResolvesToClassSource::class.java.name) {
-                VerySpecialClassThatResolvesToClassSource.getTestSourceOfThis().className
+        test("InternalTestingClass") {
+            expect(InternalTestingClass::class.java.name) {
+                InternalTestingClass.getTestSourceOfThis().className
             }
         }
     }
 
     // A nasty test. This test will make Gradle freeze after last test.
     // A Test for https://github.com/gradle/gradle/issues/5737
-    gradleFreezingTest()
+//    InternalTestingClass.gradleFreezingTest(this)
 })

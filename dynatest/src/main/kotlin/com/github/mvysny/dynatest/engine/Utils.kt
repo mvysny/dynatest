@@ -3,16 +3,17 @@ package com.github.mvysny.dynatest.engine
 import java.io.File
 import java.net.URI
 import java.net.URL
+import java.net.URLClassLoader
 import java.nio.file.FileSystemNotFoundException
 import java.nio.file.Paths
 
 internal val isRunningInsideGradle: Boolean get() {
-    try {
-        Class.forName("org.gradle.internal.remote.internal.hub.queue.EndPointQueue")
+    val jars = (Thread.currentThread().contextClassLoader as URLClassLoader).urLs.toList()
+    println(jars)
+    if (jars.any { it.toString().contains("gradle-worker.jar") }) {
         return true
-    } catch (e: ClassNotFoundException) {
-        return false
     }
+    return false
 }
 
 internal fun URI.toFile(): File? {

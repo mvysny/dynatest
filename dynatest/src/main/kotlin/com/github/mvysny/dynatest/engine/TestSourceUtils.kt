@@ -1,10 +1,12 @@
 package com.github.mvysny.dynatest.engine
 
+import com.github.mvysny.dynatest.InternalTestingClass
 import org.junit.platform.engine.TestSource
 import org.junit.platform.engine.support.descriptor.ClassSource
 import org.junit.platform.engine.support.descriptor.FilePosition
 import org.junit.platform.engine.support.descriptor.FileSource
 import java.io.File
+import java.net.URLClassLoader
 
 /**
  * Computes the pointer to the source of the test and returns it. Tries to compute at least inaccurate pointer.
@@ -35,14 +37,9 @@ internal fun StackTraceElement.toTestSource(): TestSource? {
 
         // try another approach
         val clazz = try { Class.forName(caller.className) } catch (e: ClassNotFoundException) { null }
-        if (clazz != null) {
-            val resource = clazz.`package`.name.replace('.', '/') + "/" + clazz.simpleName + ".class"
-            val url = Thread.currentThread().contextClassLoader.getResource(resource)
-            val file = url.toFile()
-            if (file != null) {
-                // we have
-                return FileSource.from(file, caller.filePosition)
-            }
+        if (clazz != null && clazz != InternalTestingClass::class.java) {
+            val file = clazz.guessSourceFileName(caller.fileName)
+            if (file != null) return FileSource.from(file, caller.filePosition)
         }
     }
 
@@ -52,10 +49,12 @@ internal fun StackTraceElement.toTestSource(): TestSource? {
     // Intellij ignores the file position: https://youtrack.jetbrains.com/issue/IDEA-186581 in ClassSource.
     // We tried to resolve the test as FileSource, but we failed. Let's at least return the ClassSource.
 
-    // Returning mixed FileSource/ClassSource will make Gradle freeze: https://github.com/gradle/gradle/issues/5737
+    // Returning mixed FileSource will make Gradle freeze: https://github.com/gradle/gradle/issues/5737
     if (isRunningInsideGradle) {
-        return null
+        // return null  // WARNING THIS WILL MAKE GRADLE SKIP TESTS!!!!!
+        throw RuntimeException("Unsupported")
     }
+
     return ClassSource.from(bareClassName, caller.filePosition)
 }
 
@@ -64,12 +63,36 @@ private val StackTraceElement.filePosition: FilePosition? get() = if (lineNumber
 internal fun Class<*>.guessSourceFileName(fileNameFromStackTraceElement: String): File? {
     val resource = `package`.name.replace('.', '/') + "/" + simpleName + ".class"
     val url = Thread.currentThread().contextClassLoader.getResource(resource) ?: return null
-    val file = url.toFile() ?: return null
 
     // We have a File that points to a .class file. We need to resolve that to the source .java file.
     // The most valuable part of the path is the absolute project path in which the file may be present.
     // Then, the class may be located in some folder named `build/something` or `out/production/classes`.
     // We need to remove that part and replace it with the path to the file.
 
-    return file
+    val classpath = (Thread.currentThread().contextClassLoader as URLClassLoader).urLs.toList()
+
+    // classpath entry which contains given class
+    val classpathEntry = classpath.firstOrNull { url.toString().startsWith(it.toString()) } ?: return null
+    val classOutputDir = classpathEntry.toFile() ?: return null
+
+    // step out of classOutputDir, but only 3 folders tops, so that we don't end up searching user's filesystem
+    var potentialModuleDir = classOutputDir
+    for (i in 0..3) {
+
+        val fileName = `package`.name.replace('.', '/') + "/" + fileNameFromStackTraceElement
+        val potentialFiles = listOf("src/main/java", "src/main/kotlin", "src/test/java", "src/test/kotlin").map {
+            "${potentialModuleDir}/$it/$fileName"
+        }
+
+        val resolvedFileName = potentialFiles.firstOrNull { File(it).exists() }
+        if (resolvedFileName != null) {
+            return File(resolvedFileName)
+        }
+
+        potentialModuleDir = potentialModuleDir.parentFile
+    }
+    // don't fail - if the user has the sources elsewhere, just bail out and return null
+//    throw RuntimeException("Looking for $this - it was found in $url which is $potentialModuleDir but I can't find it in any of the source roots!")
+
+    return null
 }
