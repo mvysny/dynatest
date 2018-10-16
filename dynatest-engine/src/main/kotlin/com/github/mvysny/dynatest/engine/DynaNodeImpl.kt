@@ -99,12 +99,9 @@ internal class DynaNodeGroupImpl internal constructor(name: String, src: StackTr
             val stackTrace = Thread.currentThread().stackTrace
             // find first stack trace which doesn't point to this package and is not Thread.getStackTrace()
             // That's going to be the caller of the test/group method.
-            val element = stackTrace.asSequence()
+            return stackTrace.asSequence()
                 .filter { !it.className.startsWith(pkg) && it.className != Thread::class.java.name }
                 .firstOrNull()
-            println(stackTrace.joinToString())
-            println(element)
-            return element
         }
     }
 }
