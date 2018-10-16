@@ -5,26 +5,24 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
 
-group = "com.github.mvysny.dynatest"
-version = "0.10-SNAPSHOT"
-
 plugins {
     kotlin("jvm") version "1.2.71"
     id("com.jfrog.bintray") version "1.8.1"
     `maven-publish`
 }
 
-defaultTasks("clean", "build")
-
-repositories {
-    jcenter()
-}
-
-subprojects {
+allprojects {
+    group = "com.github.mvysny.dynatest"
+    version = "0.10-SNAPSHOT"
 
     repositories {
         jcenter()
     }
+}
+
+defaultTasks("clean", "build")
+
+subprojects {
 
     apply {
         plugin("maven-publish")
