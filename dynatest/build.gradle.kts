@@ -15,6 +15,9 @@ dependencies {
 val configureBintray = ext["configureBintray"] as (artifactId: String) -> Unit
 configureBintray("dynatest")
 
+fun String.countSubstrings(substring: String) =
+    indices.count { substring(it).startsWith(substring) }
+
 this.getTasksByName("test", false).first().doLast {
     // verify that Gradle ran tests for all test classes and didn't ignore DynaTests
     val expectedTests = file("src/test/kotlin/com/github/mvysny/dynatest")
@@ -28,5 +31,11 @@ this.getTasksByName("test", false).first().doLast {
         .sorted()
     if (expectedTests != actualTests) {
         throw RuntimeException("Expected tests to run: $expectedTests got $actualTests")
+    }
+
+    // verify that Gradle runs all tests even if they are same-named (but different UniqueId)
+    val xml = file("build/test-results/test/TEST-com.github.mvysny.dynatest.DynaTestEngineTest.xml").readText()
+    if (xml.countSubstrings("<testcase") != 29) {
+        throw RuntimeException("Expected 29 tests in DynaTestEngineTest but got $actualTests")
     }
 }

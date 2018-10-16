@@ -388,4 +388,14 @@ class DynaTestEngineTest : DynaTest({
             expect(false) { called }
         }
     }
+
+    group("make sure Gradle runs same-named tests") {
+        // this is actually checked by the build.gradle.kts
+        group("group 1") {
+            test("a test") {  "foo".indices.count { "foo".substring(it).startsWith("bar") }  }
+        }
+        group("group 2") {
+            test("a test") {}
+        }
+    }
 })
