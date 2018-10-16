@@ -153,7 +153,7 @@ repositories {
     jcenter()
 }
 dependencies {
-    testCompile("com.github.mvysny.dynatest:dynatest:x.y")
+    testCompile("com.github.mvysny.dynatest:dynatest-engine:x.y")
 }
 ```
 
