@@ -1,5 +1,7 @@
 package com.github.mvysny.dynatest
 
+import com.github.mvysny.dynatest.engine.DynaTestEngine
+import com.github.mvysny.dynatest.engine.InitFailedTestDescriptor
 import org.junit.jupiter.api.Test
 import org.junit.platform.engine.*
 import org.junit.platform.engine.discovery.ClassSelector

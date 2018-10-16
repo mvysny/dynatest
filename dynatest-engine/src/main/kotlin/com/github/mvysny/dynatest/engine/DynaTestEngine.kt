@@ -1,5 +1,8 @@
-package com.github.mvysny.dynatest
+package com.github.mvysny.dynatest.engine
 
+import com.github.mvysny.dynatest.DynaNodeGroup
+import com.github.mvysny.dynatest.DynaNodeTest
+import com.github.mvysny.dynatest.DynaTest
 import org.junit.platform.commons.util.ReflectionUtils
 import org.junit.platform.engine.*
 import org.junit.platform.engine.discovery.*
@@ -77,7 +80,7 @@ class DynaTestEngine : TestEngine {
 
     override fun execute(request: ExecutionRequest) {
 
-        fun runTest(td: DynaNodeTestDescriptor, node: DynaNodeTest) {
+        fun runTest(td: DynaNodeTestDescriptor, node: DynaNodeTestImpl) {
             td.runBlock { node.body(node) }
         }
 
@@ -101,7 +104,7 @@ class DynaTestEngine : TestEngine {
             td.children.forEach { runAllTests(it) }
             try {
                 if (td is DynaNodeTestDescriptor && td.node is DynaNodeTest) {
-                    runTest(td, td.node)
+                    runTest(td, td.node as DynaNodeTestImpl)
                 } else if (td is InitFailedTestDescriptor) {
                     throw RuntimeException(td.failure)
                 }
@@ -128,36 +131,36 @@ internal class ClassListTestDescriptor(uniqueId: UniqueId) : AbstractTestDescrip
  * Computes [UniqueId] for given [node], from the ID of the parent.
  * @receiver the parent ID.
  */
-private fun UniqueId.append(node: DynaNode): UniqueId {
+private fun UniqueId.append(node: DynaNodeImpl): UniqueId {
     val segmentType = when(node) {
-        is DynaNodeTest -> "test"
-        is DynaNodeGroup -> "group"
+        is DynaNodeTestImpl -> "test"
+        is DynaNodeGroupImpl -> "group"
     }
     return append(segmentType, node.name)
 }
 
-internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNode) : AbstractTestDescriptor(parentId.append(node), node.name, node.src?.toTestSource()) {
+internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl) : AbstractTestDescriptor(parentId.append(node), node.name, node.src?.toTestSource()) {
     init {
         if (node is DynaNodeGroup) {
-            node.children.forEach { addChild(DynaNodeTestDescriptor(uniqueId, it)) }
+            (node as DynaNodeGroupImpl).children.forEach { addChild(DynaNodeTestDescriptor(uniqueId, it)) }
         }
     }
 
     override fun getType(): TestDescriptor.Type = when (node) {
-        is DynaNodeGroup -> TestDescriptor.Type.CONTAINER
-        is DynaNodeTest -> TestDescriptor.Type.TEST
+        is DynaNodeGroupImpl -> TestDescriptor.Type.CONTAINER
+        is DynaNodeTestImpl -> TestDescriptor.Type.TEST
     }
 
     fun runbeforeGroup() {
         if (node is DynaNodeGroup) {
-            node.beforeGroup.forEach { it() }
+            (node as DynaNodeGroupImpl).beforeGroup.forEach { it() }
         }
     }
 
     fun runafterGroup(t: Throwable?) {
         var tf = t
         if (node is DynaNodeGroup) {
-            node.afterGroup.forEach {
+            (node as DynaNodeGroupImpl).afterGroup.forEach {
                 try {
                     it()
                 } catch (ex: Throwable) {
@@ -178,7 +181,7 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNode) : 
             getPathFromRoot().forEach { descriptor ->
                 lastNodeWithBeforeEachRan = descriptor
                 if (descriptor.node is DynaNodeGroup) {
-                    descriptor.node.beforeEach.forEach { it() }
+                    (descriptor.node as DynaNodeGroupImpl).beforeEach.forEach { it() }
                 }
             }
             block()
@@ -201,9 +204,9 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNode) : 
     private fun runAfterEach(testFailure: Throwable?) {
         var tf = testFailure
         if (node is DynaNodeGroup) {
-            node.afterEach.forEach {
+            (node as DynaNodeGroupImpl).afterEach.forEach { afterEachBlock ->
                 try {
-                    it()
+                    afterEachBlock()
                 } catch (t: Throwable) {
                     if (tf == null) tf = t else tf!!.addSuppressed(t)
                 }

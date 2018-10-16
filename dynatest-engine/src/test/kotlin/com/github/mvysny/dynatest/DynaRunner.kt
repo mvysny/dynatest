@@ -1,5 +1,8 @@
 package com.github.mvysny.dynatest
 
+import com.github.mvysny.dynatest.engine.DynaNodeGroupImpl
+import com.github.mvysny.dynatest.engine.DynaNodeTestDescriptor
+import com.github.mvysny.dynatest.engine.DynaTestEngine
 import org.junit.platform.engine.*
 import org.junit.platform.engine.reporting.ReportEntry
 import java.util.*
@@ -14,7 +17,7 @@ import kotlin.test.fail
  */
 internal fun runTests(block: DynaNodeGroup.()->Unit): TestResults {
     // obtain the test definitions
-    val group = DynaNodeGroup("root", null)
+    val group = DynaNodeGroupImpl("root", null)
     group.block()
     group.onDesignPhaseEnd()
 
