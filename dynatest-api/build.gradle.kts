@@ -11,4 +11,4 @@ dependencies {
 }
 
 val configureBintray = ext["configureBintray"] as (artifactId: String) -> Unit
-configureBintray("dynatest-engine")
+configureBintray("dynatest-api")
