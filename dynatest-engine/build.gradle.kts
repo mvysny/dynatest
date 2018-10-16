@@ -18,7 +18,7 @@ configureBintray("dynatest-engine")
 fun String.countSubstrings(substring: String) =
     indices.count { substring(it).startsWith(substring) }
 
-this.getTasksByName("test", false).first().doLast {
+tasks.named<Task>("test") { doLast {
     // verify that Gradle ran tests for all test classes and didn't ignore DynaTests
     val expectedTests = file("src/test/kotlin/com/github/mvysny/dynatest")
         .list()
@@ -38,4 +38,4 @@ this.getTasksByName("test", false).first().doLast {
     if (xml.countSubstrings("<testcase") != 29) {
         throw RuntimeException("Expected 29 tests in DynaTestEngineTest but got $actualTests")
     }
-}
+} }
