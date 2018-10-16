@@ -80,42 +80,47 @@ class DynaTestEngine : TestEngine {
 
     override fun execute(request: ExecutionRequest) {
 
-        fun runTest(td: DynaNodeTestDescriptor, node: DynaNodeTestImpl) {
-            td.runBlock { node.body(node) }
+        fun DynaNodeTestDescriptor.runTest(node: DynaNodeTestImpl) {
+            runBlock { node.body(node) }
         }
 
-        fun runAllTests(td: TestDescriptor) {
+        /**
+         * Runs all tests defined in this descriptor. This function does not throw exception if any of the
+         * test/beforeEach/beforeAll/afterEach/afterAll fails.
+         */
+        fun TestDescriptor.runAllTests() {
             // mark test started
-            request.engineExecutionListener.executionStarted(td)
+            request.engineExecutionListener.executionStarted(this)
 
             // if this test descriptor denotes a DynaNodeGroup, run all `beforeGroup` blocks.
             try {
-                (td as? DynaNodeTestDescriptor)?.runbeforeGroup()
+                (this as? DynaNodeTestDescriptor)?.runBeforeGroup()
             } catch (t: Throwable) {
                 // one of the `beforeGroup` failed; do not run anything in this group (but still run all afterGroup blocks in this group)
                 // mark the group as failed.
-                (td as? DynaNodeTestDescriptor)?.runafterGroup(t)
-                request.engineExecutionListener.executionFinished(td, TestExecutionResult.failed(t))
+                (this as? DynaNodeTestDescriptor)?.runAfterGroup(t)
+                request.engineExecutionListener.executionFinished(this, TestExecutionResult.failed(t))
                 // bail out, we're done.
                 return
             }
 
             // beforeGroup ran successfully, continue with the normal test execution.
-            td.children.forEach { runAllTests(it) }
+            children.forEach { childDescriptor -> childDescriptor.runAllTests() }
+
             try {
-                if (td is DynaNodeTestDescriptor && td.node is DynaNodeTest) {
-                    runTest(td, td.node as DynaNodeTestImpl)
-                } else if (td is InitFailedTestDescriptor) {
-                    throw RuntimeException(td.failure)
+                if (this is DynaNodeTestDescriptor && this.node is DynaNodeTest) {
+                    runTest(node as DynaNodeTestImpl)
+                } else if (this is InitFailedTestDescriptor) {
+                    throw RuntimeException(failure)
                 }
-                (td as? DynaNodeTestDescriptor)?.runafterGroup(null)
-                request.engineExecutionListener.executionFinished(td, TestExecutionResult.successful())
+                (this as? DynaNodeTestDescriptor)?.runAfterGroup(null)
+                request.engineExecutionListener.executionFinished(this, TestExecutionResult.successful())
             } catch (t: Throwable) {
-                request.engineExecutionListener.executionFinished(td, TestExecutionResult.failed(t))
+                request.engineExecutionListener.executionFinished(this, TestExecutionResult.failed(t))
             }
         }
 
-        runAllTests(request.rootTestDescriptor)
+        request.rootTestDescriptor.runAllTests()
     }
 }
 
@@ -151,13 +156,13 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
         is DynaNodeTestImpl -> TestDescriptor.Type.TEST
     }
 
-    fun runbeforeGroup() {
+    fun runBeforeGroup() {
         if (node is DynaNodeGroup) {
             (node as DynaNodeGroupImpl).beforeGroup.forEach { it() }
         }
     }
 
-    fun runafterGroup(t: Throwable?) {
+    fun runAfterGroup(t: Throwable?) {
         var tf = t
         if (node is DynaNodeGroup) {
             (node as DynaNodeGroupImpl).afterGroup.forEach {
