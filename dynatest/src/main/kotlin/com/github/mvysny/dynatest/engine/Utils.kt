@@ -9,11 +9,7 @@ import java.nio.file.Paths
 
 internal val isRunningInsideGradle: Boolean get() {
     val jars = (Thread.currentThread().contextClassLoader as URLClassLoader).urLs.toList()
-    println(jars)
-    if (jars.any { it.toString().contains("gradle-worker.jar") }) {
-        return true
-    }
-    return false
+    return (jars.any { it.toString().contains("gradle-worker.jar") })
 }
 
 internal fun URI.toFile(): File? {

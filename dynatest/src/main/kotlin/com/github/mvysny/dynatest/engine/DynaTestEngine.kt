@@ -148,7 +148,7 @@ private fun UniqueId.append(node: DynaNodeImpl): UniqueId {
     return append(segmentType, node.name)
 }
 
-internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl) : AbstractTestDescriptor(parentId.append(node), node.name, node.src?.toTestSource()) {
+internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl) : AbstractTestDescriptor(parentId.append(node), node.name, node.toTestSource()) {
     init {
         if (node is DynaNodeGroup) {
             (node as DynaNodeGroupImpl).children.forEach { addChild(DynaNodeTestDescriptor(uniqueId, it)) }

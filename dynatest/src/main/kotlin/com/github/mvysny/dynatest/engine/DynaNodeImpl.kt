@@ -3,6 +3,7 @@ package com.github.mvysny.dynatest.engine
 import com.github.mvysny.dynatest.DynaNodeGroup
 import com.github.mvysny.dynatest.DynaNodeTest
 import com.github.mvysny.dynatest.DynaTest
+import org.junit.platform.engine.TestSource
 
 /**
  * A definition of a test graph node, either a group or a concrete test. Since we can't run tests right when [DynaNodeGroup.test]
@@ -12,14 +13,18 @@ import com.github.mvysny.dynatest.DynaTest
  * Every [DynaNodeGroup.test] and [DynaNodeGroup.group] call
  * creates this node which in turn can be converted to JUnit5 structures eligible for execution.
  */
-internal sealed class DynaNodeImpl(internal val name: String, internal val src: StackTraceElement?)
+internal sealed class DynaNodeImpl(internal val name: String, internal val src: StackTraceElement?) {
+    abstract fun toTestSource(): TestSource?
+}
 
 /**
  * Represents a single test with a [name] and the test's [body]. Created when you call [DynaNodeGroup.test].
  *
  * To start writing tests, just extend [DynaTest]. See [DynaTest] for more details.
  */
-internal class DynaNodeTestImpl internal constructor(name: String, internal val body: DynaNodeTest.()->Unit, src: StackTraceElement?) : DynaNodeImpl(name, src), DynaNodeTest
+internal class DynaNodeTestImpl internal constructor(name: String, internal val body: DynaNodeTest.()->Unit, src: StackTraceElement?) : DynaNodeImpl(name, src), DynaNodeTest {
+    override fun toTestSource(): TestSource? = src?.toTestSource(name)
+}
 
 /**
  * Represents a single test group with a [name]. Created when you call [group].
@@ -27,6 +32,8 @@ internal class DynaNodeTestImpl internal constructor(name: String, internal val 
  * To start writing tests, just extend [DynaTest]. See [DynaTest] for more details.
  */
 internal class DynaNodeGroupImpl internal constructor(name: String, src: StackTraceElement?) : DynaNodeImpl(name, src), DynaNodeGroup {
+    override fun toTestSource(): TestSource? = src?.toTestSource(null)
+
     private var inDesignPhase: Boolean = true
     private fun checkInDesignPhase(funName: String) {
         check(inDesignPhase) { "It appears that you are attempting to call $funName from a test{} block. You should create tests only from the group{} blocks since they run at design time (and not at run time, like the test{} blocks)" }

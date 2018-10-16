@@ -5,6 +5,7 @@ import org.junit.platform.engine.TestSource
 import org.junit.platform.engine.support.descriptor.ClassSource
 import org.junit.platform.engine.support.descriptor.FilePosition
 import org.junit.platform.engine.support.descriptor.FileSource
+import org.junit.platform.engine.support.descriptor.MethodSource
 import java.io.File
 import java.net.URLClassLoader
 
@@ -12,8 +13,25 @@ import java.net.URLClassLoader
  * Computes the pointer to the source of the test and returns it. Tries to compute at least inaccurate pointer.
  * @return the pointer to the test source; returns null if the source can not be computed by any means.
  */
-internal fun StackTraceElement.toTestSource(): TestSource? {
+internal fun StackTraceElement.toTestSource(testName: String? = null): TestSource {
     val caller: StackTraceElement = this
+
+    // Gradle is dumb to expect a hierarchy of ClassSources and MethodSources
+    // Returning mixed FileSource will make Gradle freeze: https://github.com/gradle/gradle/issues/5737
+    if (isRunningInsideGradle) {
+        // return null  // WARNING THIS WILL MAKE GRADLE SKIP TESTS!!!!!
+//        throw RuntimeException("Unsupported")   // THIS WILL MAKE GRADLE FREEZE!!! Retarded.
+        // just returning ClassSource always will make gradle freeze. dpc
+
+        // strip $ to avoid having Test$1.xml, Test$1$5.xml with tests scattered in them
+        var bareClassName = caller.className.replaceAfter('$', "").trim('$')
+        bareClassName = bareClassName.removeSuffix("Kt")
+        if (testName != null) {
+            return MethodSource.from(bareClassName, testName)
+        }
+        return ClassSource.from(bareClassName, caller.filePosition)
+    }
+
     // normally we would just return ClassSource, but there are the following issues with that:
     // 1. Intellij ignores FilePosition in ClassSource; reported as https://youtrack.jetbrains.com/issue/IDEA-186581
     // 2. If I try to remedy that by passing in the block class name (such as DynaTestTest$1$1$1$1), Intellij looks confused and won't perform any navigation
@@ -46,15 +64,7 @@ internal fun StackTraceElement.toTestSource(): TestSource? {
     // Intellij's ClassSource doesn't work on classes named DynaTestTest$1$1$1$1 (with $ in them); strip that.
     val bareClassName = caller.className.replaceAfter('$', "").trim('$')
 
-    // Intellij ignores the file position: https://youtrack.jetbrains.com/issue/IDEA-186581 in ClassSource.
     // We tried to resolve the test as FileSource, but we failed. Let's at least return the ClassSource.
-
-    // Returning mixed FileSource will make Gradle freeze: https://github.com/gradle/gradle/issues/5737
-    if (isRunningInsideGradle) {
-        // return null  // WARNING THIS WILL MAKE GRADLE SKIP TESTS!!!!!
-//        throw RuntimeException("Unsupported")   // THIS WILL MAKE GRADLE FREEZE!!! Retarded.
-    }
-
     return ClassSource.from(bareClassName, caller.filePosition)
 }
 

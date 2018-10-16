@@ -3,14 +3,13 @@ package com.github.mvysny.dynatest
 import com.github.mvysny.dynatest.engine.DynaNodeGroupImpl
 import com.github.mvysny.dynatest.engine.toTestSource
 import org.junit.platform.engine.support.descriptor.ClassSource
-import org.junit.platform.engine.support.descriptor.FileSource
 
 /**
  * This whole file is only for the purposes of testing of resolving class name to TestSource. Please ignore this file.
  */
 
 
-internal fun internalTestingClassGetTestSourceOfThis(): FileSource = DynaNodeGroupImpl.computeTestSource()!!.toTestSource() as FileSource
+internal fun internalTestingClassGetTestSourceOfThis(): StackTraceElement = DynaNodeGroupImpl.computeTestSource()!!
 
 internal class InternalTestingClass {
     companion object {
