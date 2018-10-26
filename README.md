@@ -177,10 +177,48 @@ group("String.length tests") {
 }
 ```
 
-TBD
-
 > Technical detail: You extend the `DynaTest` class which runs a block which allows you to register tests and groups.
 The block is pure Kotlin so you can use for loops, reusable functions and all features of the Kotlin programming language.
+
+### Test Lifecycle Listeners
+
+You also need to prepare environment before a test, and tear it down afterwards. For that we have:
+
+`beforeEach { body }` schedules given block to run before every individual test, both in this group and in all subgroups. If the body fails,
+the test is not run and is marked failed. Example:
+```kotlin
+lateinit var calculator: Calculator
+beforeEach { calculator = Calculator() }
+afterEach { calculator.close() }
+
+test("0+1=1") { expect(1) { calculator.plusOne(0) } }
+```
+
+`afterEach { body }` schedules given block to run after every individual test, both in this group and in all subgroups.
+The body is ran even if the test itself or the `beforeEach` block failed. See `beforeEach` for an example.
+
+`beforeGroup { body }` schedules given block to run once before every test in this group. The block won't run again for subgroups.
+If the block fails, no tests/beforeEach/afterEach from this group and its subgroups are executed and they will be all marked as failed. This is a
+direct replacement for `@BeforeClass` in JUnit, but it is a lot more powerful since you can use it on subgroups as well. You
+typically use `beforeGroup` to start something that is expensive to construct/start, e.g. a Jetty server:
+```kotlin
+lateinit var server: Server
+beforeGroup { server = Server(8080); server.start() }
+afterGroup { server.stop() }
+
+test("ping") { expect("OK") { URL("http://localhost:8080/status").readText() } }
+```
+
+`afterGroup { body }` schedules given block to run after the group concluded running its tests, both in this group and in all subgroups.
+The body is ran even if the test itself, or any `beforeEach`/`afterEach` or even `beforeGroup` blocks failed.
+See `beforeGroup` for an example.
+
+### Conclusion
+
+Now you have a good understanding of all the machinery DynaTest has to offer. This is completely enough for simple tests.
+Now we move to advanced topics on how to put this machinery to good use for more advanced scenarios.
+
+## Advanced Topics
 
 ### Conditional tests
 
