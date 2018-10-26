@@ -9,6 +9,7 @@ import kotlin.test.fail
  * Expects that given block fails with an exception of given [clazz] (or its subtype).
  * @param message optional substring which the exception message must contain.
  * @throws AssertionError if the block completed successfully or threw some other exception.
+ * @return the exception thrown, so that you can assert on it.
  */
 fun <T: Throwable> expectThrows(clazz: KClass<out T>, message: String = "", block: ()->Unit): T {
     val ex: T? = try {
