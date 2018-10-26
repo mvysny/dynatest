@@ -3,6 +3,8 @@
 [![Build Status](https://travis-ci.org/mvysny/dynatest.svg?branch=master)](https://travis-ci.org/mvysny/dynatest)
 [![GitHub tag](https://img.shields.io/github/tag/mvysny/dynatest.svg)](https://github.com/mvysny/dynatest/tags)
 
+The simplest and most powerful testing framework for Kotlin.
+
 We promote builders over annotations. Instead of having annotations forming an unfamiliar
 [embedded mini-language, interpreted by magic at runtime](https://blog.softwaremill.com/the-case-against-annotations-4b2fb170ed67),
 we let you create your test methods using Kotlin - a familiar programming language which
