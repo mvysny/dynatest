@@ -7,12 +7,13 @@ The simplest and most powerful testing framework for Kotlin.
 
 We promote builders over annotations. Instead of having annotations forming an unfamiliar
 [embedded mini-language, interpreted by magic at runtime](https://blog.softwaremill.com/the-case-against-annotations-4b2fb170ed67),
-we let you create your test methods using Kotlin - a familiar programming language which
-you know how to use refactor.
+we let you create your test methods using Kotlin - an actual programming language familiar to you.
+
+We don't program in annotations, after all. We program in Kotlin.
 
 ## Example
 
-Code example of the [CalculatorTest.kt](src/test/kotlin/com/github/mvysny/dynatest/CalculatorTest.kt):
+Code example of the [CalculatorTest.kt](dynatest-engine/src/test/kotlin/com/github/mvysny/dynatest/CalculatorTest.kt):
 
 ```kotlin
 class Calculator {
