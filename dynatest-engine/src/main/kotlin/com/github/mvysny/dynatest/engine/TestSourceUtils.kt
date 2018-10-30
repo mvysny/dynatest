@@ -48,17 +48,21 @@ internal fun StackTraceElement.toTestSource(testName: String? = null): TestSourc
         }
 
         // discover the file
-        val folders = listOf("java", "kotlin").map { File(moduleDir, "src/test/$it") } .filter { it.exists() }
+        val folders = listOf("java", "kotlin").map { File(moduleDir, "src/test/$it") }.filter { it.exists() }
         val pkg = caller.className.replace('.', '/').replaceAfterLast('/', "", "").trim('/')
-        val file: File? = folders.map { File(it, "$pkg/${caller.fileName}") } .firstOrNull { it.exists() }
-        if (file != null) return FileSource.from(file, caller.filePosition)
-
-        // try another approach
-        val clazz = try { Class.forName(caller.className) } catch (e: ClassNotFoundException) { null }
-        if (clazz != null && clazz != InternalTestingClass::class.java) {
-            val file = clazz.guessSourceFileName(caller.fileName)
-            if (file != null) return FileSource.from(file, caller.filePosition)
+        var file: File? = folders.map { File(it, "$pkg/${caller.fileName}") }.firstOrNull { it.exists() }
+        if (file == null) {
+            // try another approach
+            val clazz = try {
+                Class.forName(caller.className)
+            } catch (e: ClassNotFoundException) {
+                null
+            }
+            if (clazz != null && clazz != InternalTestingClass::class.java) {
+                file = clazz.guessSourceFileName(caller.fileName)
+            }
         }
+        if (file != null) return FileSource.from(file, caller.filePosition)
     }
 
     // Intellij's ClassSource doesn't work on classes named DynaTestTest$1$1$1$1 (with $ in them); strip that.
@@ -101,7 +105,7 @@ internal fun Class<*>.guessSourceFileName(fileNameFromStackTraceElement: String)
 
         val fileName = `package`.name.replace('.', '/') + "/" + fileNameFromStackTraceElement
         val potentialFiles = listOf("src/main/java", "src/main/kotlin", "src/test/java", "src/test/kotlin").map {
-            "${potentialModuleDir}/$it/$fileName"
+            "$potentialModuleDir/$it/$fileName"
         }
 
         val resolvedFileName = potentialFiles.firstOrNull { File(it).exists() }
