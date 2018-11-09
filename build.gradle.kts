@@ -47,22 +47,45 @@ subprojects {
             from(java.sourceSets["main"].allSource)
         }
 
+        val javadocJar = task("javadocJar", Jar::class) {
+            val javadoc = tasks.findByName("javadoc") as Javadoc
+            javadoc.isFailOnError = false
+            dependsOn(javadoc)
+            classifier = "javadoc"
+            from(javadoc.destinationDir)
+        }
+
         publishing {
             publications {
                 create("mavenJava", MavenPublication::class.java).apply {
                     groupId = project.group.toString()
                     this.artifactId = artifactId
                     version = project.version.toString()
-                    pom.withXml {
-                        val root = asNode()
-                        root.appendNode("description", "Simple Dynamic Testing Framework piggybacking on JUnit5")
-                        root.appendNode("name", artifactId)
-                        root.appendNode("url", "https://github.com/mvysny/dynatest")
+                    pom {
+                        description.set("Simple Dynamic Testing Framework piggybacking on JUnit5")
+                        name.set(artifactId)
+                        url.set("https://github.com/mvysny/dynatest")
+                        licenses {
+                            license {
+                                name.set("The Apache Software License, Version 2.0")
+                                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                                distribution.set("repo")
+                            }
+                        }
+                        developers {
+                            developer {
+                                id.set("mavi")
+                                name.set("Martin Vysny")
+                                email.set("martin@vysny.me")
+                            }
+                        }
+                        scm {
+                            url.set("https://github.com/mvysny/dynatest")
+                        }
                     }
                     from(components.findByName("java")!!)
-                    artifact(sourceJar) {
-                        classifier = "sources"
-                    }
+                    artifact(sourceJar)
+                    artifact(javadocJar)
                 }
             }
         }
