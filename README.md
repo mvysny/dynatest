@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/mvysny/dynatest.svg?branch=master)](https://travis-ci.org/mvysny/dynatest)
 [![GitHub tag](https://img.shields.io/github/tag/mvysny/dynatest.svg)](https://github.com/mvysny/dynatest/tags)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.mvysny.dynatest/dynatest-engine/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.mvysny.dynatest/dynatest-engine)
 
 The simplest and most powerful testing framework for Kotlin.
 
