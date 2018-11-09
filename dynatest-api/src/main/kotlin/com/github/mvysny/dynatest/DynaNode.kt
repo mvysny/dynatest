@@ -81,7 +81,7 @@ interface DynaNodeGroup {
 /**
  * Represents a single test with a name and a body block. Created when you call [DynaNodeGroup.test].
  *
- * To start writing tests, just extend [DynaTest]. See [DynaTest] for more details.
+ * To start writing tests, just extend the `DynaTest` class located in the `dynatest-engine` module. See `DynaTest` for more details.
  */
 @DynaNodeDsl
 interface DynaNodeTest

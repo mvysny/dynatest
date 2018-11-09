@@ -226,8 +226,17 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
     }
 }
 
+/**
+ * Returns true if this class is private.
+ */
 val Class<*>.isPrivate: Boolean get() = Modifier.isPrivate(modifiers)
+/**
+ * Returns true if this class is abstract.
+ */
 val Class<*>.isAbstract: Boolean get() = Modifier.isAbstract(modifiers)
+/**
+ * Returns true if this class is public.
+ */
 val Class<*>.isPublic: Boolean get() = Modifier.isPublic(modifiers)
 
 /**
