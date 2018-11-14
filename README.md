@@ -111,6 +111,15 @@ What this framework is not:
 
 You give any meaning you need to groups and tests.
 
+### Comparison With KotlinTest
+
+Compared to [KotlinTest](https://github.com/kotlintest/kotlintest), DynaTest
+only pushes for the `FunSpec` testing style. This may not necessary be bad: DynaTest's
+codebase is way simpler and it limits the variety of testing styles you can encounter in projects.
+DynaTest's support for functional testing is also way more
+powerful than `FunSpec` since we have support for groups and `beforeGroup`/`afterGroup`. Yet,
+KotlinTest is official and maintained (probably) by the Kotlin folk, so pick your poison :)
+
 ## Using DynaTest in your projects
 
 DynaTest sports its own TestEngine which ignores any JUnit5 tests and only runs `DynaTest` tests. As a first step,
