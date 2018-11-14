@@ -395,7 +395,11 @@ It's not just unicorns:
   That's magic which must be removed. See [Issue #1](https://github.com/mvysny/dynatest/issues/1) for more details.
 * Weak IDE (Intellij) integration:
   * "Rerun failed tests" always runs all tests
-  * Impossible to run single test only (right-clicking on the test name doesn't offer such option)
+  * You can't run just single test: in the test source file there is no "gutter green arrow" to run the test; also right-clicking the `test()` function
+    in your test class does nothing. You can only run the whole suite :(
+  * It's impossible to re-run single test only from Intellij's Test Run window -
+    right-clicking on the test name either doesn't offer such option, or you'll experience weird behavior like
+    no tests being run at all, or all tests from test class will run etc.
 
 There's a [IDEA-169198](https://youtrack.jetbrains.com/issue/IDEA-169198) bug report for Intellij, please go there and vote
 to get it resolved.
