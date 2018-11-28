@@ -5,6 +5,12 @@ import java.lang.IllegalArgumentException
 import kotlin.test.expect
 import kotlin.test.fail
 
+/**
+ * Bunch of tests for the engine.
+ *
+ * If you add tests here, don't forget to fix the `build.gradle.kts` - there is a check that there are in fact 33
+ * test methods executed by this test.
+ */
 class DynaTestEngineTest : DynaTest({
     group("test the 'beforeEach' behavior") {
 
@@ -405,40 +411,40 @@ class DynaTestEngineTest : DynaTest({
     group("prohibit same-named tests/groups in the same group") {
         test("test/test") {
             var called = 0
-            expectThrows(IllegalArgumentException::class, "test/group with name 'a test' is already present: a test") {
+            expectThrows(IllegalArgumentException::class, "test/group with name 'duplicite' is already present: duplicite") {
                 runTests {
-                    test("a test") { called++; fail("shouldn't be called") }
-                    test("a test") { called++; fail("shouldn't be called") }
+                    test("duplicite") { called++; fail("shouldn't be called") }
+                    test("duplicite") { called++; fail("shouldn't be called") }
                 }
             }
             expect(0) { called }
         }
         test("test/group") {
             var called = 0
-            expectThrows(IllegalArgumentException::class, "test/group with name 'a test' is already present: a test") {
+            expectThrows(IllegalArgumentException::class, "test/group with name 'duplicite' is already present: duplicite") {
                 runTests {
-                    test("a test") { called++; fail("shouldn't be called") }
-                    group("a test") { called++; fail("shouldn't be called") }
+                    test("duplicite") { called++; fail("shouldn't be called") }
+                    group("duplicite") { called++; fail("shouldn't be called") }
                 }
             }
             expect(0) { called }
         }
         test("group/test") {
             var called = 0
-            expectThrows(IllegalArgumentException::class, "test/group with name 'a test' is already present: a test") {
+            expectThrows(IllegalArgumentException::class, "test/group with name 'duplicite' is already present: duplicite") {
                 runTests {
-                    group("a test") { }
-                    test("a test") { called++; fail("shouldn't be called") }
+                    group("duplicite") { }
+                    test("duplicite") { called++; fail("shouldn't be called") }
                 }
             }
             expect(0) { called }
         }
         test("group/group") {
             var called = 0
-            expectThrows(IllegalArgumentException::class, "test/group with name 'a test' is already present: a test") {
+            expectThrows(IllegalArgumentException::class, "test/group with name 'duplicite' is already present: duplicite") {
                 runTests {
-                    group("a test") { }
-                    group("a test") { called++; fail("shouldn't be called") }
+                    group("duplicite") { }
+                    group("duplicite") { called++; fail("shouldn't be called") }
                 }
             }
             expect(0) { called }

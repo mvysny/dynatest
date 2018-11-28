@@ -30,12 +30,14 @@ tasks.named<Task>("test") { doLast {
         .filter { it.endsWith(".xml") && !it.contains("_UniqueIdCheckupClass") }
         .sorted()
     if (expectedTests != actualTests) {
-        throw RuntimeException("Expected tests to run: $expectedTests got $actualTests")
+        throw RuntimeException("build.gradle.kts: Expected tests to run: $expectedTests got $actualTests")
     }
 
     // verify that Gradle runs all tests even if they are same-named (but different UniqueId)
-    val xml = file("build/test-results/test/TEST-com.github.mvysny.dynatest.DynaTestEngineTest.xml").readText()
-    if (xml.countSubstrings("<testcase") != 29) {
-        throw RuntimeException("Expected 29 tests in DynaTestEngineTest but got $actualTests")
+    val testXmlPath = "build/test-results/test/TEST-com.github.mvysny.dynatest.DynaTestEngineTest.xml"
+    val xml = file(testXmlPath).readText()
+    val testcases = xml.countSubstrings("<testcase")
+    if (testcases != 33) {
+        throw RuntimeException("build.gradle.kts: Expected 29 testcases in $testXmlPath but got $testcases")
     }
 } }
