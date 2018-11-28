@@ -1,6 +1,7 @@
 package com.github.mvysny.dynatest
 
 import java.io.IOException
+import java.lang.IllegalArgumentException
 import kotlin.test.expect
 import kotlin.test.fail
 
@@ -396,6 +397,51 @@ class DynaTestEngineTest : DynaTest({
         }
         group("group 2") {
             test("a test") {}
+        }
+    }
+
+    // intellij gets confused and only runs the first test; even if the second one fails, the failure is not reported
+    // in the UI.
+    group("prohibit same-named tests/groups in the same group") {
+        test("test/test") {
+            var called = 0
+            expectThrows(IllegalArgumentException::class, "test/group with name 'a test' is already present: a test") {
+                runTests {
+                    test("a test") { called++; fail("shouldn't be called") }
+                    test("a test") { called++; fail("shouldn't be called") }
+                }
+            }
+            expect(0) { called }
+        }
+        test("test/group") {
+            var called = 0
+            expectThrows(IllegalArgumentException::class, "test/group with name 'a test' is already present: a test") {
+                runTests {
+                    test("a test") { called++; fail("shouldn't be called") }
+                    group("a test") { called++; fail("shouldn't be called") }
+                }
+            }
+            expect(0) { called }
+        }
+        test("group/test") {
+            var called = 0
+            expectThrows(IllegalArgumentException::class, "test/group with name 'a test' is already present: a test") {
+                runTests {
+                    group("a test") { }
+                    test("a test") { called++; fail("shouldn't be called") }
+                }
+            }
+            expect(0) { called }
+        }
+        test("group/group") {
+            var called = 0
+            expectThrows(IllegalArgumentException::class, "test/group with name 'a test' is already present: a test") {
+                runTests {
+                    group("a test") { }
+                    group("a test") { called++; fail("shouldn't be called") }
+                }
+            }
+            expect(0) { called }
         }
     }
 })

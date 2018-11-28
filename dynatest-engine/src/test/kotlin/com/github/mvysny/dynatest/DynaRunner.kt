@@ -96,7 +96,7 @@ internal data class TestResults(val testsRan: MutableMap<UniqueId, TestExecution
     }
 
     fun getFailure(name: String): Throwable {
-        val entry = testsRan.entries.firstOrNull { it.key.segments.last().value == name } ?: throw IllegalArgumentException("No test with name $name: ${testsRan.keys}")
+        val entry = testsRan.entries.firstOrNull { it.key.segments.last().value == name } ?: throw IllegalArgumentException("No test with name '$name': ${testsRan.keys}")
         expect(TestExecutionResult.Status.FAILED) { entry.value.status }
         return entry.value.throwable.get()
     }

@@ -62,14 +62,20 @@ internal class DynaNodeGroupImpl internal constructor(name: String, src: StackTr
         children.forEach { (it as? DynaNodeGroupImpl)?.onDesignPhaseEnd() }
     }
 
+    private fun checkNameNotYetUsed(name: String) {
+        require(children.none { it.name == name }) { "test/group with name '$name' is already present: ${children.joinToString { it.name }}"}
+    }
+
     override fun test(name: String, body: DynaNodeTest.()->Unit) {
         checkInDesignPhase("test")
+        checkNameNotYetUsed(name)
         val source = computeTestSource()
         children.add(DynaNodeTestImpl(name, body, source))
     }
 
     override fun group(name: String, block: DynaNodeGroup.()->Unit) {
         checkInDesignPhase("group")
+        checkNameNotYetUsed(name)
         val source = computeTestSource()
         val group = DynaNodeGroupImpl(name, source)
         group.block()
