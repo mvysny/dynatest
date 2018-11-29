@@ -8,14 +8,14 @@ import java.util.*
 
 plugins {
     kotlin("jvm") version "1.3.10"
-    id("com.jfrog.bintray") version "1.8.4"
+    id("com.jfrog.bintray") version "1.8.3"
     `maven-publish`
     id("org.jetbrains.dokka") version "0.9.17"
 }
 
 allprojects {
     group = "com.github.mvysny.dynatest"
-    version = "0.13-SNAPSHOT"
+    version = "0.13"
 
     repositories {
         jcenter()
