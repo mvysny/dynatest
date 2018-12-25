@@ -12,7 +12,7 @@ we let you create your test methods using Kotlin - an actual programming languag
 
 We don't program in annotations, after all. We program in Kotlin.
 
-## Example
+## Example Code
 
 Code example of the [CalculatorTest.kt](dynatest-engine/src/test/kotlin/com/github/mvysny/dynatest/CalculatorTest.kt):
 
@@ -87,40 +87,15 @@ Running this in your IDE will produce:
 
 ![DynaTest CalculatorTest screenshot](images/dynatest.png)
 
-## DynaTest Design principles
+## Using DynaTest In Your Projects
 
-We:
+### Example Project
 
-* Promote component-oriented programming. You should be able to create a test suite as a component,
-  and simply include that test suite anywhere you see fit.
-* Dissuade from abominable programming techniques like inheritance and annotatiomania.
-* Let programmer use a familiar language to define tests, one that the programmer can refactor Put the programmer in charge and allow him to use the full palette of software practices, in order
-  to create well-maintainable test code.
-* With great power comes great responsibility. Don't make the test structure generation code more complex
-  than anything else in your project. Keep it simple.
-* No outside lifecycle listeners. Init belongs close to the test. Instead of external listener interfaces we
-  promote `beforeEach`/`afterEach` and `beforeGroup`/`afterGroup`
+Please see [karibu-helloworld-application](https://github.com/mvysny/karibu-helloworld-application)
+for a very simple Gradle-based project employing DynaTest, to see how to integrate DynaTest
+with your app.
 
-What this framework is not:
-
-* BDD. What BDD strives for is to describe a behavior of an app. What it really does is that it provides
-  a really lousy, obfuscated and computationally weak way of writing test programs. There is no good. For bad, head to
-  [JBehave](http://jbehave.org/). To experience a real horror, head to [Robot Framework](http://robotframework.org/).
-* Spec. What spec strives for is to describe a specification of an app. What it really does is that it provides
-  a lousy way of writing test programs. If you want spec, use [Spek](http://spekframework.org/).
-
-You give any meaning you need to groups and tests.
-
-### Comparison With KotlinTest
-
-Compared to [KotlinTest](https://github.com/kotlintest/kotlintest), DynaTest
-only pushes for the `FunSpec` testing style. This may not necessary be bad: DynaTest's
-codebase is way simpler and it limits the variety of testing styles you can encounter in projects.
-DynaTest's support for functional testing is also way more
-powerful than `FunSpec` since we have support for groups and `beforeGroup`/`afterGroup`. Yet,
-KotlinTest is official and maintained (probably) by the Kotlin folk, so pick your poison :)
-
-## Using DynaTest in your projects
+### Gradle+DynaTest Integration Guide
 
 DynaTest sports its own TestEngine which ignores any JUnit5 tests and only runs `DynaTest` tests. As a first step,
 add the test dependency on this library to your `build.gradle` file:
@@ -403,6 +378,39 @@ It's not just unicorns:
 
 There's a [IDEA-169198](https://youtrack.jetbrains.com/issue/IDEA-169198) bug report for Intellij, please go there and vote
 to get it resolved.
+
+# DynaTest Design principles
+
+We:
+
+* Promote component-oriented programming. You should be able to create a test suite as a component,
+  and simply include that test suite anywhere you see fit.
+* Dissuade from abominable programming techniques like inheritance and annotatiomania.
+* Let programmer use a familiar language to define tests, one that the programmer can refactor Put the programmer in charge and allow him to use the full palette of software practices, in order
+  to create well-maintainable test code.
+* With great power comes great responsibility. Don't make the test structure generation code more complex
+  than anything else in your project. Keep it simple.
+* No outside lifecycle listeners. Init belongs close to the test. Instead of external listener interfaces we
+  promote `beforeEach`/`afterEach` and `beforeGroup`/`afterGroup`
+
+What this framework is not:
+
+* BDD. What BDD strives for is to describe a behavior of an app. What it really does is that it provides
+  a really lousy, obfuscated and computationally weak way of writing test programs. There is no good. For bad, head to
+  [JBehave](http://jbehave.org/). To experience a real horror, head to [Robot Framework](http://robotframework.org/).
+* Spec. What spec strives for is to describe a specification of an app. What it really does is that it provides
+  a lousy way of writing test programs. If you want spec, use [Spek](http://spekframework.org/).
+
+You give any meaning you need to groups and tests.
+
+## Comparison With KotlinTest
+
+Compared to [KotlinTest](https://github.com/kotlintest/kotlintest), DynaTest
+only pushes for the `FunSpec` testing style. This may not necessary be bad: DynaTest's
+codebase is way simpler and it limits the variety of testing styles you can encounter in projects.
+DynaTest's support for functional testing is also way more
+powerful than `FunSpec` since we have support for groups and `beforeGroup`/`afterGroup`. Yet,
+KotlinTest is official and maintained (probably) by the Kotlin folk, so pick your poison :)
 
 # License
 
