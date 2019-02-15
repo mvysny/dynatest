@@ -15,7 +15,7 @@ plugins {
 
 allprojects {
     group = "com.github.mvysny.dynatest"
-    version = "0.14"
+    version = "0.15-SNAPSHOT"
 
     repositories {
         jcenter()
