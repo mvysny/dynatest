@@ -8,7 +8,7 @@ import java.nio.file.FileSystemNotFoundException
 import java.nio.file.Paths
 
 internal val isRunningInsideGradle: Boolean get() {
-    val jars = (Thread.currentThread().contextClassLoader as URLClassLoader).urLs.toList()
+    val jars: List<URL> = (Thread.currentThread().contextClassLoader as URLClassLoader).urLs.toList()
     return (jars.any { it.toString().contains("gradle-worker.jar") })
 }
 
