@@ -28,11 +28,9 @@ internal val isRunningInsideGradle: Boolean get() {
     }
 }
 
-internal fun URI.toFile(): File? {
-    try {
-        return Paths.get(this).toFile()
-    } catch (e: FileSystemNotFoundException) {
-        return null
-    }
+internal fun URI.toFile(): File? = try {
+    Paths.get(this).toFile()
+} catch (e: FileSystemNotFoundException) {
+    null
 }
 internal fun URL.toFile(): File? = toURI().toFile()
