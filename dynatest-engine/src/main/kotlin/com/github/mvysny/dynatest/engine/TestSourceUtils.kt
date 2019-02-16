@@ -88,21 +88,21 @@ internal fun Class<*>.guessSourceFileName(fileNameFromStackTraceElement: String)
     // file:/home/mavi/work/my/dynatest/dynatest-engine/out/production/classes/com/github/mvysny/dynatest/InternalTestingClassKt.class
     val url = classLoader.getResource(resource) ?: return null
 
-    // We have a File that points to a .class file. We need to resolve that to the source .java file.
+    // We have a File that points to a .class file. We need to resolve that to the source .java/.kt file.
     // The most valuable part of the path is the absolute project path in which the file may be present.
     // Then, the class may be located in some folder named `build/something` or `out/production/classes`.
     // We need to remove that part and replace it with the path to the file, e.g. `src/main/kotlin`
 
-    // try to replace "out/production/classes" or "build/classes/java/test" with "src/main/kotlin" or others
+    // try to replace "out/production/classes" or "build/classes/java/test" with "src/main/kotlin" (or such)
     val fullPathToClassName: File = url.toFile() ?: return null
     val buildFolderRegex = "(build/classes/(java|kotlin)/[^/]+/)|out/production/classes/".toRegex()
     if (fullPathToClassName.absolutePath.contains(buildFolderRegex)) {
         for (srcPath in listOf("src/main/java/", "src/main/kotlin/", "src/test/java/", "src/test/kotlin/")) {
             val replacement = fullPathToClassName.absolutePath.replace(buildFolderRegex, srcPath)
             assert(replacement != fullPathToClassName.absolutePath)
-            val replacementFile = File(File(replacement).absoluteFile.parentFile, fileNameFromStackTraceElement)
-            if (replacementFile.exists()) {
-                return replacementFile
+            val potentialSourceFile = File(File(replacement).absoluteFile.parentFile, fileNameFromStackTraceElement)
+            if (potentialSourceFile.exists()) {
+                return potentialSourceFile
             }
         }
     }
