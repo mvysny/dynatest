@@ -1,43 +1,51 @@
 package com.github.mvysny.dynatest
 
 import com.github.mvysny.dynatest.engine.DynaNodeGroupImpl
-import com.github.mvysny.dynatest.engine.isRunningInsideGradle
+import com.github.mvysny.dynatest.engine.pretendIsRunningInsideGradle
 import com.github.mvysny.dynatest.engine.toTestSource
 import org.junit.platform.engine.support.descriptor.ClassSource
 import org.junit.platform.engine.support.descriptor.FileSource
 import kotlin.test.expect
 
-class TestSourceUtilsTest: DynaTest({
+class TestSourceUtilsTest : DynaTest({
 
     group("tests for StackTraceElement.toTestSource()") {
-        test("this class resolves to FileSource") {
-            val e = DynaNodeGroupImpl.computeTestSource()!!
-            if (isRunningInsideGradle) {
+        group("this class resolves to FileSource") {
+            afterEach { pretendIsRunningInsideGradle = null }
+            test("gradle") {
+                pretendIsRunningInsideGradle = true
+                val e = DynaNodeGroupImpl.computeTestSource()!!
                 val src = e.toTestSource() as ClassSource
                 expect(TestSourceUtilsTest::class.java.name) { src.className }
                 expect(e.lineNumber) { src.position.get().line }
-            } else {
+            }
+            test("intellij") {
+                pretendIsRunningInsideGradle = false
+                val e = DynaNodeGroupImpl.computeTestSource()!!
                 val src = e.toTestSource() as FileSource
-                expect(
-                    true,
-                    src.file.absolutePath
-                ) { src.file.absolutePath.endsWith("src/test/kotlin/com/github/mvysny/dynatest/TestSourceUtilsTest.kt") }
+                expect(true, src.file.absolutePath) {
+                    src.file.absolutePath.endsWith("src/test/kotlin/com/github/mvysny/dynatest/TestSourceUtilsTest.kt")
+                }
                 expect(e.lineNumber) { src.position.get().line }
             }
         }
 
-        test("InternalTestingClass resolves to FileSource") {
-            val e = internalTestingClassGetTestSourceOfThis()
-            if (isRunningInsideGradle) {
+        group("InternalTestingClass resolves to FileSource") {
+            afterEach { pretendIsRunningInsideGradle = null }
+            test("gradle") {
+                pretendIsRunningInsideGradle = true
+                val e = internalTestingClassGetTestSourceOfThis()
                 val src = e.toTestSource() as ClassSource
                 expect(InternalTestingClass::class.java.name) { src.className }
                 expect(e.lineNumber) { src.position.get().line }
-            } else {
+            }
+            test("intellij") {
+                pretendIsRunningInsideGradle = false
+                val e = internalTestingClassGetTestSourceOfThis()
                 val src = e.toTestSource() as FileSource
-                expect(
-                    true,
-                    src.file.absolutePath
-                ) { src.file.absolutePath.endsWith("src/main/kotlin/com/github/mvysny/dynatest/InternalTestingClass.kt") }
+                expect(true, src.file.absolutePath) {
+                    src.file.absolutePath.endsWith("src/main/kotlin/com/github/mvysny/dynatest/InternalTestingClass.kt")
+                }
                 expect(12) { src.position.get().line }
             }
         }

@@ -7,7 +7,12 @@ import java.net.URLClassLoader
 import java.nio.file.FileSystemNotFoundException
 import java.nio.file.Paths
 
+internal var pretendIsRunningInsideGradle: Boolean? = null
+
 internal val isRunningInsideGradle: Boolean get() {
+    // testing purposes
+    if (pretendIsRunningInsideGradle != null) return pretendIsRunningInsideGradle!!
+
     // if this function fails, Gradle will freeze. What the fuck!
     try {
         val classLoader = Thread.currentThread().contextClassLoader
