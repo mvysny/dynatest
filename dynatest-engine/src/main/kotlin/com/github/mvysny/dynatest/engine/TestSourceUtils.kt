@@ -77,17 +77,42 @@ private val StackTraceElement.filePosition: FilePosition? get() = if (lineNumber
 /**
  * Guesses source file for given class. For Intellij it is able to discover sources also in another module,
  * for Gradle it only discovers sources in this module.
+ * @param fileNameFromStackTraceElement the class is known to be present in this file. May be different than `simpleClassName.java`
+ * in case of Kotlin where classes may reside in random files.
  */
 internal fun Class<*>.guessSourceFileName(fileNameFromStackTraceElement: String): File? {
     val resource = `package`.name.replace('.', '/') + "/" + simpleName + ".class"
-    val url = Thread.currentThread().contextClassLoader.getResource(resource) ?: return null
+    val classLoader: ClassLoader = Thread.currentThread().contextClassLoader
+
+    // in case of Intellij, the url is something like
+    // file:/home/mavi/work/my/dynatest/dynatest-engine/out/production/classes/com/github/mvysny/dynatest/InternalTestingClassKt.class
+    val url = classLoader.getResource(resource) ?: return null
 
     // We have a File that points to a .class file. We need to resolve that to the source .java file.
     // The most valuable part of the path is the absolute project path in which the file may be present.
     // Then, the class may be located in some folder named `build/something` or `out/production/classes`.
-    // We need to remove that part and replace it with the path to the file.
+    // We need to remove that part and replace it with the path to the file, e.g. `src/main/kotlin`
 
-    val classpath = (Thread.currentThread().contextClassLoader as URLClassLoader).urLs.toList()
+    // try to replace "out/production/classes" or "build/classes/java/test" with "src/main/kotlin" or others
+    val fullPathToClassName: File = url.toFile() ?: return null
+    val buildFolderRegex = "(build/classes/(java|kotlin)/[^/]+/)|out/production/classes/".toRegex()
+    if (fullPathToClassName.absolutePath.contains(buildFolderRegex)) {
+        for (srcPath in listOf("src/main/java/", "src/main/kotlin/", "src/test/java/", "src/test/kotlin/")) {
+            val replacement = fullPathToClassName.absolutePath.replace(buildFolderRegex, srcPath)
+            assert(replacement != fullPathToClassName.absolutePath)
+            val replacementFile = File(File(replacement).absoluteFile.parentFile, fileNameFromStackTraceElement)
+            if (replacementFile.exists()) {
+                return replacementFile
+            }
+        }
+    }
+    if (classLoader !is URLClassLoader) {
+        // JDK9+  - can't do the classpath scanning, just bail out
+        return null
+    }
+
+    // JDK8: scan the classpath and find the path that matches the file.
+    val classpath = classLoader.urLs.toList()
 
     // classpath entry which contains given class
     val classpathEntry = classpath.firstOrNull { url.toString().startsWith(it.toString()) } ?: return null

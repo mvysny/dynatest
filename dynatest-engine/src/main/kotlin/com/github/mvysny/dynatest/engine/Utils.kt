@@ -19,7 +19,7 @@ internal val isRunningInsideGradle: Boolean get() {
         // JDK 9+ uses AppClassLoader which doesn't provide a list of URLs for us.
         // we need to check in a different way whether there is `gradle-worker.jar` on the classpath.
         // we know that it contains the worker/org/gradle/api/JavaVersion.class
-        val workerJar = classLoader.getResource("worker/org/gradle/api/JavaVersion.class")
+        val workerJar: URL? = classLoader.getResource("worker/org/gradle/api/JavaVersion.class")
         return workerJar.toString().contains("gradle-worker.jar")
     } catch (t: Throwable) {
         // give up, just pretend that we're inside of Gradle

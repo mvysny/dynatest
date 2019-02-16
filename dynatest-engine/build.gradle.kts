@@ -7,19 +7,20 @@ import java.util.*
 
 dependencies {
     compile(project(":dynatest-api"))
-    compile("org.junit.jupiter:junit-jupiter-api:5.3.0")
-    compile("org.junit.platform:junit-platform-engine:1.3.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.3.0")
+    compile("org.junit.jupiter:junit-jupiter-api:5.4.0")
+    compile("org.junit.platform:junit-platform-engine:1.4.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.0")
 }
 
 val configureBintray = ext["configureBintray"] as (artifactId: String) -> Unit
 configureBintray("dynatest-engine")
 
+
+// verify that Gradle ran tests for all test classes and didn't ignore DynaTests
 fun String.countSubstrings(substring: String) =
     indices.count { substring(it).startsWith(substring) }
 
 tasks.named<Task>("test") { doLast {
-    // verify that Gradle ran tests for all test classes and didn't ignore DynaTests
     val expectedTests = file("src/test/kotlin/com/github/mvysny/dynatest")
         .list()
         .filter { it.endsWith("Test.kt") }
