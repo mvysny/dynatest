@@ -1,4 +1,5 @@
 language: java
+# Need to test on openjdk11 also: https://github.com/mvysny/dynatest/issues/4
 jdk:
   - openjdk8
   - openjdk9
