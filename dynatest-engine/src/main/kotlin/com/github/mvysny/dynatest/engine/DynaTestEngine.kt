@@ -65,6 +65,9 @@ class DynaTestEngine : TestEngine {
                 .filter { DynaTest::class.java.isAssignableFrom(it) }
                 .forEach {
                     try {
+                        // let's use newInstance() since the recommended way of getDeclaredConstructor().newInstance()
+                        // wraps any checked exceptions in InvocationTargetException which we really don't want in Kotlin :)
+                        @Suppress("DEPRECATION")
                         val test: DynaTest = it.newInstance() as DynaTest
                         val td = DynaNodeTestDescriptor(result.uniqueId, test.root)
                         result.addChild(td)
