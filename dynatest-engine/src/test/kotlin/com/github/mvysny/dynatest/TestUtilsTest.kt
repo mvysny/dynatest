@@ -12,7 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.test.expect
 
 class TestUtilsTest : DynaTest({
-    group("tests for expectThrows()") {
+    group("expectThrows()") {
         test("throwing expected exception succeeds") {
             expectThrows(RuntimeException::class) { throw RuntimeException("Expected") }
         }
@@ -21,7 +21,10 @@ class TestUtilsTest : DynaTest({
             try {
                 expectThrows(RuntimeException::class) {} // expected to be failed with AssertionError
                 throw RuntimeException("Should have failed")
-            } catch (e: AssertionError) { /*okay*/ }
+            } catch (e: AssertionError) {
+                // okay
+                expect("Expected to fail with java.lang.RuntimeException but completed successfully") { e.message }
+            }
         }
 
         test("fails if block throws something else") {
@@ -29,6 +32,41 @@ class TestUtilsTest : DynaTest({
                 // this should fail with AssertionError since some other exception has been thrown
                 expectThrows(RuntimeException::class) {
                     throw IOException("simulated")
+                }
+            }
+        }
+
+        group("message") {
+            test("throwing expected exception succeeds") {
+                expectThrows(RuntimeException::class, "Expected") { throw RuntimeException("Expected") }
+            }
+
+            test("fails if the message is different") {
+                try {
+                    expectThrows(RuntimeException::class, "foo") { throw RuntimeException("actual") }
+                    throw RuntimeException("Should have failed")
+                } catch (e: AssertionError) {
+                    // expected
+                    expect("java.lang.RuntimeException message: Expected 'foo' but was 'actual'") { e.message }
+                }
+            }
+
+            test("fails if block completes successfully") {
+                try {
+                    expectThrows(RuntimeException::class, "foo") {} // expected to be failed with AssertionError
+                    throw RuntimeException("Should have failed")
+                } catch (e: AssertionError) {
+                    // okay
+                    expect("Expected to fail with java.lang.RuntimeException but completed successfully") { e.message }
+                }
+            }
+
+            test("fails if block throws something else") {
+                expectThrows(AssertionError::class, "Expected to fail with java.lang.RuntimeException but failed with java.io.IOException: simulated") {
+                    // this should fail with AssertionError since some other exception has been thrown
+                    expectThrows(RuntimeException::class, "simulated") {
+                        throw IOException("simulated")
+                    }
                 }
             }
         }

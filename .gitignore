@@ -4,4 +4,4 @@ build
 *.iml
 out
 local.properties
-
+.attach_pid*

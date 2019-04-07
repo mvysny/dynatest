@@ -16,11 +16,15 @@ fun <T: Throwable> expectThrows(clazz: KClass<out T>, message: String = "", bloc
         block()
         null
     } catch (t: Throwable) {
-        if (!clazz.java.isInstance(t)) throw AssertionError("Expected to fail with $clazz but failed with $t", t)
-        expect(true, "Expected: $message but was ${t.message}") { (t.message ?: "").contains(message) }
+        if (!clazz.java.isInstance(t)) {
+            throw AssertionError("Expected to fail with ${clazz.javaObjectType.name} but failed with $t", t)
+        }
+        if (!(t.message ?: "").contains(message)) {
+            throw AssertionError("${clazz.javaObjectType.name} message: Expected '$message' but was '${t.message}'", t)
+        }
         clazz.java.cast(t)
     }
-    return ex ?: fail("Expected to fail with $clazz but completed successfully")
+    return ex ?: fail("Expected to fail with ${clazz.javaObjectType.name} but completed successfully")
 }
 
 /**
