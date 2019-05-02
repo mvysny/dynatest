@@ -228,8 +228,9 @@ The `if (OS.isLinux())` is just a simple Kotlin `if()` followed by a call to the
 
 ### Reusable test battery
 
-Remember that you call functions to register a test or a block. You can call those functions in the
-`DynaTest` block, but you can call them from anywhere - you can extract a reusable function that registers some kind
+Remember that the `test()`/`group()` are just plain Kotlin functions, which register a test or a group.
+Typically you call those functions from the block passed into the
+`DynaTest` constructor, but you can call them from anywhere - you can extract a reusable function that registers some kind
 of reusable battery of tests. The only thing that's needed is the `DynaNodeGroup` receiver (to have a context from
 which you can call the `test()`/`group()`/other functions).
 
