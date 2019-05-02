@@ -149,8 +149,10 @@ DynaTest is composed of just 6 methods (and 0 annotations).
 
 Calling the `test("name") { test body }` function creates a new test and schedules it to be run by JUnit5 core. Example:
 ```kotlin
-test("'save' button saves data") {
-    button.click(); expect(1) { Person.findAll().size }
+class MyTest : DynaTest({
+    test("'save' button saves data") {
+        button.click(); expect(1) { Person.findAll().size }
+    }
 }
 ```
 
@@ -158,8 +160,10 @@ Calling the `group("name") { register more groups and tests }` function creates 
 more groups) inside of it. By itself the group does nothing more than nesting tests in your IDE output when you run
 tests; however it becomes very powerful with the lifecycle methods `beforeGroup`/`afterGroup`. Example:
 ```kotlin
-group("String.length tests") {
-    test("Empty string has zero length") { expect(0) { "".length } }
+class MyTest : DynaTest({
+    group("String.length tests") {
+        test("Empty string has zero length") { expect(0) { "".length } }
+    }
 }
 ```
 
@@ -175,11 +179,13 @@ the following functions:
 `beforeEach { body }` schedules given block to run before every individual test, both in this group and in all subgroups. If the body fails,
 the test is not run and is marked failed. Example:
 ```kotlin
-lateinit var calculator: Calculator
-beforeEach { calculator = Calculator() }
-afterEach { calculator.close() }
-
-test("0+1=1") { expect(1) { calculator.plusOne(0) } }
+class CalculatorTest : DynaTest({
+    lateinit var calculator: Calculator
+    beforeEach { calculator = Calculator() }
+    afterEach { calculator.close() }
+    
+    test("0+1=1") { expect(1) { calculator.plusOne(0) } }
+}
 ```
 
 `afterEach { body }` schedules given block to run after every individual test, both in this group and in all subgroups.
@@ -190,11 +196,13 @@ If the block fails, no tests/beforeEach/afterEach from this group and its subgro
 direct replacement for `@BeforeClass` in JUnit, but it is a lot more powerful since you can use it on subgroups as well. You
 typically use `beforeGroup` to start something that is expensive to construct/start, e.g. a Jetty server:
 ```kotlin
-lateinit var server: Server
-beforeGroup { server = Server(8080); server.start() }
-afterGroup { server.stop() }
-
-test("ping") { expect("OK") { URL("http://localhost:8080/status").readText() } }
+class ServerTest : DynaTest({
+    lateinit var server: Server
+    beforeGroup { server = Server(8080); server.start() }
+    afterGroup { server.stop() }
+    
+    test("ping") { expect("OK") { URL("http://localhost:8080/status").readText() } }
+}
 ```
 
 `afterGroup { body }` schedules given block to run after the group concluded running its tests, both in this group and in all subgroups.
