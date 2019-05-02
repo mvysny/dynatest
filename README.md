@@ -147,14 +147,14 @@ dependencies {
 
 DynaTest is composed of just 6 methods (and 0 annotations).
 
-The `test("name") { test body }` creates a new test and schedules it to be run by JUnit5 core. Example:
+Calling the `test("name") { test body }` function creates a new test and schedules it to be run by JUnit5 core. Example:
 ```kotlin
 test("'save' button saves data") {
     button.click(); expect(1) { Person.findAll().size }
 }
 ```
 
-The `group("name") { register more groups and tests }` creates a test group and allows you to define tests (or
+Calling the `group("name") { register more groups and tests }` function creates a test group and allows you to define tests (or
 more groups) inside of it. By itself the group does nothing more than nesting tests in your IDE output when you run
 tests; however it becomes very powerful with the lifecycle methods `beforeGroup`/`afterGroup`. Example:
 ```kotlin
@@ -163,12 +163,14 @@ group("String.length tests") {
 }
 ```
 
-> Technical detail: You extend the `DynaTest` class which runs a block which allows you to register tests and groups.
+> Technical detail: You write your test suite by extending the `DynaTest` class. The DynaTest constructor runs a block
+which allows you to register tests and groups.
 The block is pure Kotlin so you can use for loops, reusable functions and all features of the Kotlin programming language.
 
 ### Test Lifecycle Listeners
 
-You also need to prepare environment before a test, and tear it down afterwards. For that we have:
+Often you need to prepare some kind of environment before a test, and tear it down afterwards. For that simply call
+the following functions:
 
 `beforeEach { body }` schedules given block to run before every individual test, both in this group and in all subgroups. If the body fails,
 the test is not run and is marked failed. Example:
@@ -208,7 +210,9 @@ Now we move to advanced topics on how to put this machinery to good use for more
 
 ### Conditional tests
 
-Simply call the `test()` function only when the condition applies. For example:
+Remember, the block is pure Kotlin code. In fact it is a mini-DSL language, creating tests and groups.
+You call the `test()` function to create/register a test; if you don't call the function the test is simply
+not created. For example:
 
 ```kotlin
 class NativesTest : DynaTest({
@@ -220,9 +224,17 @@ class NativesTest : DynaTest({
 })
 ```
 
+The `if (OS.isLinux())` is just a simple Kotlin `if()` followed by a call to the `isLinux()` function.
+
 ### Reusable test battery
 
-You can simply create a (possibly parametrized) function which runs in the context of the
+Remember that you call functions to register a test or a block. You can call those functions in the
+`DynaTest` block, but you can call them from anywhere - you can extract a reusable function that registers some kind
+of reusable battery of tests. The only thing that's needed is the `DynaNodeGroup` receiver (to have a context from
+which you can call the `test()`/`group()`/other functions).
+
+Therefore, in order to create a reusable test battery, you can simply create a (possibly parametrized) function which
+runs in the context of the
 `DynaNodeGroup`. That allows the function to create test groups and tests as necessary:
 
 ```kotlin
@@ -247,7 +259,8 @@ class LayoutTest : DynaTest({
 
 ### Plugging in into the test life-cycle
 
-Say that you want to mock the database and clean it before and after every test. Very easy:
+Say that you want to mock the database and clean it before and after every test. Very easy: just extract the
+lifecycle-controlling functions into a separate function:
 
 ```kotlin
 fun DynaNodeGroup.usingDatabase() {
