@@ -24,15 +24,21 @@ class TestUtilsTest : DynaTest({
             } catch (e: AssertionError) {
                 // okay
                 expect("Expected to fail with java.lang.RuntimeException but completed successfully") { e.message }
+                expect(null) { e.cause }
             }
         }
 
         test("fails if block throws something else") {
-            expectThrows(AssertionError::class) {
+            try {
                 // this should fail with AssertionError since some other exception has been thrown
                 expectThrows(RuntimeException::class) {
                     throw IOException("simulated")
                 }
+                throw RuntimeException("Should have failed")
+            } catch (e: AssertionError) {
+                // okay
+                expect("Expected to fail with java.lang.RuntimeException but failed with java.io.IOException: simulated") { e.message }
+                expect<Class<*>?>(IOException::class.java) { e.cause?.javaClass }
             }
         }
 
@@ -67,6 +73,19 @@ class TestUtilsTest : DynaTest({
                     expectThrows(RuntimeException::class, "simulated") {
                         throw IOException("simulated")
                     }
+                }
+            }
+
+            test("thrown exception attached as cause to the AssertionError") {
+                try {
+                    expectThrows(IOException::class, "foo") {
+                        throw IOException("simulated")
+                    }
+                    throw RuntimeException("Should have failed")
+                } catch (e: AssertionError) {
+                    // okay
+                    expect("java.io.IOException message: Expected 'foo' but was 'simulated'") { e.message }
+                    expect<Class<*>>(IOException::class.java) { e.cause!!.javaClass }
                 }
             }
         }
