@@ -1,10 +1,3 @@
-import com.jfrog.bintray.gradle.BintrayExtension
-import groovy.lang.Closure
-import org.gradle.api.tasks.GradleBuild
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.util.*
-
 dependencies {
     compile(project(":dynatest-api"))
     compile("org.junit.jupiter:junit-jupiter-api:5.4.0")
@@ -21,13 +14,13 @@ fun String.countSubstrings(substring: String) =
     indices.count { substring(it).startsWith(substring) }
 
 tasks.named<Task>("test") { doLast {
-    val expectedTests = file("src/test/kotlin/com/github/mvysny/dynatest")
-        .list()
+    val expectedTests: List<String> = file("src/test/kotlin/com/github/mvysny/dynatest")
+        .list()!!
         .filter { it.endsWith("Test.kt") }
         .map { "TEST-com.github.mvysny.dynatest.${it.removeSuffix(".kt")}.xml" }
         .sorted()
     val actualTests = file("build/test-results/test")
-        .list()
+        .list()!!
         .filter { it.endsWith(".xml") && !it.contains("_UniqueIdCheckupClass") }
         .sorted()
     if (expectedTests != actualTests) {
@@ -39,6 +32,6 @@ tasks.named<Task>("test") { doLast {
     val xml = file(testXmlPath).readText()
     val testcases = xml.countSubstrings("<testcase")
     if (testcases != 33) {
-        throw RuntimeException("build.gradle.kts: Expected 29 testcases in $testXmlPath but got $testcases")
+        throw RuntimeException("build.gradle.kts: Expected 33 testcases in $testXmlPath but got $testcases")
     }
 } }
