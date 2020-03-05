@@ -1,8 +1,8 @@
 dependencies {
     compile(project(":dynatest-api"))
-    compile("org.junit.jupiter:junit-jupiter-api:5.4.0")
-    compile("org.junit.platform:junit-platform-engine:1.4.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.0")
+    compile("org.junit.jupiter:junit-jupiter-api:5.6.0")
+    compile("org.junit.platform:junit-platform-engine:1.6.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.0")
 }
 
 val configureBintray = ext["configureBintray"] as (artifactId: String) -> Unit
