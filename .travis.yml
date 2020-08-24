@@ -2,7 +2,6 @@ language: java
 # Need to test on openjdk11 also: https://github.com/mvysny/dynatest/issues/4
 jdk:
   - openjdk8
-  - openjdk9
   - openjdk11
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
