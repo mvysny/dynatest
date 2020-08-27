@@ -1,6 +1,6 @@
 dependencies {
-    compile(kotlin("stdlib"))  // don't depend on stdlib-jdk8 to stay compatible with Android
-    compile(kotlin("test"))
+    api(kotlin("stdlib"))  // don't depend on stdlib-jdk8 to stay compatible with Android
+    api(kotlin("test"))
 }
 
 val configureBintray = ext["configureBintray"] as (artifactId: String) -> Unit
