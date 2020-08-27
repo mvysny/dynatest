@@ -1,12 +1,14 @@
 package com.github.mvysny.dynatest.engine
 
 import com.github.mvysny.dynatest.InternalTestingClass
+import org.junit.platform.commons.util.ReflectionUtils
 import org.junit.platform.engine.TestSource
 import org.junit.platform.engine.support.descriptor.ClassSource
 import org.junit.platform.engine.support.descriptor.FilePosition
 import org.junit.platform.engine.support.descriptor.FileSource
 import org.junit.platform.engine.support.descriptor.MethodSource
 import java.io.File
+import java.lang.RuntimeException
 import java.net.URLClassLoader
 
 /**
@@ -24,11 +26,23 @@ internal fun StackTraceElement.toTestSource(testName: String? = null): TestSourc
         // just returning ClassSource always will make gradle freeze. dpc
 
         // strip $ to avoid having Test$1.xml, Test$1$5.xml with tests scattered in them
-        var bareClassName = caller.className.replaceAfter('$', "").trim('$')
-        bareClassName = bareClassName.removeSuffix("Kt")
+        var bareClassName: String = caller.className
+        val bareClassNameOmittingInnerclass: String = bareClassName.replaceAfter('$', "").trim('$')
+        if (ReflectionUtils.tryToLoadClass(bareClassNameOmittingInnerclass).toOptional().isPresent) {
+            bareClassName = bareClassNameOmittingInnerclass
+            val bareClassNameOmittingKtSuffix: String = bareClassName.removeSuffix("Kt")
+            if (ReflectionUtils.tryToLoadClass(bareClassNameOmittingKtSuffix).toOptional().isPresent) {
+                bareClassName = bareClassNameOmittingKtSuffix
+            }
+        }
         if (testName != null) {
             return MethodSource.from(bareClassName, testName)
         }
+
+        // BEWARE: if the bareClassName doesn't exist, then JUnit 5 will skip this group and
+        // all nested tests silently!
+        // it's better to fail properly than to risk tests not being run.
+        ReflectionUtils.tryToLoadClass(bareClassNameOmittingInnerclass).getOrThrow { RuntimeException("Failed to load class", it) }
         return ClassSource.from(bareClassName, caller.filePosition)
     }
 
@@ -66,7 +80,7 @@ internal fun StackTraceElement.toTestSource(testName: String? = null): TestSourc
     }
 
     // Intellij's ClassSource doesn't work on classes named DynaTestTest$1$1$1$1 (with $ in them); strip that.
-    val bareClassName = caller.className.replaceAfter('$', "").trim('$')
+    val bareClassName: String = caller.className.replaceAfter('$', "").trim('$')
 
     // We tried to resolve the test as FileSource, but we failed. Let's at least return the ClassSource.
     return ClassSource.from(bareClassName, caller.filePosition)
