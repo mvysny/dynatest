@@ -213,6 +213,19 @@ See `beforeGroup` for an example.
 Now you have a good understanding of all the machinery DynaTest has to offer. This is completely enough for simple tests.
 Now we move to advanced topics on how to put this machinery to good use for more advanced scenarios.
 
+## File/Directory Utilities
+
+dynatest 0.18 and later contains support for filesystem-related assertions and ops:
+
+* File.expectExists()
+* File.expectFile()
+* File.expectDirectory()
+* File.expectReadableFile()
+* File.expectWritableFile()
+
+You can use Kotlin built-in `createTempDir()` and `createTempFile()` global functions to create temporary
+folders and files.
+
 ## Advanced Topics
 
 ### Conditional tests
