@@ -223,6 +223,30 @@ private fun DynaNodeGroup.expectThrowsTestBatch() {
             expect("foo.txt") { file.name }
         }
     }
+    group("withTempDir()") {
+        group("simple") {
+            val tempDir by withTempDir()
+            lateinit var file: File
+            beforeEach {
+                // expect that the folder already exists, so that we can e.g. copy stuff there
+                tempDir.expectDirectory()
+                file = File(tempDir, "foo.txt") // example contents
+                file.writeText("")
+            }
+            test("temp dir checker") {
+                tempDir.expectDirectory()
+                tempDir.expectFiles("**/*.txt")
+                file.expectReadableFile()
+            }
+        }
+        group("deletes temp folder afterwards") {
+            val tempDir by withTempDir()
+            afterEach {
+                expect(false) { tempDir.exists() }
+            }
+            test("dummy") {}
+        }
+    }
 }
 
 val slash = File.separatorChar

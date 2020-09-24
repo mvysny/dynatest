@@ -89,7 +89,7 @@ class DynaTestEngine : TestEngine {
     override fun execute(request: ExecutionRequest) {
 
         fun DynaNodeTestDescriptor.runTest(node: DynaNodeTestImpl) {
-            runBlock { node.body(node) }
+            runBlock(node.name) { node.body(node) }
         }
 
         /**
@@ -180,7 +180,7 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
         if (node is DynaNodeGroup) {
             (node as DynaNodeGroupImpl).afterGroup.forEach {
                 try {
-                    it(Outcome(tf))
+                    it(Outcome(null, tf))
                 } catch (ex: Throwable) {
                     if (tf == null) tf = ex else tf!!.addSuppressed(ex)
                 }
@@ -193,7 +193,7 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
      * Runs given [block], properly prefixed with calls to `beforeEach` blocks and postfixed with calls to `afterEach` blocks.
      * If any of those fails, does a proper cleanup and then throws the exception.
      */
-    fun runBlock(block: () -> Unit) {
+    fun runBlock(testName: String, block: () -> Unit) {
         var lastNodeWithBeforeEachRan: DynaNodeTestDescriptor? = null
         try {
             getPathFromRoot().forEach { descriptor ->
@@ -204,10 +204,10 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
             }
             block()
         } catch(t: Throwable) {
-            lastNodeWithBeforeEachRan?.runAfterEach(t)
+            lastNodeWithBeforeEachRan?.runAfterEach(testName, t)
             throw t
         }
-        lastNodeWithBeforeEachRan?.runAfterEach(null)
+        lastNodeWithBeforeEachRan?.runAfterEach(testName, null)
     }
 
     /**
@@ -220,18 +220,18 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
      * Runs all `afterEach` blocks recursively, from this node all the way up to the root node. Properly propagates exceptions.
      * @param testFailure if not null, the test has failed with this exception.
      */
-    private fun runAfterEach(testFailure: Throwable?) {
+    private fun runAfterEach(testName: String, testFailure: Throwable?) {
         var tf = testFailure
         if (node is DynaNodeGroup) {
             (node as DynaNodeGroupImpl).afterEach.forEach { afterEachBlock ->
                 try {
-                    afterEachBlock(Outcome(tf))
+                    afterEachBlock(Outcome(testName, tf))
                 } catch (t: Throwable) {
                     if (tf == null) tf = t else tf!!.addSuppressed(t)
                 }
             }
         }
-        (parent.orElse(null) as? DynaNodeTestDescriptor)?.runAfterEach(tf)
+        (parent.orElse(null) as? DynaNodeTestDescriptor)?.runAfterEach(testName, tf)
         if (testFailure == null && tf != null) throw tf!!
     }
 }

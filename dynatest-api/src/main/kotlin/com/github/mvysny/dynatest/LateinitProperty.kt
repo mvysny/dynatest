@@ -28,9 +28,8 @@ public class LateinitPropertyProvider<V: Any> {
 /**
  * Allows you to write lateinit variables as follows:
  * ```
- * val file: File by late()
+ * var file: File by late()
  * ```
- * Useful for vending variables for tests which change their values for every test run.
- * See
+ * Used in [withTempDir].
  */
 public fun <V: Any> late(): LateinitPropertyProvider<V> = LateinitPropertyProvider()
