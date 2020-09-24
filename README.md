@@ -264,6 +264,7 @@ fun DynaNodeGroup.withSources(): ReadWriteProperty<Any?, File> {
   }
   return sourcesProperty
 }
+
 group("source generator tests") {
   val sources: File by withSources()
   test("simple") {
