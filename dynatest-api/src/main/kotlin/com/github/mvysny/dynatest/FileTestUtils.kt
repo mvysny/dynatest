@@ -78,7 +78,7 @@ public class TempFolderProvider(
  * Configures current [DynaNodeGroup] to create a temporary folder before every test is run, then delete it afterwards.
  *
  * Usage:
- * ```
+ * ```kotlin
  * group("source generator tests") {
  *   val sources: File by withTempDir("sources")
  *   test("simple") {
@@ -97,7 +97,7 @@ public class TempFolderProvider(
  * To create a reusable utility function which e.g. pre-populates the directory, you have
  * to use a different syntax:
  *
- * ```
+ * ```kotlin
  * fun DynaNodeGroup.withSources(): ReadWriteProperty<Any?, File> {
  *   val sourcesProperty: ReadWriteProperty<Any?, File> = withTempDir("sources")
  *   val sources by sourcesProperty

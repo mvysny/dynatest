@@ -236,7 +236,7 @@ If you need to assert that given folder contains certain amount of files, use th
 You can use the `withTempDir()` helper function to create a test folder before every test,
 then tear it down afterwards:
 
-```
+```kotlin
 group("source generator tests") {
   val sources: File by withTempDir("sources")
   test("simple") {
@@ -255,7 +255,7 @@ group("source generator tests") {
 To create a reusable utility function which e.g. pre-populates the directory, you have
 to use a different syntax:
 
-```
+```kotlin
 fun DynaNodeGroup.withSources(): ReadWriteProperty<Any?, File> {
   val sourcesProperty: ReadWriteProperty<Any?, File> = withTempDir("sources")
   val sources by sourcesProperty
