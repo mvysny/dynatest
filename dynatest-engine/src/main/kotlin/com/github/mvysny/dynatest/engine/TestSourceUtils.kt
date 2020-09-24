@@ -11,6 +11,8 @@ import java.io.File
 import java.lang.RuntimeException
 import java.net.URLClassLoader
 
+private val slash = File.separatorChar
+
 /**
  * Computes the pointer to the source of the test and returns it. Tries to compute at least inaccurate pointer.
  * @return the pointer to the test source; returns null if the source can not be computed by any means.
@@ -56,14 +58,17 @@ internal fun StackTraceElement.toTestSource(testName: String? = null): TestSourc
         // workaround for https://youtrack.jetbrains.com/issue/IDEA-188466
         // the thing is that when using $MODULE_DIR$, IDEA will set CWD to, say, karibu-testing/.idea/modules/karibu-testing-v8
         // we need to revert that back to karibu-testing/karibu-testing-v8
-        var moduleDir = File("").absoluteFile
-        if (moduleDir.absolutePath.contains("/.idea/modules")) {
-            moduleDir = File(moduleDir.absolutePath.replace("/.idea/modules", ""))
+        var moduleDir: File = File("").absoluteFile
+        if (moduleDir.absolutePath.contains("$slash.idea${slash}modules")) {
+            moduleDir = File(moduleDir.absolutePath.replace("$slash.idea${slash}modules", ""))
         }
 
         // discover the file
-        val folders = listOf("java", "kotlin").map { File(moduleDir, "src/test/$it") }.filter { it.exists() }
-        val pkg = caller.className.replace('.', '/').replaceAfterLast('/', "", "").trim('/')
+        val folders: List<File> = listOf("java", "kotlin").map { File(moduleDir, "src/test/$it") }.filter { it.exists() }
+        val pkg: String = caller.className
+                .replace('.', '/')
+                .replaceAfterLast(slash, "", "")
+                .trim(slash)
         var file: File? = folders.map { File(it, "$pkg/${caller.fileName}") }.firstOrNull { it.exists() }
         if (file == null) {
             // try another approach
