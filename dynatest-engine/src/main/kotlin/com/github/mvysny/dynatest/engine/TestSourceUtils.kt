@@ -12,7 +12,7 @@ import java.lang.RuntimeException
 import java.net.URL
 import java.net.URLClassLoader
 
-private val slash = File.separatorChar
+private val slash: Char = File.separatorChar
 
 /**
  * Computes the pointer to the source of the test and returns it. Tries to compute at least inaccurate pointer.
@@ -102,7 +102,7 @@ private val StackTraceElement.filePosition: FilePosition? get() = if (lineNumber
  * in case of Kotlin where classes may reside in random files.
  */
 internal fun Class<*>.guessSourceFileName(fileNameFromStackTraceElement: String): File? {
-    val resource = `package`.name.replace('.', '/') + "/" + simpleName + ".class"
+    val resource: String = `package`.name.replace('.', '/') + "/" + simpleName + ".class"
     val classLoader: ClassLoader = Thread.currentThread().contextClassLoader
 
     // in case of Intellij, the url is something like
