@@ -67,7 +67,7 @@ public class TempFolderProvider(
             if (!keepOnFailure || outcome.isSuccess) {
                 dir.deleteRecursively()
             } else {
-                println("Test ${outcome.testName} failed, keeping temporary dir $property")
+                println("Test '${outcome.testName}' failed, keeping temporary dir $property")
             }
         }
         return property
