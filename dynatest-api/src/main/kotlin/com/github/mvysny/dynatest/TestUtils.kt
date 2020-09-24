@@ -1,10 +1,7 @@
 package com.github.mvysny.dynatest
 
 import java.io.*
-import java.lang.RuntimeException
-import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
-import kotlin.reflect.KProperty
 import kotlin.test.expect
 import kotlin.test.fail
 
@@ -67,17 +64,4 @@ public fun Throwable.getStackTraceAsString(): String {
     printStackTrace(pw)
     pw.flush()
     return sw.toString()
-}
-
-/**
- * A very simple implementation of [ReadWriteProperty] which implements the semantics of `lateinit`.
- */
-public data class LateinitProperty<V: Any>(val name: String, private var value: V? = null) : ReadWriteProperty<Any?, V> {
-    override fun setValue(thisRef: Any?, property: KProperty<*>, value: V) {
-        this.value = value
-    }
-
-    override fun getValue(thisRef: Any?, property: KProperty<*>): V {
-        return value ?: throw RuntimeException("$this: not initialized")
-    }
 }
