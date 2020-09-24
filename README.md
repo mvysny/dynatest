@@ -268,7 +268,7 @@ fun DynaNodeGroup.withSources(): ReadWriteProperty<Any?, File> {
 group("source generator tests") {
   val sources: File by withSources()
   test("simple") {
-    val generatedFiles: List<File> = sources.expectFiles("*.java", 10..10)
+    sources.expectFiles("*.java", 10..10)
   }
 }
 ```
