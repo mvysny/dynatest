@@ -24,7 +24,7 @@ class TestSourceUtilsTest : DynaTest({
                 val e = DynaNodeGroupImpl.computeTestSource()!!
                 val src = e.toTestSource() as FileSource
                 expect(true, src.file.absolutePath) {
-                    src.file.absolutePath.endsWith("src/test/kotlin/com/github/mvysny/dynatest/TestSourceUtilsTest.kt")
+                    src.file.endsWith("src/test/kotlin/com/github/mvysny/dynatest/TestSourceUtilsTest.kt")
                 }
                 expect(e.lineNumber) { src.position.get().line }
             }
@@ -44,7 +44,7 @@ class TestSourceUtilsTest : DynaTest({
                 val e = internalTestingClassGetTestSourceOfThis()
                 val src = e.toTestSource() as FileSource
                 expect(true, src.file.absolutePath) {
-                    src.file.absolutePath.endsWith("src/main/kotlin/com/github/mvysny/dynatest/InternalTestingClass.kt")
+                    src.file.endsWith("src/main/kotlin/com/github/mvysny/dynatest/InternalTestingClass.kt")
                 }
                 expect(12) { src.position.get().line }
             }

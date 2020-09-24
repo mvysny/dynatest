@@ -212,6 +212,8 @@ private fun DynaNodeGroup.expectThrowsTestBatch() {
     }
 }
 
+val slash = File.pathSeparatorChar
+
 private fun DynaNodeGroup.fileTestBatch() {
     group("expectExists()") {
         test("passes on existing file") {
@@ -221,7 +223,7 @@ private fun DynaNodeGroup.fileTestBatch() {
             createTempDir().expectExists()
         }
         test("fails on nonexisting file") {
-            expectThrows(AssertionError::class, "/non/existing does not exist") {
+            expectThrows(AssertionError::class, "${slash}non${slash}existing does not exist") {
                 File("/non/existing").expectExists()
             }
         }
@@ -236,7 +238,7 @@ private fun DynaNodeGroup.fileTestBatch() {
             }
         }
         test("fails on nonexisting file") {
-            expectThrows(AssertionError::class, "/non/existing does not exist") {
+            expectThrows(AssertionError::class, "${slash}non${slash}existing does not exist") {
                 File("/non/existing").expectFile()
             }
         }
@@ -251,7 +253,7 @@ private fun DynaNodeGroup.fileTestBatch() {
             createTempDir().expectDirectory()
         }
         test("fails on nonexisting file") {
-            expectThrows(AssertionError::class, "/non/existing does not exist") {
+            expectThrows(AssertionError::class, "${slash}non${slash}existing does not exist") {
                 File("/non/existing").expectDirectory()
             }
         }
@@ -266,7 +268,7 @@ private fun DynaNodeGroup.fileTestBatch() {
             }
         }
         test("fails on nonexisting file") {
-            expectThrows(AssertionError::class, "/non/existing does not exist") {
+            expectThrows(AssertionError::class, "${slash}non${slash}existing does not exist") {
                 File("/non/existing").expectReadableFile()
             }
         }
