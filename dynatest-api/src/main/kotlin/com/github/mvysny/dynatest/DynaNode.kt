@@ -25,7 +25,7 @@ interface DynaNodeGroup {
      * @param body the implementation of the test; does not run immediately but only when the test case is run
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
-    fun test(name: String, body: DynaNodeTest.()->Unit)
+    fun test(name: String, body: DynaNodeTest.() -> Unit)
 
     /**
      * Creates a nested group with given [name] and runs given [block]. In the block, you can create both sub-groups and tests, and you can
@@ -33,7 +33,7 @@ interface DynaNodeGroup {
      * @param block the block, runs immediately.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
-    fun group(name: String, block: DynaNodeGroup.()->Unit)
+    fun group(name: String, block: DynaNodeGroup.() -> Unit)
 
     /**
      * Registers a block which will be run exactly once before any of the tests in the current group are run. Only the tests nested in this group and its subgroups are
@@ -41,7 +41,7 @@ interface DynaNodeGroup {
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
-    fun beforeGroup(block: ()->Unit)
+    fun beforeGroup(block: () -> Unit)
 
     /**
      * Registers a block which will be run before every test registered to this group and to any nested groups.
@@ -52,7 +52,7 @@ interface DynaNodeGroup {
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
-    fun beforeEach(block: ()->Unit)
+    fun beforeEach(block: () -> Unit)
 
     /**
      * Registers a block which will be run after every test registered to this group and to any nested groups.
@@ -67,7 +67,7 @@ interface DynaNodeGroup {
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
-    fun afterEach(block: ()->Unit)
+    fun afterEach(block: () -> Unit)
 
     /**
      * Registers a block which will be run only once after all of the tests are run in the current group. Only the tests nested in this group and its subgroups are
@@ -75,7 +75,7 @@ interface DynaNodeGroup {
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
-    fun afterGroup(block: ()->Unit)
+    fun afterGroup(block: () -> Unit)
 }
 
 /**
