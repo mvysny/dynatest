@@ -65,14 +65,15 @@ internal fun StackTraceElement.toTestSource(testName: String? = null): TestSourc
 
         // discover the file
         val folders: List<File> = listOf("java", "kotlin").map { File(moduleDir, "src/test/$it") }.filter { it.exists() }
+        // don't use $slash here, since it's us who's producing those slashes
         val pkg: String = caller.className
                 .replace('.', '/')
-                .replaceAfterLast(slash, "", "")
-                .trim(slash)
+                .replaceAfterLast('/', "", "")
+                .trim('/')
         var file: File? = folders.map { File(it, "$pkg/${caller.fileName}") }.firstOrNull { it.exists() }
         if (file == null) {
             // try another approach
-            val clazz = try {
+            val clazz: Class<*>? = try {
                 Class.forName(caller.className)
             } catch (e: ClassNotFoundException) {
                 null
