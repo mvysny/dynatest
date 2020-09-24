@@ -212,7 +212,7 @@ private fun DynaNodeGroup.expectThrowsTestBatch() {
     }
 }
 
-val slash = File.pathSeparatorChar
+val slash = File.separatorChar
 
 private fun DynaNodeGroup.fileTestBatch() {
     group("expectExists()") {

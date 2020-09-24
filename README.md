@@ -224,7 +224,7 @@ dynatest 0.18 and later contains support for filesystem-related assertions and o
 * File.expectWritableFile()
 
 You can use Kotlin built-in `createTempDir()` and `createTempFile()` global functions to create temporary
-folders and files.
+folders and files; use Kotlin built-in `copyRecursively()` to copy entire folders.
 
 ## Advanced Topics
 
