@@ -10,6 +10,7 @@ import java.io.IOException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.properties.ReadWriteProperty
 import kotlin.test.expect
 
 class TestUtilsTest : DynaTest({
@@ -224,6 +225,14 @@ private fun DynaNodeGroup.expectThrowsTestBatch() {
         }
     }
     group("withTempDir()") {
+        fun DynaNodeGroup.reusable(): ReadWriteProperty<Any?, File> {
+            val sourcesProperty: ReadWriteProperty<Any?, File> = withTempDir("sources")
+            val sources by sourcesProperty
+            beforeEach {
+                File(sources, "foo.txt").writeText("")
+            }
+            return sourcesProperty
+        }
         group("simple") {
             val tempDir by withTempDir()
             lateinit var file: File
@@ -237,6 +246,12 @@ private fun DynaNodeGroup.expectThrowsTestBatch() {
                 tempDir.expectDirectory()
                 tempDir.expectFiles("**/*.txt")
                 file.expectReadableFile()
+            }
+        }
+        group("reusable") {
+            val tempDir by reusable()
+            test("txt file checker") {
+                tempDir.expectFiles("**/*.txt")
             }
         }
         group("deletes temp folder afterwards") {

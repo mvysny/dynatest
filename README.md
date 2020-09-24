@@ -226,12 +226,19 @@ dynatest 0.18 and later contains support for filesystem-related assertions and o
 You can use Kotlin built-in `createTempDir()` and `createTempFile()` global functions to create temporary
 folders and files; use Kotlin built-in `copyRecursively()` to copy entire folders.
 
+If you need to assert that given folder contains certain amount of files, use the
+`File.expectFiles()` function as follows:
+
+* `File("build").expectFiles("generated/**/*.java", 40..50)`
+
+### Temporary Directories 
+
 You can use the `withTempDir()` helper function to create a test folder before every test,
 then tear it down afterwards:
 
 ```
 group("source generator tests") {
-  val sources: File by withTempDir()
+  val sources: File by withTempDir("sources")
   test("simple") {
     generateSourcesTo(sources)
     val generatedFiles: List<File> = sources.expectFiles("*.java", 10..10)
@@ -245,10 +252,28 @@ group("source generator tests") {
 }
 ```
 
-If you need to assert that given folder contains certain amount of files, use the
-`File.expectFiles()` function as follows:
+To create a reusable utility function which e.g. pre-populates the directory, you have
+to use a different syntax:
 
-* `File("build").expectFiles("generated/**/*.java", 40..50)`
+```
+fun DynaNodeGroup.withSources(): ReadWriteProperty<Any?, File> {
+  val sourcesProperty: ReadWriteProperty<Any?, File> = withTempDir("sources")
+  val sources by sourcesProperty
+  beforeEach {
+    generateSourcesTo(sources)
+  }
+  return sourcesProperty
+}
+group("source generator tests") {
+  val sources: File by withSources()
+  test("simple") {
+    val generatedFiles: List<File> = sources.expectFiles("*.java", 10..10)
+  }
+}
+```
+
+Make sure to never return `sources` since that would query the value of the `sourcesProperty`
+right away, failing with `unitialized` `RuntimeException`.
 
 ## Advanced Topics
 

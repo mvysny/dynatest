@@ -53,7 +53,7 @@ public fun File.expectWritableFile() {
  */
 public class TempFolderProvider(
         private val node: DynaNodeGroup,
-        private val prefix: String?,
+        private val prefix: String,
         private val suffix: String?,
         private val keepOnFailure: Boolean
 ) {
@@ -61,9 +61,9 @@ public class TempFolderProvider(
         val property = LateinitProperty<File>(prop.name)
         var dir: File by property
         node.beforeEach {
-            dir = createTempDir("tmp-${prefix ?: prop.name}", suffix)
+            dir = createTempDir(prefix, suffix)
         }
-        node.afterEach { outcome ->
+        node.afterEach { outcome: Outcome ->
             if (!keepOnFailure || outcome.isSuccess) {
                 dir.deleteRecursively()
             } else {
@@ -80,7 +80,7 @@ public class TempFolderProvider(
  * Usage:
  * ```
  * group("source generator tests") {
- *   val sources: File by withTempDir()
+ *   val sources: File by withTempDir("sources")
  *   test("simple") {
  *     generateSourcesTo(sources)
  *     val generatedFiles: List<File> = sources.expectFiles("*.java", 10..10)
@@ -93,11 +93,53 @@ public class TempFolderProvider(
  *   }
  * }
  * ```
- * @param prefix an optional temporary directory prefix as passed into [createTempDir].
- * Defaults to null which will use the variable name.
+ *
+ * To create a reusable utility function which e.g. pre-populates the directory, you have
+ * to use a different syntax:
+ *
+ * ```
+ * fun DynaNodeGroup.withSources(): ReadWriteProperty<Any?, File> {
+ *   val sourcesProperty: ReadWriteProperty<Any?, File> = withTempDir("sources")
+ *   val sources by sourcesProperty
+ *   beforeEach {
+ *     generateSourcesTo(sources)
+ *   }
+ *   return sourcesProperty
+ * }
+ *
+ * group("source generator tests") {
+ *   val sources: File by withSources()
+ *   test("simple") {
+ *     val generatedFiles: List<File> = sources.expectFiles("*.java", 10..10)
+ *   }
+ * }
+ * ```
+ * Make sure to never return `sources` since that would query the value of the `sourcesProperty`
+ * right away, failing with `unitialized` `RuntimeException`.
+ * @param name an optional tempdir name as passed into [createTempDir].
+ * Defaults to "dir".
+ * @param suffix an optional temporary directory suffix as passed into [createTempDir].
+ * @param keepOnFailure if true (default), the directory is not deleted on test failure so that you
+ * can take a look what went wrong. Set this to false to always delete the directory.
  */
-public fun DynaNodeGroup.withTempDir(prefix: String? = null, suffix: String? = null, keepOnFailure: Boolean = true): TempFolderProvider =
-        TempFolderProvider(this, prefix, suffix, keepOnFailure)
+public fun DynaNodeGroup.withTempDir(name: String = "dir", suffix: String? = null, keepOnFailure: Boolean = true): ReadWriteProperty<Any?, File> {
+    // don't use a Provider class with 'public operator fun provideDelegate' since it makes it really
+    // hard to wrap `withTempDir()` in another utility function.
+
+    val property = LateinitProperty<File>(name)
+    var dir: File by property
+    beforeEach {
+        dir = createTempDir("tmp-$name", suffix)
+    }
+    afterEach { outcome: Outcome ->
+        if (!keepOnFailure || outcome.isSuccess) {
+            dir.deleteRecursively()
+        } else {
+            println("Test ${outcome.testName} failed, keeping temporary dir $property")
+        }
+    }
+    return property
+}
 
 /**
  * Finds all files matching given [glob] pattern in this directory.
