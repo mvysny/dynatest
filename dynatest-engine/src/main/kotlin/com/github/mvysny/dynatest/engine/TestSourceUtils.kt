@@ -9,6 +9,7 @@ import org.junit.platform.engine.support.descriptor.FileSource
 import org.junit.platform.engine.support.descriptor.MethodSource
 import java.io.File
 import java.lang.RuntimeException
+import java.net.URL
 import java.net.URLClassLoader
 
 private val slash = File.separatorChar
@@ -106,7 +107,7 @@ internal fun Class<*>.guessSourceFileName(fileNameFromStackTraceElement: String)
 
     // in case of Intellij, the url is something like
     // file:/home/mavi/work/my/dynatest/dynatest-engine/out/production/classes/com/github/mvysny/dynatest/InternalTestingClassKt.class
-    val url = classLoader.getResource(resource) ?: return null
+    val url: URL = classLoader.getResource(resource) ?: return null
 
     // We have a File that points to a .class file. We need to resolve that to the source .java/.kt file.
     // The most valuable part of the path is the absolute project path in which the file may be present.
@@ -114,12 +115,12 @@ internal fun Class<*>.guessSourceFileName(fileNameFromStackTraceElement: String)
     // We need to remove that part and replace it with the path to the file, e.g. `src/main/kotlin`
 
     // try to replace "out/production/classes" or "build/classes/java/test" with "src/main/kotlin" (or such)
-    val fullPathToClassName: File = url.toFile() ?: return null
-    val buildFolderRegex = "(build/classes/(java|kotlin)/[^/]+/)|out/production/classes/".toRegex()
-    if (fullPathToClassName.absolutePath.contains(buildFolderRegex)) {
+    val fullPathToClassName: String = url.toFile()?.absolutePath?.replace('\\', '/') ?: return null
+    val buildFolderRegex: Regex = "(build/classes/(java|kotlin)/[^/]+/)|out/production/classes/".toRegex()
+    if (fullPathToClassName.contains(buildFolderRegex)) {
         for (srcPath in listOf("src/main/java/", "src/main/kotlin/", "src/test/java/", "src/test/kotlin/")) {
-            val replacement = fullPathToClassName.absolutePath.replace(buildFolderRegex, srcPath)
-            assert(replacement != fullPathToClassName.absolutePath)
+            val replacement: String = fullPathToClassName.replace(buildFolderRegex, srcPath)
+            assert(replacement != fullPathToClassName)
             val potentialSourceFile = File(File(replacement).absoluteFile.parentFile, fileNameFromStackTraceElement)
             if (potentialSourceFile.exists()) {
                 return potentialSourceFile
@@ -132,11 +133,11 @@ internal fun Class<*>.guessSourceFileName(fileNameFromStackTraceElement: String)
     }
 
     // JDK8: scan the classpath and find the path that matches the file.
-    val classpath = classLoader.urLs.toList()
+    val classpath: List<URL> = classLoader.urLs.toList()
 
     // classpath entry which contains given class
-    val classpathEntry = classpath.firstOrNull { url.toString().startsWith(it.toString()) } ?: return null
-    val classOutputDir = classpathEntry.toFile() ?: return null
+    val classpathEntry: URL = classpath.firstOrNull { url.toString().startsWith(it.toString()) } ?: return null
+    val classOutputDir: File = classpathEntry.toFile() ?: return null
 
     // step out of classOutputDir, but only 4 folders tops, so that we don't end up searching user's filesystem
     // Intellij outputs to out/production/classes
@@ -145,15 +146,15 @@ internal fun Class<*>.guessSourceFileName(fileNameFromStackTraceElement: String)
     // Doesn't work with Gradle! It will include dependent modules as jars, e.g.
     // file:/home/mavi/work/my/dynatest/dynatest-api/build/libs/dynatest-api-0.11-SNAPSHOT.jar
     // With Gradle, this will only resolve sources in current project.
-    var potentialModuleDir = classOutputDir
+    var potentialModuleDir: File = classOutputDir
     repeat(5) {
 
-        val fileName = `package`.name.replace('.', '/') + "/" + fileNameFromStackTraceElement
+        val fileName: String = `package`.name.replace('.', '/') + "/" + fileNameFromStackTraceElement
         val potentialFiles = listOf("src/main/java", "src/main/kotlin", "src/test/java", "src/test/kotlin").map {
             "$potentialModuleDir/$it/$fileName"
         }
 
-        val resolvedFileName = potentialFiles.firstOrNull { File(it).exists() }
+        val resolvedFileName: String? = potentialFiles.firstOrNull { File(it).exists() }
 
         if (resolvedFileName != null) {
             return File(resolvedFileName)
