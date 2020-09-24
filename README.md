@@ -248,7 +248,7 @@ group("source generator tests") {
 If you need to assert that given folder contains certain amount of files, use the
 `File.expectFiles()` function as follows:
 
-* `expectFiles("build/generated/**/*.java", 40..50)`
+* `File("build").expectFiles("generated/**/*.java", 40..50)`
 
 ## Advanced Topics
 
