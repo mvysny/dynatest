@@ -84,11 +84,12 @@ public class TempFolderProvider(
  *   test("simple") {
  *     generateSourcesTo(sources)
  *     val generatedFiles: List<File> = sources.expectFiles("*.java", 10..10)
+ *     // ...
  *   }
  *   test("more complex test") {
  *     // 'sources' will point to a new temporary directory now.
  *     generateSourcesTo(sources)
- *     val generatedFiles: List<File> = sources.expectFiles("*.java", 10..10)
+ *     // ...
  *   }
  * }
  * ```
