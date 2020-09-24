@@ -106,12 +106,10 @@ public fun DynaNodeGroup.withTempDir(prefix: String? = null, suffix: String? = n
  * @param expectedCount expected number of files, defaults to 1.
  */
 public fun File.expectFiles(glob: String, expectedCount: IntRange = 1..1): List<File> {
-    var glob = glob
-    if (glob.startsWith("**/")) {
-        // common mistake: wouldn't match files in root folder.
-        glob = "**" + glob.substring(3)
-    }
     expectDirectory()
+
+    // common mistake: **/*.java wouldn't match files in root folder.
+    val glob: String = glob.replace("**/", "**")
     val pattern: String = if (OsUtils.isWindows) {
         // replace \ with \\ to avoid collapsing; replace forward slashes in glob with \\
         "glob:$absolutePath".replace("""\""", """\\""") + """\\""" + glob.replace("/", """\\""")

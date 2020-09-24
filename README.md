@@ -226,6 +226,30 @@ dynatest 0.18 and later contains support for filesystem-related assertions and o
 You can use Kotlin built-in `createTempDir()` and `createTempFile()` global functions to create temporary
 folders and files; use Kotlin built-in `copyRecursively()` to copy entire folders.
 
+You can use the `withTempDir()` helper function to create a test folder before every test,
+then tear it down afterwards:
+
+```
+group("source generator tests") {
+  val sources: File by withTempDir()
+  test("simple") {
+    generateSourcesTo(sources)
+    val generatedFiles: List<File> = sources.expectFiles("*.java", 10..10)
+    // ...
+  }
+  test("more complex test") {
+    // 'sources' will point to a new temporary directory now.
+    generateSourcesTo(sources)
+    // ...
+  }
+}
+```
+
+If you need to assert that given folder contains certain amount of files, use the
+`File.expectFiles()` function as follows:
+
+* `expectFiles("build/generated/**/*.java", 40..50)`
+
 ## Advanced Topics
 
 ### Conditional tests
