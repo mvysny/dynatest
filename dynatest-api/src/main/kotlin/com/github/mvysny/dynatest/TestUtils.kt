@@ -61,3 +61,42 @@ fun Throwable.getStackTraceAsString(): String {
     pw.flush()
     return sw.toString()
 }
+
+/**
+ * Expects that this file or directory exists on the file system.
+ */
+fun File.expectExists() {
+    expect(true, "file $absoluteFile does not exist") { exists() }
+}
+
+/**
+ * Expects that this file or directory [expectExists] and is a directory.
+ */
+fun File.expectDirectory() {
+    expectExists()
+    expect(true, "file $absoluteFile is not a directory") { isDirectory }
+}
+
+/**
+ * Expects that this file or directory [expectExists] and is a file.
+ */
+fun File.expectFile() {
+    expectExists()
+    expect(true, "file $absoluteFile is not a file") { isFile }
+}
+
+/**
+ * Expects that this file or directory is a file [expectFile] and is readable ([File.canRead]).
+ */
+fun File.expectReadableFile() {
+    expectFile()
+    expect(true, "file $absoluteFile is not readable") { canRead() }
+}
+
+/**
+ * Expects that this file or directory is a file [expectFile] and is readable ([File.canRead]).
+ */
+fun File.expectWritableFile() {
+    expectFile()
+    expect(true, "file $absoluteFile is not readable") { canWrite() }
+}
