@@ -5,7 +5,7 @@ package com.github.mvysny.dynatest
  * @property failureCause if not null then either the test, or one of [DynaNodeGroup.afterEach] and [DynaNodeGroup.afterGroup]
  * have failed with an exception.
  */
-data class Outcome(val failureCause: Throwable?) {
+public data class Outcome(val failureCause: Throwable?) {
     /**
      * If true then the test and all previously called [DynaNodeGroup.afterEach] and [DynaNodeGroup.afterGroup] have succeeded.
      */

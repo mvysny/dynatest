@@ -4,7 +4,7 @@ package com.github.mvysny.dynatest
  * Makes sure to not to call [DynaNodeGroup] methods from the scope of the [DynaNodeTest].
  */
 @DslMarker
-annotation class DynaNodeDsl
+public annotation class DynaNodeDsl
 
 /**
  * A group of tests, may contain tests and other groups as well. Created when you call [group]. Allows you to control test
@@ -18,14 +18,14 @@ annotation class DynaNodeDsl
  * tests are being run. Doing so will throw [IllegalStateException].
  */
 @DynaNodeDsl
-interface DynaNodeGroup {
+public interface DynaNodeGroup {
     /**
      * Creates a new test case with given [name] and registers it within current group. Does not run the test closure immediately -
      * the test is only registered for being run later on by JUnit5 runner.
      * @param body the implementation of the test; does not run immediately but only when the test case is run
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
-    fun test(name: String, body: DynaNodeTest.() -> Unit)
+    public fun test(name: String, body: DynaNodeTest.() -> Unit)
 
     /**
      * Creates a nested group with given [name] and runs given [block]. In the block, you can create both sub-groups and tests, and you can
@@ -33,7 +33,7 @@ interface DynaNodeGroup {
      * @param block the block, runs immediately.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
-    fun group(name: String, block: DynaNodeGroup.() -> Unit)
+    public fun group(name: String, block: DynaNodeGroup.() -> Unit)
 
     /**
      * Registers a block which will be run exactly once before any of the tests in the current group are run. Only the tests nested in this group and its subgroups are
@@ -41,7 +41,7 @@ interface DynaNodeGroup {
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
-    fun beforeGroup(block: () -> Unit)
+    public fun beforeGroup(block: () -> Unit)
 
     /**
      * Registers a block which will be run before every test registered to this group and to any nested groups.
@@ -52,7 +52,7 @@ interface DynaNodeGroup {
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
-    fun beforeEach(block: () -> Unit)
+    public fun beforeEach(block: () -> Unit)
 
     /**
      * Registers a [block] which will be run after every test registered to this group and to any nested groups.
@@ -68,7 +68,7 @@ interface DynaNodeGroup {
      * The block receives an [Outcome] of the test run.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
-    fun afterEach(block: (outcome: Outcome) -> Unit)
+    public fun afterEach(block: (outcome: Outcome) -> Unit)
 
     /**
      * Registers a block which will be run only once after all of the tests are run in the current group. Only the tests nested in this group and its subgroups are
@@ -77,7 +77,7 @@ interface DynaNodeGroup {
      * The block receives an [Outcome] of the test run.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
-    fun afterGroup(block: (outcome: Outcome) -> Unit)
+    public fun afterGroup(block: (outcome: Outcome) -> Unit)
 }
 
 /**
@@ -86,4 +86,4 @@ interface DynaNodeGroup {
  * To start writing tests, just extend the `DynaTest` class located in the `dynatest-engine` module. See `DynaTest` for more details.
  */
 @DynaNodeDsl
-interface DynaNodeTest
+public interface DynaNodeTest

@@ -1,7 +1,10 @@
 package com.github.mvysny.dynatest
 
 import java.io.*
+import java.lang.RuntimeException
+import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
 import kotlin.test.expect
 import kotlin.test.fail
 
@@ -11,7 +14,7 @@ import kotlin.test.fail
  * @throws AssertionError if the block completed successfully or threw some other exception.
  * @return the exception thrown, so that you can assert on it.
  */
-fun <T: Throwable> expectThrows(clazz: KClass<out T>, message: String = "", block: ()->Unit): T {
+public fun <T: Throwable> expectThrows(clazz: KClass<out T>, message: String = "", block: ()->Unit): T {
     val ex: T? = try {
         block()
         null
@@ -30,31 +33,35 @@ fun <T: Throwable> expectThrows(clazz: KClass<out T>, message: String = "", bloc
 /**
  * Expects that [actual] list of objects matches [expected] list of objects. Fails otherwise.
  */
-fun <T> expectList(vararg expected: T, actual: ()->List<T>) = expect(expected.toList(), actual)
+public fun <T> expectList(vararg expected: T, actual: ()->List<T>) {
+    expect(expected.toList(), actual)
+}
 
 /**
  * Expects that [actual] map matches [expected] map, passed in as a list of pairs. Fails otherwise.
  */
-fun <K, V> expectMap(vararg expected: Pair<K, V>, actual: ()->Map<K, V>) = expect(mapOf(*expected), actual)
+public fun <K, V> expectMap(vararg expected: Pair<K, V>, actual: ()->Map<K, V>) {
+    expect(mapOf(*expected), actual)
+}
 
 /**
  * Serializes the object to a byte array
  * @return the byte array containing this object serialized form.
  */
-fun Serializable?.serializeToBytes(): ByteArray = ByteArrayOutputStream().also { ObjectOutputStream(it).writeObject(this) }.toByteArray()
+public fun Serializable?.serializeToBytes(): ByteArray = ByteArrayOutputStream().also { ObjectOutputStream(it).writeObject(this) }.toByteArray()
 
-inline fun <reified T: Serializable> ByteArray.deserialize(): T? = T::class.java.cast(ObjectInputStream(inputStream()).readObject())
+public inline fun <reified T: Serializable> ByteArray.deserialize(): T? = T::class.java.cast(ObjectInputStream(inputStream()).readObject())
 
 /**
  * Clones this object by serialization and returns the deserialized clone.
  * @return the clone of this
  */
-fun <T : Serializable> T.cloneBySerialization(): T = javaClass.cast(serializeToBytes().deserialize())
+public fun <T : Serializable> T.cloneBySerialization(): T = javaClass.cast(serializeToBytes().deserialize())
 
 /**
  * Handy function to get a stack trace from receiver.
  */
-fun Throwable.getStackTraceAsString(): String {
+public fun Throwable.getStackTraceAsString(): String {
     val sw = StringWriter()
     val pw = PrintWriter(sw)
     printStackTrace(pw)
@@ -63,40 +70,14 @@ fun Throwable.getStackTraceAsString(): String {
 }
 
 /**
- * Expects that this file or directory exists on the file system.
+ * A very simple implementation of [ReadWriteProperty] which implements the semantics of `lateinit`.
  */
-fun File.expectExists() {
-    expect(true, "file $absoluteFile does not exist") { exists() }
-}
+public data class LateinitProperty<V: Any>(val name: String, private var value: V? = null) : ReadWriteProperty<Any?, V> {
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: V) {
+        this.value = value
+    }
 
-/**
- * Expects that this file or directory [expectExists] and is a directory.
- */
-fun File.expectDirectory() {
-    expectExists()
-    expect(true, "file $absoluteFile is not a directory") { isDirectory }
-}
-
-/**
- * Expects that this file or directory [expectExists] and is a file.
- */
-fun File.expectFile() {
-    expectExists()
-    expect(true, "file $absoluteFile is not a file") { isFile }
-}
-
-/**
- * Expects that this file or directory is a file [expectFile] and is readable ([File.canRead]).
- */
-fun File.expectReadableFile() {
-    expectFile()
-    expect(true, "file $absoluteFile is not readable") { canRead() }
-}
-
-/**
- * Expects that this file or directory is a file [expectFile] and is readable ([File.canRead]).
- */
-fun File.expectWritableFile() {
-    expectFile()
-    expect(true, "file $absoluteFile is not readable") { canWrite() }
+    override fun getValue(thisRef: Any?, property: KProperty<*>): V {
+        return value ?: throw RuntimeException("$this: not initialized")
+    }
 }
