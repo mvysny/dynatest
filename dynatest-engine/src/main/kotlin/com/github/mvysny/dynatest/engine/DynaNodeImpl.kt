@@ -3,6 +3,7 @@ package com.github.mvysny.dynatest.engine
 import com.github.mvysny.dynatest.DynaNodeGroup
 import com.github.mvysny.dynatest.DynaNodeTest
 import com.github.mvysny.dynatest.DynaTest
+import com.github.mvysny.dynatest.Outcome
 import org.junit.platform.engine.TestSource
 
 /**
@@ -47,7 +48,7 @@ internal class DynaNodeGroupImpl internal constructor(name: String, src: StackTr
     /**
      * What to run after every test.
      */
-    internal val afterEach = mutableListOf<()->Unit>()
+    internal val afterEach = mutableListOf<(Outcome)->Unit>()
     /**
      * What to run before any of the test is started in this group.
      */
@@ -55,7 +56,7 @@ internal class DynaNodeGroupImpl internal constructor(name: String, src: StackTr
     /**
      * What to run after all tests are done in this group.
      */
-    internal val afterGroup = mutableListOf<()->Unit>()
+    internal val afterGroup = mutableListOf<(Outcome)->Unit>()
 
     internal fun onDesignPhaseEnd() {
         inDesignPhase = false
@@ -87,7 +88,7 @@ internal class DynaNodeGroupImpl internal constructor(name: String, src: StackTr
         beforeEach.add(block)
     }
 
-    override fun afterEach(block: ()->Unit) {
+    override fun afterEach(block: (Outcome)->Unit) {
         checkInDesignPhase("afterEach")
         afterEach.add(block)
     }
@@ -97,7 +98,7 @@ internal class DynaNodeGroupImpl internal constructor(name: String, src: StackTr
         beforeGroup.add(block)
     }
 
-    override fun afterGroup(block: ()->Unit) {
+    override fun afterGroup(block: (Outcome)->Unit) {
         checkInDesignPhase("afterGroup")
         afterGroup.add(block)
     }

@@ -55,27 +55,29 @@ interface DynaNodeGroup {
     fun beforeEach(block: () -> Unit)
 
     /**
-     * Registers a block which will be run after every test registered to this group and to any nested groups.
-     * `afterEach` blocks registered by a parent/ancestor group runs after `afterEach` blocks registered by this group.
+     * Registers a [block] which will be run after every test registered to this group and to any nested groups.
+     * All `afterEach` blocks registered by a parent/ancestor group runs after `afterEach` blocks registered by this group.
      *
      * The `afterEach` blocks are called even if the test fails. If the `beforeEach` block fails, only the `afterEach` blocks in the corresponding
      * group and all ancestor groups are called.
      *
-     * If the `afterEach` blocks throws an exception, those exceptions are added as [Throwable.getSuppressed] to the main exception (as thrown
+     * If any of the `afterEach` blocks throws an exception, those exceptions are added as [Throwable.getSuppressed] to the main exception (as thrown
      * by the `beforeEach` block or the test itself); or just rethrown if there is no main exception. Any exception thrown by the `afterEach`
      * block will cause the test to fail.
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
+     * The block receives an [Outcome] of the test run.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
-    fun afterEach(block: () -> Unit)
+    fun afterEach(block: (outcome: Outcome) -> Unit)
 
     /**
      * Registers a block which will be run only once after all of the tests are run in the current group. Only the tests nested in this group and its subgroups are
      * considered.
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
+     * The block receives an [Outcome] of the test run.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
-    fun afterGroup(block: () -> Unit)
+    fun afterGroup(block: (outcome: Outcome) -> Unit)
 }
 
 /**

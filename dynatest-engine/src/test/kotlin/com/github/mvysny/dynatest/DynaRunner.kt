@@ -14,6 +14,7 @@ import kotlin.test.fail
  * JUnit5 to run your tests instead - just extend [DynaTest] class. To create a reusable test battery just define an extension method on the
  * [DynaNodeGroup] class - see the `CalculatorTest.kt` file for more details.
  * @throws TestFailedException if any of the test failed. To expect this, nest call to this function into the [expectFailures] function.
+ * @return the test statistics results
  */
 internal fun runTests(block: DynaNodeGroup.()->Unit): TestResults {
     // obtain the test definitions
@@ -32,6 +33,9 @@ internal fun runTests(block: DynaNodeGroup.()->Unit): TestResults {
     return result
 }
 
+/**
+ * Listens on JUnit5 lifecycle. Counts tests which ran, tests which failed, etc...
+ */
 private class TestResultBuilder(val results: TestResults) : EngineExecutionListener {
     override fun executionFinished(testDescriptor: TestDescriptor, testExecutionResult: TestExecutionResult) {
         if (testDescriptor is DynaNodeTestDescriptor && testDescriptor.isContainer && testExecutionResult.status == TestExecutionResult.Status.SUCCESSFUL) {

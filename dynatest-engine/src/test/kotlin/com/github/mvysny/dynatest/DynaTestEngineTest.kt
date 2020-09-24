@@ -67,12 +67,12 @@ class DynaTestEngineTest : DynaTest({
 
     group("test the 'afterEach' behavior") {
         test("test that 'afterEach' runs after every test") {
-            var called = false
+            lateinit var outcome: Outcome
             runTests {
-                afterEach { called = true }
+                afterEach { outcome = it }
                 test("dummy test which triggers 'afterEach'") {}
             }
-            expect(true) { called }
+            expect(true) { outcome.isSuccess }
         }
 
         test("test that 'afterEach' is also applied to tests nested inside a child group") {
@@ -128,18 +128,20 @@ class DynaTestEngineTest : DynaTest({
         }
 
         test("all `afterEach` should have been invoked even if some of them fail") {
-            var called = false
+            lateinit var outcome: Outcome
             expectFailures({
                 runTests {
                     test("dummy") {}
                     afterEach { throw RuntimeException("simulated") }
-                    afterEach { called = true }
+                    afterEach { outcome = it }
                 }
             }) {
                 expectStats(0, 1, 0)
                 expectFailure<RuntimeException>("dummy")
             }
-            expect(true) { called }
+            expect(true) { outcome.isFailure }
+            expect(RuntimeException::class.java) { outcome.failureCause?.javaClass }
+            expect("simulated") { outcome.failureCause?.message }
         }
 
         test("if `beforeEach` fails, no `afterEach` in subgroup should be called") {

@@ -3,6 +3,7 @@ package com.github.mvysny.dynatest.engine
 import com.github.mvysny.dynatest.DynaNodeGroup
 import com.github.mvysny.dynatest.DynaNodeTest
 import com.github.mvysny.dynatest.DynaTest
+import com.github.mvysny.dynatest.Outcome
 import org.junit.platform.commons.util.ReflectionUtils
 import org.junit.platform.engine.*
 import org.junit.platform.engine.discovery.*
@@ -169,12 +170,17 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
         }
     }
 
+    /**
+     * Runs all [DynaNodeGroupImpl.afterGroup] on [node], even if some if the blocks fails with an exception.
+     * @param t if not null, the test has failed with this exception.
+     * @throws Throwable if any of the block fails or [t] was not null.
+     */
     fun runAfterGroup(t: Throwable?) {
         var tf = t
         if (node is DynaNodeGroup) {
             (node as DynaNodeGroupImpl).afterGroup.forEach {
                 try {
-                    it()
+                    it(Outcome(tf))
                 } catch (ex: Throwable) {
                     if (tf == null) tf = ex else tf!!.addSuppressed(ex)
                 }
@@ -212,13 +218,14 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
 
     /**
      * Runs all `afterEach` blocks recursively, from this node all the way up to the root node. Properly propagates exceptions.
+     * @param testFailure if not null, the test has failed with this exception.
      */
     private fun runAfterEach(testFailure: Throwable?) {
         var tf = testFailure
         if (node is DynaNodeGroup) {
             (node as DynaNodeGroupImpl).afterEach.forEach { afterEachBlock ->
                 try {
-                    afterEachBlock()
+                    afterEachBlock(Outcome(tf))
                 } catch (t: Throwable) {
                     if (tf == null) tf = t else tf!!.addSuppressed(t)
                 }
