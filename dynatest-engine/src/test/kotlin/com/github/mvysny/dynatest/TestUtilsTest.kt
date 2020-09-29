@@ -225,6 +225,8 @@ private fun DynaNodeGroup.expectThrowsTestBatch() {
         }
     }
     group("withTempDir()") {
+
+        // a demo of a function which uses `withTempDir` and populates/inits the folder further.
         fun DynaNodeGroup.reusable(): ReadWriteProperty<Any?, File> {
             val sourcesProperty: ReadWriteProperty<Any?, File> = withTempDir("sources")
             val sources by sourcesProperty
@@ -233,8 +235,9 @@ private fun DynaNodeGroup.expectThrowsTestBatch() {
             }
             return sourcesProperty
         }
+
         group("simple") {
-            val tempDir by withTempDir()
+            val tempDir: File by withTempDir()
             lateinit var file: File
             beforeEach {
                 // expect that the folder already exists, so that we can e.g. copy stuff there
@@ -248,14 +251,16 @@ private fun DynaNodeGroup.expectThrowsTestBatch() {
                 file.expectReadableFile()
             }
         }
+        // tests the 'reusable' approach where the developer doesn't call `withTempDir()` directly
+        // but creates a reusable function.
         group("reusable") {
-            val tempDir by reusable()
+            val tempDir: File by reusable()
             test("txt file checker") {
                 tempDir.expectFiles("**/*.txt")
             }
         }
         group("deletes temp folder afterwards") {
-            val tempDir by withTempDir()
+            val tempDir: File by withTempDir()
             afterEach {
                 expect(false) { tempDir.exists() }
             }
@@ -264,8 +269,11 @@ private fun DynaNodeGroup.expectThrowsTestBatch() {
     }
 }
 
-val slash = File.separatorChar
+val slash: Char = File.separatorChar
 
+/**
+ * Tests the File.expectXxx() utility methods.
+ */
 private fun DynaNodeGroup.fileTestBatch() {
     group("expectExists()") {
         test("passes on existing file") {
