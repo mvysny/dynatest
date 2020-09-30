@@ -151,6 +151,7 @@ public fun File.expectFiles(glob: String, expectedCount: IntRange = 1..1): List<
     expectDirectory()
 
     // common mistake: **/*.java wouldn't match files in root folder.
+    @Suppress("NAME_SHADOWING")
     val glob: String = glob.replace("**/", "**")
     val pattern: String = if (OsUtils.isWindows) {
         // replace \ with \\ to avoid collapsing; replace forward slashes in glob with \\
