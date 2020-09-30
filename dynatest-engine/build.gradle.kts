@@ -5,9 +5,12 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${properties["junit_jupiter_version"]}")
 }
 
+kotlin {
+    explicitApi()
+}
+
 val configureBintray = ext["configureBintray"] as (artifactId: String) -> Unit
 configureBintray("dynatest-engine")
-
 
 // verify that Gradle ran tests for all test classes and didn't ignore DynaTests
 fun String.countSubstrings(substring: String) =

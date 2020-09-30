@@ -21,7 +21,7 @@ import org.junit.platform.commons.annotation.Testable
  * @param block add groups and tests within this block, to register them to a test suite.
  */
 @Testable
-abstract class DynaTest(block: DynaNodeGroup.()->Unit) {
+public abstract class DynaTest(block: DynaNodeGroup.()->Unit) {
     /**
      * The "root" group which will nest all groups and tests produced by the initialization block.
      */
@@ -31,7 +31,7 @@ abstract class DynaTest(block: DynaNodeGroup.()->Unit) {
     }
 
     @Testable
-    fun blank() {
+    public fun blank() {
         // must  be here, otherwise Intellij won't launch this class as a test (via rightclick).
     }
 }

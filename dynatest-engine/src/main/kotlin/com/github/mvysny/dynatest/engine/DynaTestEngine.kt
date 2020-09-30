@@ -25,12 +25,12 @@ import java.util.function.Predicate
  * * do not allow to reference the pointer to the source code of the test accurately: https://github.com/junit-team/junit5/issues/1293
  * * do not support beforeGroup/afterGroup: https://github.com/junit-team/junit5/issues/1292
  */
-class DynaTestEngine : TestEngine {
+public class DynaTestEngine : TestEngine {
 
     private val classFilter: Predicate<Class<*>> = Predicate { it.isPublic && !it.isAbstract && DynaTest::class.java.isAssignableFrom(it) }
 
     override fun discover(request: EngineDiscoveryRequest, uniqueId: UniqueId): TestDescriptor {
-        // this function must never fail, otherwise JUnit5 will silently ignore this TestEngine and the user will never know.
+        // this functionDynamicNode must never fail, otherwise JUnit5 will silently ignore this TestEngine and the user will never know.
         // that's why we will wrap any exception thrown by this method into a specialized, always failing TestDescriptor.
         // see https://github.com/gradle/gradle/issues/4418 for more details.
 
@@ -84,7 +84,7 @@ class DynaTestEngine : TestEngine {
         }
     }
 
-    override fun getId() = "DynaTest"
+    override fun getId(): String = "DynaTest"
 
     override fun execute(request: ExecutionRequest) {
 
@@ -241,15 +241,15 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
 /**
  * Returns true if this class is private.
  */
-val Class<*>.isPrivate: Boolean get() = Modifier.isPrivate(modifiers)
+public val Class<*>.isPrivate: Boolean get() = Modifier.isPrivate(modifiers)
 /**
  * Returns true if this class is abstract.
  */
-val Class<*>.isAbstract: Boolean get() = Modifier.isAbstract(modifiers)
+public val Class<*>.isAbstract: Boolean get() = Modifier.isAbstract(modifiers)
 /**
  * Returns true if this class is public.
  */
-val Class<*>.isPublic: Boolean get() = Modifier.isPublic(modifiers)
+public val Class<*>.isPublic: Boolean get() = Modifier.isPublic(modifiers)
 
 /**
  * When the [DynaTest]'s block fails to run properly and produce tests, [DynaTestEngine.discover] will return this test descriptor to mark
