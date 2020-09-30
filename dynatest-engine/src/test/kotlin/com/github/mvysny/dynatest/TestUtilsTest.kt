@@ -35,10 +35,6 @@ class TestUtilsTest : DynaTest({
             }
         }
     }
-
-    group("File-related") {
-        fileTestBatch()
-    }
 })
 
 private fun DynaNodeGroup.expectThrowsTestBatch() {
@@ -192,72 +188,6 @@ private fun DynaNodeGroup.expectThrowsTestBatch() {
                 expect(false) { tempDir.exists() }
             }
             test("dummy") {}
-        }
-    }
-}
-
-val slash: Char = File.separatorChar
-
-/**
- * Tests the File.expectXxx() utility methods.
- */
-private fun DynaNodeGroup.fileTestBatch() {
-    group("expectExists()") {
-        test("passes on existing file") {
-            File.createTempFile("foooo", "bar").expectExists()
-        }
-        test("passes on existing dir") {
-            createTempDir().expectExists()
-        }
-        test("fails on nonexisting file") {
-            expectThrows(AssertionError::class, "${slash}non${slash}existing does not exist") {
-                File("/non/existing").expectExists()
-            }
-        }
-    }
-    group("expectFile()") {
-        test("passes on existing file") {
-            File.createTempFile("foooo", "bar").expectFile()
-        }
-        test("fails on existing dir") {
-            expectThrows(AssertionError::class, ".tmp is not a file") {
-                createTempDir().expectFile()
-            }
-        }
-        test("fails on nonexisting file") {
-            expectThrows(AssertionError::class, "${slash}non${slash}existing does not exist") {
-                File("/non/existing").expectFile()
-            }
-        }
-    }
-    group("expectDirectory()") {
-        test("fails on existing file") {
-            expectThrows(AssertionError::class, "bar is not a directory") {
-                File.createTempFile("foooo", "bar").expectDirectory()
-            }
-        }
-        test("passes on existing dir") {
-            createTempDir().expectDirectory()
-        }
-        test("fails on nonexisting file") {
-            expectThrows(AssertionError::class, "${slash}non${slash}existing does not exist") {
-                File("/non/existing").expectDirectory()
-            }
-        }
-    }
-    group("expectReadableFile()") {
-        test("passes on existing file") {
-            File.createTempFile("foooo", "bar").expectReadableFile()
-        }
-        test("fails on existing dir") {
-            expectThrows(AssertionError::class, ".tmp is not a file") {
-                createTempDir().expectReadableFile()
-            }
-        }
-        test("fails on nonexisting file") {
-            expectThrows(AssertionError::class, "${slash}non${slash}existing does not exist") {
-                File("/non/existing").expectReadableFile()
-            }
         }
     }
 }
