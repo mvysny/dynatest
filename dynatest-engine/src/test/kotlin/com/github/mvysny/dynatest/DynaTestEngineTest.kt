@@ -140,7 +140,7 @@ class DynaTestEngineTest : DynaTest({
                 expectFailure<RuntimeException>("dummy")
             }
             expect(true) { outcome.isFailure }
-            expect(RuntimeException::class.java) { outcome.failureCause?.javaClass }
+            expect<Class<*>?>(RuntimeException::class.java) { outcome.failureCause?.javaClass }
             expect("simulated") { outcome.failureCause?.message }
         }
 
