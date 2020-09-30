@@ -14,15 +14,15 @@ fun String.countSubstrings(substring: String) =
     indices.count { substring(it).startsWith(substring) }
 
 tasks.named<Task>("test") { doLast {
-    val expectedTests: List<String> = file("src/test/kotlin/com/github/mvysny/dynatest")
-        .list()!!
-        .filter { it.endsWith("Test.kt") }
-        .map { "TEST-com.github.mvysny.dynatest.${it.removeSuffix(".kt")}.xml" }
-        .sorted()
-    val actualTests = file("build/test-results/test")
-        .list()!!
-        .filter { it.endsWith(".xml") && !it.contains("_UniqueIdCheckupClass") }
-        .sorted()
+    val testClasses: Array<String> = file("src/test/kotlin/com/github/mvysny/dynatest").list()!!
+    val expectedTests: List<String> = testClasses
+            .filter { it.endsWith("Test.kt") }
+            .map { "TEST-com.github.mvysny.dynatest.${it.removeSuffix(".kt")}.xml" }
+            .sorted()
+    val actualTests: List<String> = file("build/test-results/test")
+            .list()!!
+            .filter { it.endsWith(".xml") && !it.contains("_UniqueIdCheckupClass") }
+            .sorted()
     if (expectedTests != actualTests) {
         throw RuntimeException("build.gradle.kts: Expected tests to run: $expectedTests got $actualTests")
     }

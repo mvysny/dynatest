@@ -15,7 +15,7 @@ internal val isRunningInsideGradle: Boolean get() {
 
     // if this function fails, Gradle will freeze. What the fuck!
     try {
-        val classLoader = Thread.currentThread().contextClassLoader
+        val classLoader: ClassLoader = Thread.currentThread().contextClassLoader
         if (classLoader is URLClassLoader) {
             // JDK 8 and older
             val jars: List<URL> = classLoader.urLs.toList()
