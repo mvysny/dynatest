@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test
 import java.io.File
 import kotlin.test.expect
 
+// can't use dynatest yet :-D
 class LateinitPropertyTest {
-    // can't use dynatest yet :-D
     @Test
     fun testFailsIfNoValue() {
         val file: File by late()
