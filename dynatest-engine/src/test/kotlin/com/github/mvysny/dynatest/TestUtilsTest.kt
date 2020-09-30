@@ -18,71 +18,11 @@ class TestUtilsTest : DynaTest({
         expectThrowsTestBatch()
     }
 
-    group("expectList()") {
-        test("empty list") {
-            expectList() { listOf<Int>() }
-            expectList() { mutableListOf<Int>() }
-            expectList() { LinkedList<Int>() }
-            expectList() { CopyOnWriteArrayList<Int>() }
-        }
-        test("trivial list") {
-            expectList(25) { listOf(25) }
-        }
-        test("simple list of strings") {
-            expectList("a", "b", "c") { listOf("a", "b", "c") }
-        }
-        test("comparison failure") {
-            expectThrows(AssertionError::class) {
-                expectList() { listOf("a", "b", "c") }
-            }
-            expectThrows(AssertionError::class) {
-                expectList(1, 2, 3) { listOf("a", "b", "c") }
-            }
-            expectThrows(AssertionError::class) {
-                expectList(1, 2, 3) { listOf() }
-            }
-        }
-    }
-
-    group("expectMap()") {
-        test("empty map") {
-            expectMap() { mapOf<Int, Int>() }
-            expectMap() { mutableMapOf<Int, Int>() }
-            expectMap() { LinkedHashMap<String, Boolean>() }
-            expectMap() { ConcurrentHashMap<String, Boolean>() }
-        }
-        test("trivial map") {
-            expectMap(25 to "a") { mapOf(25 to "a") }
-        }
-        test("simple map of strings") {
-            expectMap("a" to 1, "b" to 2, "c" to 3) { mutableMapOf("a" to 1, "b" to 2, "c" to 3) }
-        }
-        test("comparison failure") {
-            expectThrows(AssertionError::class) {
-                expectMap() { mapOf("a" to 1, "b" to 2, "c" to 3) }
-            }
-            expectThrows(AssertionError::class) {
-                expectMap("a" to 1, "b" to 2, "c" to 3) { mapOf<Any, Any>(1 to "a", 2 to "b", 3 to "c") }
-            }
-            expectThrows(AssertionError::class) {
-                expectMap("a" to 1, "b" to 2, "c" to 3) { mapOf<Any, Any>() }
-            }
-        }
-    }
-
-    group("cloneBySerialization()") {
-        test("simple objects") {
-            expect("a") { "a".cloneBySerialization() }
-            expect("") { "".cloneBySerialization() }
-            expect(25) { 25.cloneBySerialization() }
-        }
-    }
-
     group("tests for StackTraceElement.toTestSource()") {
         test("this class resolves to FileSource") {
             val e = DynaNodeGroupImpl.computeTestSource()!!
             if (isRunningInsideGradle) {
-                val src = e.toTestSource() as ClassSource
+                val src: ClassSource = e.toTestSource() as ClassSource
                 expect(src.className) { src.className }
                 expect(e.lineNumber) { src.position.get().line }
             } else {
@@ -209,19 +149,6 @@ private fun DynaNodeGroup.expectThrowsTestBatch() {
                 }
                 throw RuntimeException("Should have failed")
             } catch (e: AssertionError) { /*okay*/ }
-        }
-    }
-    group("LateinitProperty") {
-        test("fails if no value") {
-            val file: File by late()
-            expectThrows(RuntimeException::class, "LateinitProperty(name=file, value=null): not initialized") {
-                file.name
-            }
-        }
-        test("simple") {
-            var file: File by late()
-            file = File("foo.txt")
-            expect("foo.txt") { file.name }
         }
     }
     group("withTempDir()") {
