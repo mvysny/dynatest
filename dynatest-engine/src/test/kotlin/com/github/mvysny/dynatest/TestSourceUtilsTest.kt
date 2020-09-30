@@ -14,15 +14,15 @@ class TestSourceUtilsTest : DynaTest({
             afterEach { pretendIsRunningInsideGradle = null }
             test("gradle") {
                 pretendIsRunningInsideGradle = true
-                val e = DynaNodeGroupImpl.computeTestSource()!!
-                val src = e.toTestSource() as ClassSource
+                val e: StackTraceElement = DynaNodeGroupImpl.computeTestSource()!!
+                val src: ClassSource = e.toTestSource() as ClassSource
                 expect(TestSourceUtilsTest::class.java.name) { src.className }
                 expect(e.lineNumber) { src.position.get().line }
             }
             test("intellij") {
                 pretendIsRunningInsideGradle = false
-                val e = DynaNodeGroupImpl.computeTestSource()!!
-                val src = e.toTestSource() as FileSource
+                val e: StackTraceElement = DynaNodeGroupImpl.computeTestSource()!!
+                val src: FileSource = e.toTestSource() as FileSource
                 expect(true, src.file.absolutePath) {
                     src.file.endsWith("src/test/kotlin/com/github/mvysny/dynatest/TestSourceUtilsTest.kt")
                 }
@@ -34,15 +34,15 @@ class TestSourceUtilsTest : DynaTest({
             afterEach { pretendIsRunningInsideGradle = null }
             test("gradle") {
                 pretendIsRunningInsideGradle = true
-                val e = internalTestingClassGetTestSourceOfThis()
-                val src = e.toTestSource() as ClassSource
+                val e: StackTraceElement = internalTestingClassGetTestSourceOfThis()
+                val src: ClassSource = e.toTestSource() as ClassSource
                 expect(InternalTestingClass::class.java.name) { src.className }
                 expect(e.lineNumber) { src.position.get().line }
             }
             test("intellij") {
                 pretendIsRunningInsideGradle = false
-                val e = internalTestingClassGetTestSourceOfThis()
-                val src = e.toTestSource() as FileSource
+                val e: StackTraceElement = internalTestingClassGetTestSourceOfThis()
+                val src: FileSource = e.toTestSource() as FileSource
                 expect(true, src.file.absolutePath) {
                     src.file.endsWith("src/main/kotlin/com/github/mvysny/dynatest/InternalTestingClass.kt")
                 }

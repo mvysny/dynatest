@@ -9,6 +9,9 @@ import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.test.expect
 
 class TestUtilsTest {
+
+    // tests for expectThrows() are in dynatest-engine. I was too lazy to port them here.
+
     @Nested
     @DisplayName("cloneBySerialization()")
     inner class CloneBySerialization {

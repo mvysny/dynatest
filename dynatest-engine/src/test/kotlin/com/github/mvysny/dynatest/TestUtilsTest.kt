@@ -17,7 +17,7 @@ class TestUtilsTest : DynaTest({
 
     group("tests for StackTraceElement.toTestSource()") {
         test("this class resolves to FileSource") {
-            val e = DynaNodeGroupImpl.computeTestSource()!!
+            val e: StackTraceElement = DynaNodeGroupImpl.computeTestSource()!!
             if (isRunningInsideGradle) {
                 val src: ClassSource = e.toTestSource() as ClassSource
                 expect(src.className) { src.className }
