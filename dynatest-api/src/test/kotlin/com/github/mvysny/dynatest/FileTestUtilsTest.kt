@@ -7,8 +7,8 @@ import java.io.File
 
 class FileTestUtilsTest {
     @Nested
-    @DisplayName("FileTestUtilsTest / expectExists()")
-    class ExpectExistsTest {
+    @DisplayName("expectExists()")
+    inner class ExpectExistsTest {
         @Test
         fun `passes on existing file`() {
             File.createTempFile("foooo", "bar").expectExists()
@@ -28,8 +28,8 @@ class FileTestUtilsTest {
     }
 
     @Nested
-    @DisplayName("FileTestUtilsTest / expectFile()")
-    class ExpectFileTests {
+    @DisplayName("expectFile()")
+    inner class ExpectFileTests {
         @Test
         fun `passes on existing file`() {
             File.createTempFile("foooo", "bar").expectFile()
@@ -51,8 +51,8 @@ class FileTestUtilsTest {
     }
 
     @Nested
-    @DisplayName("FileTestUtilsTest / expectDirectory()")
-    class ExpectDirectoryTest {
+    @DisplayName("expectDirectory()")
+    inner class ExpectDirectoryTest {
         @Test
         fun `fails on existing file`() {
             expectThrows(AssertionError::class, "bar is not a directory") {
@@ -74,8 +74,8 @@ class FileTestUtilsTest {
     }
 
     @Nested
-    @DisplayName("FileTestUtilsTest / expectReadableFile()")
-    class ExpectReadableFileTest {
+    @DisplayName("expectReadableFile()")
+    inner class ExpectReadableFileTest {
         @Test
         fun `passes on existing file`() {
             File.createTempFile("foooo", "bar").expectReadableFile()
