@@ -214,16 +214,18 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
      * Computes the path of dyna nodes from the root group towards this one.
      */
     private fun getPathFromRoot(): List<DynaNodeTestDescriptor> =
-        generateSequence(this, { it -> it.parent.orElse(null) as? DynaNodeTestDescriptor }).toList().reversed()
+        generateSequence(this, { it: DynaNodeTestDescriptor -> it.parent.orElse(null) as? DynaNodeTestDescriptor })
+                .toList()
+                .reversed()
 
     /**
      * Runs all `afterEach` blocks recursively, from this node all the way up to the root node. Properly propagates exceptions.
      * @param testFailure if not null, the test has failed with this exception.
      */
     private fun runAfterEach(testName: String, testFailure: Throwable?) {
-        var tf = testFailure
+        var tf: Throwable? = testFailure
         if (node is DynaNodeGroup) {
-            (node as DynaNodeGroupImpl).afterEach.forEach { afterEachBlock ->
+            (node as DynaNodeGroupImpl).afterEach.forEach { afterEachBlock: (Outcome) -> Unit ->
                 try {
                     afterEachBlock(Outcome(testName, tf))
                 } catch (t: Throwable) {
