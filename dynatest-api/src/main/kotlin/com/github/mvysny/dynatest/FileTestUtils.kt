@@ -61,6 +61,8 @@ public class TempFolderProvider(
         val property = LateinitProperty<File>(prop.name)
         var dir: File by property
         node.beforeEach {
+            // don't use createTempDirectory() which uses Files.createTempDirectory() which might not be available on Android
+            @Suppress("DEPRECATION")
             dir = createTempDir(prefix, suffix)
         }
         node.afterEach { outcome: Outcome ->
@@ -129,6 +131,8 @@ public fun DynaNodeGroup.withTempDir(name: String = "dir", suffix: String? = nul
     val property = LateinitProperty<File>(name)
     var dir: File by property
     beforeEach {
+        // don't use createTempDirectory() which uses Files.createTempDirectory() which might not be available on Android
+        @Suppress("DEPRECATION")
         dir = createTempDir("tmp-$name", suffix)
     }
     afterEach { outcome: Outcome ->
