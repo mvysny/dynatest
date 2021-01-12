@@ -4,7 +4,6 @@ import java.io.File
 import java.nio.file.FileSystems
 import java.nio.file.PathMatcher
 import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KProperty
 import kotlin.test.expect
 import kotlin.test.fail
 
@@ -46,34 +45,6 @@ public fun File.expectReadableFile() {
 public fun File.expectWritableFile() {
     expectFile()
     expect(true, "file $absoluteFile is not readable") { canWrite() }
-}
-
-/**
- * Internal.
- */
-public class TempFolderProvider(
-        private val node: DynaNodeGroup,
-        private val prefix: String,
-        private val suffix: String?,
-        private val keepOnFailure: Boolean
-) {
-    public operator fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadWriteProperty<Any?, File> {
-        val property = LateinitProperty<File>(prop.name)
-        var dir: File by property
-        node.beforeEach {
-            // don't use createTempDirectory() which uses Files.createTempDirectory() which might not be available on Android
-            @Suppress("DEPRECATION")
-            dir = createTempDir(prefix, suffix)
-        }
-        node.afterEach { outcome: Outcome ->
-            if (!keepOnFailure || outcome.isSuccess) {
-                dir.deleteRecursively()
-            } else {
-                println("Test '${outcome.testName}' failed, keeping temporary dir $property")
-            }
-        }
-        return property
-    }
 }
 
 /**
