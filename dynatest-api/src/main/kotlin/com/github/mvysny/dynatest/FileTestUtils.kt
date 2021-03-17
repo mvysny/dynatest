@@ -141,7 +141,7 @@ public fun DynaNodeGroup.withTempDir(name: String = "dir", keepOnFailure: Boolea
     }
     afterEach { outcome: Outcome ->
         if (!keepOnFailure || outcome.isSuccess) {
-            dir.deleteRecursively8()
+            dir.toPath().deleteRecursively()
         } else {
             println("Test ${outcome.testName} failed, keeping temporary dir $property")
         }

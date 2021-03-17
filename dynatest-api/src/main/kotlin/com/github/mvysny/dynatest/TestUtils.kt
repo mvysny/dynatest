@@ -69,10 +69,9 @@ public fun Throwable.getStackTraceAsString(): String {
 }
 
 /**
- * Similar to [File.deleteRecursively] but uses Java 8 [Files] to delete files and folders,
- * which has the advantage of failing with an informative [IOException] instead of
- * just returning false.
+ * Similar to [File.deleteRecursively] but throws informative [IOException] instead of
+ * just returning false on error. uses Java 8 [Files.deleteIfExists] to delete files and folders.
  */
-public fun File.deleteRecursively8() {
-    walkBottomUp().forEach { Files.deleteIfExists(it.toPath()) }
+public fun Path.deleteRecursively() {
+    toFile().walkBottomUp().forEach { Files.deleteIfExists(it.toPath()) }
 }
