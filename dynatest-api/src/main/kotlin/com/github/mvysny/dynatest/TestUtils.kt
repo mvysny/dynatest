@@ -2,6 +2,7 @@ package com.github.mvysny.dynatest
 
 import java.io.*
 import java.nio.file.Files
+import java.nio.file.Path
 import kotlin.reflect.KClass
 import kotlin.test.expect
 import kotlin.test.fail

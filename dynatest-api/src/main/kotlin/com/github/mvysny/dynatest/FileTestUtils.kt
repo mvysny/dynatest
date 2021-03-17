@@ -2,6 +2,8 @@ package com.github.mvysny.dynatest
 
 import java.io.File
 import java.nio.file.FileSystems
+import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.PathMatcher
 import kotlin.properties.ReadWriteProperty
 import kotlin.test.expect
@@ -15,6 +17,13 @@ public fun File.expectExists() {
 }
 
 /**
+ * Expects that this file or directory exists on the file system.
+ */
+public fun Path.expectExists() {
+    toFile().expectExists()
+}
+
+/**
  * Expects that this file or directory [expectExists] and is a directory.
  */
 public fun File.expectDirectory() {
@@ -23,11 +32,25 @@ public fun File.expectDirectory() {
 }
 
 /**
+ * Expects that this file or directory [expectExists] and is a directory.
+ */
+public fun Path.expectDirectory() {
+    toFile().expectDirectory()
+}
+
+/**
  * Expects that this file or directory [expectExists] and is a file.
  */
 public fun File.expectFile() {
     expectExists()
     expect(true, "file $absoluteFile is not a file") { isFile }
+}
+
+/**
+ * Expects that this file or directory [expectExists] and is a file.
+ */
+public fun Path.expectFile() {
+    toFile().expectFile()
 }
 
 /**
@@ -41,9 +64,23 @@ public fun File.expectReadableFile() {
 /**
  * Expects that this file or directory is a file [expectFile] and is readable ([File.canRead]).
  */
+public fun Path.expectReadableFile() {
+    toFile().expectReadableFile()
+}
+
+/**
+ * Expects that this file or directory is a file [expectFile] and is readable ([File.canRead]).
+ */
 public fun File.expectWritableFile() {
     expectFile()
     expect(true, "file $absoluteFile is not readable") { canWrite() }
+}
+
+/**
+ * Expects that this file or directory is a file [expectFile] and is readable ([File.canRead]).
+ */
+public fun Path.expectWritableFile() {
+    toFile().expectWritableFile()
 }
 
 /**
@@ -90,20 +127,17 @@ public fun File.expectWritableFile() {
  * right away, failing with `unitialized` `RuntimeException`.
  * @param name an optional tempdir name as passed into [createTempDir].
  * Defaults to "dir".
- * @param suffix an optional temporary directory suffix as passed into [createTempDir].
  * @param keepOnFailure if true (default), the directory is not deleted on test failure so that you
  * can take a look what went wrong. Set this to false to always delete the directory.
  */
-public fun DynaNodeGroup.withTempDir(name: String = "dir", suffix: String? = null, keepOnFailure: Boolean = true): ReadWriteProperty<Any?, File> {
+public fun DynaNodeGroup.withTempDir(name: String = "dir", keepOnFailure: Boolean = true): ReadWriteProperty<Any?, File> {
     // don't use a Provider class with 'public operator fun provideDelegate' since it makes it really
     // hard to wrap `withTempDir()` in another utility function.
 
     val property = LateinitProperty<File>(name)
     var dir: File by property
     beforeEach {
-        // createTempDirectory is experimental API; use createTempDir() for now.
-        @Suppress("DEPRECATION")
-        dir = createTempDir("tmp-$name", suffix)
+        dir = Files.createTempDirectory("tmp-$name").toFile()
     }
     afterEach { outcome: Outcome ->
         if (!keepOnFailure || outcome.isSuccess) {

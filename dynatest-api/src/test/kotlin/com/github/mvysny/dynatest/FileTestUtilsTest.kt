@@ -4,7 +4,9 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.io.File
+import java.nio.file.Files
 
+// can't use dynatest yet :-D
 class FileTestUtilsTest {
     @Nested
     @DisplayName("expectExists()")
@@ -16,9 +18,7 @@ class FileTestUtilsTest {
 
         @Test
         fun `passes on existing dir`() {
-            // createTempDirectory is experimental API; use createTempDir() for now.
-            @Suppress("DEPRECATION")
-            createTempDir().expectExists()
+            Files.createTempDirectory("foo").expectExists()
         }
 
         @Test
@@ -39,10 +39,8 @@ class FileTestUtilsTest {
 
         @Test
         fun `fails on existing dir`() {
-            expectThrows(AssertionError::class, ".tmp is not a file") {
-                // createTempDirectory is experimental API; use createTempDir() for now.
-                @Suppress("DEPRECATION")
-                createTempDir().expectFile()
+            expectThrows(AssertionError::class, " is not a file") {
+                Files.createTempDirectory("foo").expectFile()
             }
         }
 
@@ -66,9 +64,7 @@ class FileTestUtilsTest {
 
         @Test
         fun `passes on existing dir`() {
-            // createTempDirectory is experimental API; use createTempDir() for now.
-            @Suppress("DEPRECATION")
-            createTempDir().expectDirectory()
+            Files.createTempDirectory("foo").expectDirectory()
         }
 
         @Test
@@ -89,10 +85,8 @@ class FileTestUtilsTest {
 
         @Test
         fun `fails on existing dir`() {
-            expectThrows(AssertionError::class, ".tmp is not a file") {
-                // createTempDirectory is experimental API; use createTempDir() for now.
-                @Suppress("DEPRECATION")
-                createTempDir().expectReadableFile()
+            expectThrows(AssertionError::class, " is not a file") {
+                Files.createTempDirectory("foo").expectReadableFile()
             }
         }
 

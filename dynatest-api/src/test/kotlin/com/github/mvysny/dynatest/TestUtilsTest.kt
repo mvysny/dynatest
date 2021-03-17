@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.test.expect
 
+// can't use dynatest yet :-D
 class TestUtilsTest {
 
     // tests for expectThrows() are in dynatest-engine. I was too lazy to port them here.
