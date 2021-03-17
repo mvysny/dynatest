@@ -7,7 +7,6 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.test.expect
 import kotlin.test.fail
 
-
 /**
  * Expects that this file or directory exists on the file system.
  */
@@ -102,13 +101,13 @@ public fun DynaNodeGroup.withTempDir(name: String = "dir", suffix: String? = nul
     val property = LateinitProperty<File>(name)
     var dir: File by property
     beforeEach {
-        // don't use createTempDirectory() which uses Files.createTempDirectory() which might not be available on Android
+        // createTempDirectory is experimental API; use createTempDir() for now.
         @Suppress("DEPRECATION")
         dir = createTempDir("tmp-$name", suffix)
     }
     afterEach { outcome: Outcome ->
         if (!keepOnFailure || outcome.isSuccess) {
-            dir.deleteRecursively()
+            dir.deleteRecursively8()
         } else {
             println("Test ${outcome.testName} failed, keeping temporary dir $property")
         }

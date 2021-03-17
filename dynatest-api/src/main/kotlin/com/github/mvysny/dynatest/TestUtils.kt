@@ -1,6 +1,7 @@
 package com.github.mvysny.dynatest
 
 import java.io.*
+import java.nio.file.Files
 import kotlin.reflect.KClass
 import kotlin.test.expect
 import kotlin.test.fail
@@ -64,4 +65,13 @@ public fun Throwable.getStackTraceAsString(): String {
     printStackTrace(pw)
     pw.flush()
     return sw.toString()
+}
+
+/**
+ * Similar to [File.deleteRecursively] but uses Java 8 [Files] to delete files and folders,
+ * which has the advantage of failing with an informative [IOException] instead of
+ * just returning false.
+ */
+public fun File.deleteRecursively8() {
+    walkBottomUp().forEach { Files.deleteIfExists(it.toPath()) }
 }

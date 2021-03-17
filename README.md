@@ -11,6 +11,8 @@ we let you create your test methods using Kotlin - an actual programming languag
 
 We don't program in annotations, after all. We program in Kotlin.
 
+Requires Java 8 or higher.
+
 ## Example Code
 
 Code example of the [CalculatorTest.kt](dynatest-engine/src/test/kotlin/com/github/mvysny/dynatest/CalculatorTest.kt):

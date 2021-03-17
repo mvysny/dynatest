@@ -16,6 +16,8 @@ class FileTestUtilsTest {
 
         @Test
         fun `passes on existing dir`() {
+            // createTempDirectory is experimental API; use createTempDir() for now.
+            @Suppress("DEPRECATION")
             createTempDir().expectExists()
         }
 
@@ -38,6 +40,8 @@ class FileTestUtilsTest {
         @Test
         fun `fails on existing dir`() {
             expectThrows(AssertionError::class, ".tmp is not a file") {
+                // createTempDirectory is experimental API; use createTempDir() for now.
+                @Suppress("DEPRECATION")
                 createTempDir().expectFile()
             }
         }
@@ -62,6 +66,8 @@ class FileTestUtilsTest {
 
         @Test
         fun `passes on existing dir`() {
+            // createTempDirectory is experimental API; use createTempDir() for now.
+            @Suppress("DEPRECATION")
             createTempDir().expectDirectory()
         }
 
@@ -84,6 +90,8 @@ class FileTestUtilsTest {
         @Test
         fun `fails on existing dir`() {
             expectThrows(AssertionError::class, ".tmp is not a file") {
+                // createTempDirectory is experimental API; use createTempDir() for now.
+                @Suppress("DEPRECATION")
                 createTempDir().expectReadableFile()
             }
         }
