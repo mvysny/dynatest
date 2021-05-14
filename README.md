@@ -150,9 +150,10 @@ DynaTest is composed of just 6 methods (and 0 annotations).
 Calling the `test("name") { test body }` function creates a new test and schedules it to be run by JUnit5 core. Example:
 ```kotlin
 class MyTest : DynaTest({
-    test("'save' button saves data") {
-        button.click(); expect(1) { Person.findAll().size }
-    }
+  test("'save' button saves data") {
+    button.click()
+    expect(1) { Person.findAll().size }
+  }
 })
 ```
 
@@ -161,9 +162,11 @@ more groups) inside of it. By itself the group does nothing more than nesting te
 tests; however it becomes very powerful with the lifecycle methods `beforeGroup`/`afterGroup`. Example:
 ```kotlin
 class MyTest : DynaTest({
-    group("String.length tests") {
-        test("Empty string has zero length") { expect(0) { "".length } }
+  group("String.length tests") {
+    test("Empty string has zero length") { 
+      expect(0) { "".length }
     }
+  }
 })
 ```
 
@@ -184,8 +187,10 @@ class CalculatorTest : DynaTest({
     beforeEach { calculator = Calculator() }
     afterEach { calculator.close() }
     
-    test("0+1=1") { expect(1) { calculator.plusOne(0) } }
-}
+    test("0+1=1") {
+      expect(1) { calculator.plusOne(0) }
+    }
+})
 ```
 
 `afterEach { body }` schedules given block to run after every individual test, both in this group and in all subgroups.
@@ -201,8 +206,10 @@ class ServerTest : DynaTest({
     beforeGroup { server = Server(8080); server.start() }
     afterGroup { server.stop() }
     
-    test("ping") { expect("OK") { URL("http://localhost:8080/status").readText() } }
-}
+    test("ping") {
+      expect("OK") { URL("http://localhost:8080/status").readText() }
+    }
+})
 ```
 
 `afterGroup { body }` schedules given block to run after the group concluded running its tests, both in this group and in all subgroups.
@@ -311,21 +318,22 @@ runs in the context of the
 
 ```kotlin
 fun DynaNodeGroup.layoutTestBattery(clazz: Class<out ComponentContainer>) {
-    group("tests for ${clazz.simpleName}") {
-        lateinit var layout: ComponentContainer
-        beforeEach { layout = clazz.newInstance() }
-        test("Adding a component will make the count go to 1") {
-            layout.addComponent(Label("Hello World"))
-            expect(1) { layout.getComponentCount() }
-        }
+  group("tests for ${clazz.simpleName}") {
+    lateinit var layout: ComponentContainer
+    beforeEach { layout = clazz.newInstance() }
+    
+    test("Adding a component will make the count go to 1") {
+      layout.addComponent(Label("Hello World"))
+      expect(1) { layout.getComponentCount() }
     }
+  }
 }
 
 class LayoutTest : DynaTest({
-    layoutTestBattery(VerticalLayout::class.java)
-    layoutTestBattery(HorizontalLayout::class.java)
-    layoutTestBattery(CssLayout::class.java)
-    layoutTestBattery(FlexLayout::class.java)
+  layoutTestBattery(VerticalLayout::class.java)
+  layoutTestBattery(HorizontalLayout::class.java)
+  layoutTestBattery(CssLayout::class.java)
+  layoutTestBattery(FlexLayout::class.java)
 })
 ```
 
