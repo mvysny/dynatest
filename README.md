@@ -432,9 +432,12 @@ A.K.A The Boring Stuff. We:
 
 * Promote component-oriented programming. You should be able to create a test suite as a component,
   and simply include that test suite anywhere you see fit.
+* Let programmer use a familiar general-purpose language (Kotlin) to define tests.
+  Put the programmer in charge and allow him to use the well-known language tools and software practices
+  he's already using, in order to create well-maintainable test code.
 * Dissuade from abominable programming techniques like inheritance and annotatiomania.
-* Let programmer use a familiar language to define tests, one that the programmer can refactor Put the programmer in charge and allow him to use the full palette of software practices, in order
-  to create well-maintainable test code.
+  Don't force the developer to use a mini-language based on annotations, for which there
+  are no tools.
 * With great power comes great responsibility. Don't make the test structure generation code more complex
   than anything else in your project. Keep it simple.
 * No outside lifecycle listeners. Init belongs close to the test. Instead of external listener interfaces we
@@ -455,7 +458,7 @@ With DynaTest, you give any meaning you need to groups and tests you need.
 
 ## Oh God Not Yet Another Testing Framework
 
-I feel you. I hate to create frameworks. It takes a lot of time and
+I feel you. I hate creating frameworks. It takes a lot of time and
 energy to create DynaTest, maintain it, test it, document it, find workarounds
 for Intellij bugs. I'd much rather spend that energy elsewhere.
 
