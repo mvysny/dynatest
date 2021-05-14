@@ -426,45 +426,6 @@ class MainViewTest: DynaTest({
 })
 ```
 
-## Comparison With JUnit
-
-Traditional JUnit/TestNG approach is to have a bunch of test classes with `@Test`-annotated methods. That's not bad per se,
-but it would seem as if the ultimate JUnit's goal was that the test collection must be *pre-known* - computable by static-analyzing class files alone,
-without running any test generator code whatsoever. With such approach,
-the possibilities to create tests dynamically (e.g. creating a reusable test suite) are severely limited. I believe this requirement is not only
-useless in modern programming,
-it also *reduces the possibilities* of how to structure test code and *promotes bad practices*:
-
-* You simply can't create a parametrized test suite class as a component, instantiating it with various parameters and running it as needed,
-  with parameters supplied in the call site.
-* Annotations are weak - they don't have the full computative power of a proper imperative programming language; attempts to use annotations to
-  express any non-trivial logic leads to annotation overuse and that leads to horrible constructs and [annotatiomania](http://annotatiomania.com/).
-* Reuse of test suites is only possible by the means of inheritance (having a base class with tests, and a bunch of classes
-  extending that base class, parametrizing it with constructors). That leads to deep inheritance hierarchies, which typically lead to spaghetti code.
-  Reusing code as components typically leads to much better separated code with clear boundaries.
-* Even worse than inheritance, it is possible to "reuse" test suites by the means of interface mixins. That's a whole new level
-  of inheritance hell.
-
-### Disadvantages Of DynaTest
-
-It's not just unicorns:
-
-* There is no clear distinction between the code that *creates* tests (calls the `test()` method to create a test), and
-  the *testing* code itself (blocks inside of `test()` method). However, there is a ton of difference:
-  those two code bases run at completely different time. Furthermore Kotlin allows to share variables
-  freely between those two code bases, which may create a really dangerous code which fails in mysterious ways.
-  That's magic which must be removed. See [Issue #1](https://github.com/mvysny/dynatest/issues/1) for more details.
-* Weak IDE (Intellij) integration:
-  * "Rerun failed tests" always runs all tests
-  * You can't run just single test: in the test source file there is no "gutter green arrow" to run the test; also right-clicking the `test()` function
-    in your test class does nothing. You can only run the whole suite :(
-  * It's impossible to re-run single test only from Intellij's Test Run window -
-    right-clicking on the test name either doesn't offer such option, or you'll experience weird behavior like
-    no tests being run at all, or all tests from test class will run etc.
-
-There's a [IDEA-169198](https://youtrack.jetbrains.com/issue/IDEA-169198) bug report for Intellij, please go there and vote
-to get it resolved.
-
 # DynaTest Design principles
 
 We:
@@ -499,6 +460,44 @@ energy to create DynaTest, maintain it, test it, document it, find workarounds
 for Intellij bugs. I'd much rather spend that energy elsewhere.
 
 Unfortunately, all other functional-style testing frameworks suck.
+
+## Comparison With JUnit
+
+Traditional JUnit/TestNG approach is to have a bunch of test classes with `@Test`-annotated methods. That's not bad per se,
+but it would seem as if the ultimate JUnit's goal was that the test collection must be *pre-known* - computable by static-analyzing class files alone,
+without running any test generator code whatsoever. With such approach,
+the possibilities to create tests dynamically (e.g. creating a reusable test suite) are severely limited. I believe this requirement is not only
+useless in modern programming,
+it also *reduces the possibilities* of how to structure test code and *promotes bad practices*:
+
+With JUnit:
+* You simply can't create a parametrized test suite class as a component, instantiating it with various parameters and running it as needed,
+  with parameters supplied in the call site.
+* Annotations are weak - they don't have the full computative power of a proper imperative programming language; attempts to use annotations to
+  express any non-trivial logic leads to annotation overuse and that leads to horrible constructs and [annotatiomania](http://annotatiomania.com/).
+* Reuse of test suites is only possible by the means of inheritance (having a base class with tests, and a bunch of classes
+  extending that base class, parametrizing it with constructors). That leads to deep inheritance hierarchies, which typically lead to spaghetti code.
+  Reusing code as components typically leads to much better separated code with clear boundaries.
+* Even worse than inheritance, it is possible to "reuse" test suites by the means of interface mixins. That's a whole new level
+  of inheritance hell.
+
+It's not just unicorns - DynaTest has disadvantages when compared to JUnit:
+
+* There is no clear distinction between the code that *creates* tests (calls the `test()` method to create a test), and
+  the *testing* code itself (blocks inside of `test()` method). However, there is a ton of difference:
+  those two code bases run at completely different time. Furthermore Kotlin allows to share variables
+  freely between those two code bases, which may create a really dangerous code which fails in mysterious ways.
+  That's magic which must be removed. See [Issue #1](https://github.com/mvysny/dynatest/issues/1) for more details.
+* Weak IDE (Intellij) integration:
+  * "Rerun failed tests" always runs all tests
+  * You can't run just single test: in the test source file there is no "gutter green arrow" to run the test; also right-clicking the `test()` function
+    in your test class does nothing. You can only run the whole suite :(
+  * It's impossible to re-run single test only from Intellij's Test Run window -
+    right-clicking on the test name either doesn't offer such option, or you'll experience weird behavior like
+    no tests being run at all, or all tests from test class will run etc.
+
+There's a [IDEA-169198](https://youtrack.jetbrains.com/issue/IDEA-169198) bug report for Intellij, please go there and vote
+to get it resolved.
 
 ## Comparison With KoTest
 
