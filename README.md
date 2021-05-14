@@ -98,13 +98,12 @@ with your app.
 
 ### Gradle+DynaTest Integration Guide
 
-DynaTest sports its own TestEngine which ignores any JUnit5 tests and only runs `DynaTest` tests. As a first step,
+DynaTest runs on top of JUnit5 engine, but it ignores any JUnit5 tests and only runs `DynaTest` tests. As a first step,
 add the test dependency on this library to your `build.gradle` file:
 
 ```groovy
 repositories {
-    jcenter()
-    // mavenCentral()   // DynaTest is both on Maven Central and JCenter so you can pick any of those
+    mavenCentral()
 }
 dependencies {
     testCompile("com.github.mvysny.dynatest:dynatest-engine:x.y")
