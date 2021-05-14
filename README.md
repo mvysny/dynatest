@@ -153,7 +153,7 @@ class MyTest : DynaTest({
     test("'save' button saves data") {
         button.click(); expect(1) { Person.findAll().size }
     }
-}
+})
 ```
 
 Calling the `group("name") { register more groups and tests }` function creates a test group and allows you to define tests (or
@@ -164,7 +164,7 @@ class MyTest : DynaTest({
     group("String.length tests") {
         test("Empty string has zero length") { expect(0) { "".length } }
     }
-}
+})
 ```
 
 > Technical detail: You write your test suite by extending the `DynaTest` class. The DynaTest constructor runs a block
