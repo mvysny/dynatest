@@ -371,22 +371,10 @@ fun DynaNodeGroup.usingDatabase() {
         Sql2oVOKPlugin().destroy()
     }
 
-    fun clearDatabase() = Person.deleteAll()
+    fun clearDatabase() { Person.deleteAll() }
     beforeEach { clearDatabase() }
     afterEach { clearDatabase() }
 }
-
-class EntityDataProviderTest : DynaTest({
-
-    usingDatabase()
-
-    test("noEntitiesTest") {
-        val ds = Person.dataProvider
-        expect(0) { ds.size(Query()) }
-        expect(false) { ds.isInMemory }
-        expectList() { ds.getAll() }
-    }
-})
 ```
 
 This sample is taken from Vaadin-on-Kotlin [EntityDataProviderTest.kt](https://github.com/mvysny/vaadin-on-kotlin/blob/master/vok-framework-sql2o/src/test/kotlin/com/github/vok/framework/sql2o/vaadin/EntityDataProviderTest.kt) file,
