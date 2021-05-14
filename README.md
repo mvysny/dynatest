@@ -481,22 +481,58 @@ We:
 
 What this framework is not:
 
-* BDD. What BDD strives for is to describe a behavior of an app. What it really does is that it provides
-  a really lousy, obfuscated and computationally weak way of writing test programs. There is no good. For bad, head to
+* BDD. What BDD strives for is to describe a behavior of an app using the English language.
+  What it really does is that it provides
+  a really lousy, confusing and computationally weak way of writing test programs.
+  There are no good examples to write BDD - all BDD test suites will degrade into
+  an unmaintainable mess. For bad examples, head to
   [JBehave](http://jbehave.org/). To experience a real horror, head to [Robot Framework](http://robotframework.org/).
 * Spec. What spec strives for is to describe a specification of an app. What it really does is that it provides
   a lousy way of writing test programs. If you want spec, use [Spek](http://spekframework.org/).
 
-You give any meaning you need to groups and tests.
+With DynaTest, you give any meaning you need to groups and tests you need.
 
-## Comparison With KotlinTest
+## Oh God Not Yet Another Testing Framework
 
-Compared to [KotlinTest](https://github.com/kotlintest/kotlintest), DynaTest
+I feel you. I hate to create frameworks. It takes a lot of time and
+energy to create DynaTest, maintain it, test it, document it, find workarounds
+for Intellij bugs. I'd much rather spend that energy elsewhere.
+
+Unfortunately, all other functional-style testing frameworks suck.
+
+## Comparison With KoTest
+
+Compared to [KoTest](https://github.com/kotest/kotest), DynaTest
 only pushes for the `FunSpec` testing style. This may not necessary be bad: DynaTest's
 codebase is way simpler and it limits the variety of testing styles you can encounter in projects.
-DynaTest's support for functional testing is also way more
-powerful than `FunSpec` since we have support for groups and `beforeGroup`/`afterGroup`. Yet,
-KotlinTest is official and maintained (probably) by the Kotlin folk, so pick your poison :)
+
+DynaTest-KoTest similarities:
+* KoTest offers similar testing style named `FunSpec`; to create a test simply call
+  the `test{}` function; to group tests simply call the `context{}` function in KoTest
+  or `group{}` function in DynaTest.
+
+DynaTest advantages:
+* KoTest doesn't support `beforeGroup{}`/`afterGroup{}`. Yes, there is `beforeContainer{}` and
+  `afterContainer{}` but it works much differently: DynaTest's `beforeGroup{}`/`afterGroup{}`
+  only triggers for the parent group (and not for subgroups), allowing the group itself
+  to control its environment (e.g. start a server before all tests, then tear it down).
+  KoTest's `before/afterContainer{}` is run for every
+  child+grandchild context and it's unclear what its purpose is. There's `beforeSpec{}`/`afterSpec{}`
+  but it always works in the scope of the entire test class; moreover `beforeSpec{}`
+  never seems to be called (a bug?). DynaTest replaces all of that with a simple `beforeGroup{}`/`afterGroup{}`.
+  In short, DynaTest is simpler, much easier to understand
+  and the granularity of control is much better.
+* KoTest `tempfile()`/`tempdir()` creates one temp file/dir for all tests within
+  a test class. If one test fails, you can't inspect the folder contents since the follow-up
+  tests have overwritten the folder contents. DynaTest's `withTempDir()` creates
+  a fresh test folder for every test, and prints the full path to the test folder in case
+  of a test failure - much more pleasant.
+
+DynaTest disadvantages:
+* Navigation to sources sometimes doesn't work, because of [IDEA-169198](https://youtrack.jetbrains.com/issue/IDEA-169198).
+  KoTest is also affected but it offers a native plugin for Intellij, working around the bug.
+* KoTest is official and maintained (probably) by the Kotlin folk, while
+  DynaTest is maintained by "A Random Internet Dude".
 
 # License
 
