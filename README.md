@@ -428,6 +428,8 @@ class MainViewTest: DynaTest({
 
 # DynaTest Design principles
 
+A.K.A. The Boring Stuff.
+
 We:
 
 * Promote component-oriented programming. You should be able to create a test suite as a component,
