@@ -36,6 +36,27 @@ public interface DynaNodeGroup {
     public fun group(name: String, block: DynaNodeGroup.() -> Unit)
 
     /**
+     * Creates a disabled test case with given [name] and registers it within current group. Does not run the test closure -
+     * the test is only registered but not run later on by JUnit5 runner.
+     *
+     * Useful for temporarily disabling a test.
+     * @param body the implementation of the test; does not run immediately but only when the test case is run
+     * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
+     */
+    public fun xtest(name: String, body: DynaNodeTest.() -> Unit)
+
+    /**
+     * Creates a nested group with given [name] and runs given [block].
+     * In the block, you can create both sub-groups and tests, and you can
+     * mix those freely as you like.
+     *
+     * None of the child tests are run. Useful for temporarily disabling a group of tests.
+     * @param block the block, runs immediately.
+     * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
+     */
+    public fun xgroup(name: String, block: DynaNodeGroup.() -> Unit)
+
+    /**
      * Registers a block which will be run exactly once before any of the tests in the current group are run. Only the tests nested in this group and its subgroups are
      * considered.
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.

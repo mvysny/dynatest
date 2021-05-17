@@ -18,7 +18,7 @@ import kotlin.test.fail
  */
 internal fun runTests(block: DynaNodeGroup.()->Unit): TestResults {
     // obtain the test definitions
-    val group = DynaNodeGroupImpl("root", null)
+    val group = DynaNodeGroupImpl("root", null, true)
     group.block()
     group.onDesignPhaseEnd()
 

@@ -9,14 +9,9 @@ import org.junit.platform.engine.*
 import org.junit.platform.engine.discovery.*
 import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor
 import org.junit.platform.engine.support.descriptor.ClassSource
-import org.junit.platform.engine.support.descriptor.FilePosition
-import org.junit.platform.engine.support.descriptor.FileSource
-import java.io.File
+import org.junit.platform.engine.support.hierarchical.EngineExecutionContext
+import org.junit.platform.engine.support.hierarchical.Node
 import java.lang.reflect.Modifier
-import java.net.URI
-import java.net.URL
-import java.nio.file.FileSystemNotFoundException
-import java.nio.file.Paths
 import java.util.*
 import java.util.function.Predicate
 
@@ -88,10 +83,6 @@ public class DynaTestEngine : TestEngine {
 
     override fun execute(request: ExecutionRequest) {
 
-        fun DynaNodeTestDescriptor.runTest(node: DynaNodeTestImpl) {
-            runBlock(node.name) { node.body(node) }
-        }
-
         /**
          * Runs all tests defined in this descriptor. This function does not throw exception if any of the
          * test/beforeEach/beforeAll/afterEach/afterAll fails.
@@ -116,8 +107,8 @@ public class DynaTestEngine : TestEngine {
             children.forEach { childDescriptor -> childDescriptor.runAllTests() }
 
             try {
-                if (this is DynaNodeTestDescriptor && this.node is DynaNodeTest) {
-                    runTest(node as DynaNodeTestImpl)
+                if (this is DynaNodeTestDescriptor && this.isTest) {
+                    runTest()
                 } else if (this is InitFailedTestDescriptor) {
                     throw RuntimeException(failure)
                 }
@@ -152,12 +143,15 @@ private fun UniqueId.append(node: DynaNodeImpl): UniqueId {
     return append(segmentType, node.name)
 }
 
-internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl) : AbstractTestDescriptor(parentId.append(node), node.name, node.toTestSource()) {
+internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl) :
+    AbstractTestDescriptor(parentId.append(node), node.name, node.toTestSource()), Node<EngineExecutionContext> {
     init {
-        if (node is DynaNodeGroup) {
+        if (node is DynaNodeGroup && isEnabled) {
             (node as DynaNodeGroupImpl).children.forEach { addChild(DynaNodeTestDescriptor(uniqueId, it)) }
         }
     }
+
+    val isEnabled: Boolean get() = node.enabled
 
     override fun getType(): TestDescriptor.Type = when (node) {
         is DynaNodeGroupImpl -> TestDescriptor.Type.CONTAINER
@@ -165,7 +159,7 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
     }
 
     fun runBeforeGroup() {
-        if (node is DynaNodeGroup) {
+        if (node is DynaNodeGroup && isEnabled) {
             (node as DynaNodeGroupImpl).beforeGroup.forEach { it() }
         }
     }
@@ -177,7 +171,7 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
      */
     fun runAfterGroup(t: Throwable?) {
         var tf = t
-        if (node is DynaNodeGroup) {
+        if (node is DynaNodeGroup && isEnabled) {
             (node as DynaNodeGroupImpl).afterGroup.forEach {
                 try {
                     it(Outcome(null, tf))
@@ -193,7 +187,7 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
      * Runs given [block], properly prefixed with calls to `beforeEach` blocks and postfixed with calls to `afterEach` blocks.
      * If any of those fails, does a proper cleanup and then throws the exception.
      */
-    fun runBlock(testName: String, block: () -> Unit) {
+    private fun runBlock(testName: String, block: () -> Unit) {
         var lastNodeWithBeforeEachRan: DynaNodeTestDescriptor? = null
         try {
             getPathFromRoot().forEach { descriptor ->
@@ -210,6 +204,12 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
         lastNodeWithBeforeEachRan?.runAfterEach(testName, null)
     }
 
+    fun runTest() {
+        if (isEnabled) {
+            runBlock(node.name) { (node as DynaNodeTestImpl).body(node) }
+        }
+    }
+
     /**
      * Computes the path of dyna nodes from the root group towards this one.
      */
@@ -224,17 +224,27 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
      */
     private fun runAfterEach(testName: String, testFailure: Throwable?) {
         var tf: Throwable? = testFailure
-        if (node is DynaNodeGroup) {
-            (node as DynaNodeGroupImpl).afterEach.forEach { afterEachBlock: (Outcome) -> Unit ->
-                try {
-                    afterEachBlock(Outcome(testName, tf))
-                } catch (t: Throwable) {
-                    if (tf == null) tf = t else tf!!.addSuppressed(t)
+        if (isEnabled) {
+            if (node is DynaNodeGroup) {
+                (node as DynaNodeGroupImpl).afterEach.forEach { afterEachBlock: (Outcome) -> Unit ->
+                    try {
+                        afterEachBlock(Outcome(testName, tf))
+                    } catch (t: Throwable) {
+                        if (tf == null) tf = t else tf!!.addSuppressed(t)
+                    }
                 }
             }
+            (parent.orElse(null) as? DynaNodeTestDescriptor)?.runAfterEach(
+                testName,
+                tf
+            )
         }
-        (parent.orElse(null) as? DynaNodeTestDescriptor)?.runAfterEach(testName, tf)
         if (testFailure == null && tf != null) throw tf!!
+    }
+
+    override fun shouldBeSkipped(context: EngineExecutionContext): Node.SkipResult = when {
+        node.enabled -> Node.SkipResult.doNotSkip()
+        else -> Node.SkipResult.skip("x")
     }
 }
 

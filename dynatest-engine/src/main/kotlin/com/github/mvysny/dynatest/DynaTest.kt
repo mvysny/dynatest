@@ -25,7 +25,11 @@ public abstract class DynaTest(block: DynaNodeGroup.()->Unit) {
     /**
      * The "root" group which will nest all groups and tests produced by the initialization block.
      */
-    internal val root = DynaNodeGroupImpl(javaClass.simpleName, StackTraceElement(javaClass.name, "<init>", null, -1))
+    internal val root = DynaNodeGroupImpl(
+        javaClass.simpleName,
+        StackTraceElement(javaClass.name, "<init>", null, -1),
+        true
+    )
     init {
         root.block()
     }

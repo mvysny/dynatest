@@ -14,7 +14,11 @@ import org.junit.platform.engine.TestSource
  * Every [DynaNodeGroup.test] and [DynaNodeGroup.group] call
  * creates this node which in turn can be converted to JUnit5 structures eligible for execution.
  */
-internal sealed class DynaNodeImpl(internal val name: String, internal val src: StackTraceElement?) {
+internal sealed class DynaNodeImpl(
+    internal val name: String,
+    internal val src: StackTraceElement?,
+    internal val enabled: Boolean
+) {
     abstract fun toTestSource(): TestSource?
 }
 
@@ -23,7 +27,12 @@ internal sealed class DynaNodeImpl(internal val name: String, internal val src: 
  *
  * To start writing tests, just extend [DynaTest]. See [DynaTest] for more details.
  */
-internal class DynaNodeTestImpl internal constructor(name: String, internal val body: DynaNodeTest.()->Unit, src: StackTraceElement?) : DynaNodeImpl(name, src), DynaNodeTest {
+internal class DynaNodeTestImpl internal constructor(
+    name: String,
+    internal val body: DynaNodeTest.() -> Unit,
+    src: StackTraceElement?,
+    enabled: Boolean
+) : DynaNodeImpl(name, src, enabled), DynaNodeTest {
     override fun toTestSource(): TestSource? = src?.toTestSource(name)
 }
 
@@ -32,7 +41,12 @@ internal class DynaNodeTestImpl internal constructor(name: String, internal val 
  *
  * To start writing tests, just extend [DynaTest]. See [DynaTest] for more details.
  */
-internal class DynaNodeGroupImpl internal constructor(name: String, src: StackTraceElement?) : DynaNodeImpl(name, src), DynaNodeGroup {
+internal class DynaNodeGroupImpl internal constructor(
+    name: String,
+    src: StackTraceElement?,
+    enabled: Boolean
+) : DynaNodeImpl(name, src, enabled), DynaNodeGroup {
+
     override fun toTestSource(): TestSource? = src?.toTestSource(null)
 
     private var inDesignPhase: Boolean = true
@@ -64,23 +78,39 @@ internal class DynaNodeGroupImpl internal constructor(name: String, src: StackTr
     }
 
     private fun checkNameNotYetUsed(name: String) {
-        require(children.none { it.name == name }) { "test/group with name '$name' is already present: ${children.joinToString { it.name }}"}
+        require(children.none { it.name == name }) { "test/group with name '$name' is already present: ${children.joinToString { it.name }}" }
     }
 
     override fun test(name: String, body: DynaNodeTest.()->Unit) {
+        test(name, body, true)
+    }
+
+    private fun test(name: String, body: DynaNodeTest.()->Unit, enabled: Boolean) {
         checkInDesignPhase("test")
         checkNameNotYetUsed(name)
         val source = computeTestSource()
-        children.add(DynaNodeTestImpl(name, body, source))
+        children.add(DynaNodeTestImpl(name, body, source, enabled))
     }
 
     override fun group(name: String, block: DynaNodeGroup.()->Unit) {
+        group(name, block, true)
+    }
+
+    private fun group(name: String, block: DynaNodeGroup.()->Unit, enabled: Boolean) {
         checkInDesignPhase("group")
         checkNameNotYetUsed(name)
         val source = computeTestSource()
-        val group = DynaNodeGroupImpl(name, source)
+        val group = DynaNodeGroupImpl(name, source, enabled)
         group.block()
         children.add(group)
+    }
+
+    override fun xtest(name: String, body: DynaNodeTest.() -> Unit) {
+        test(name, body, false)
+    }
+
+    override fun xgroup(name: String, block: DynaNodeGroup.() -> Unit) {
+        group(name, block, false)
     }
 
     override fun beforeEach(block: ()->Unit) {
