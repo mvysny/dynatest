@@ -89,7 +89,7 @@ internal class DynaNodeGroupImpl internal constructor(
         checkInDesignPhase("test")
         checkNameNotYetUsed(name)
         val source = computeTestSource()
-        children.add(DynaNodeTestImpl(name, body, source, enabled))
+        children.add(DynaNodeTestImpl(name, body, source, this.enabled && enabled))
     }
 
     override fun group(name: String, block: DynaNodeGroup.()->Unit) {
@@ -100,7 +100,7 @@ internal class DynaNodeGroupImpl internal constructor(
         checkInDesignPhase("group")
         checkNameNotYetUsed(name)
         val source = computeTestSource()
-        val group = DynaNodeGroupImpl(name, source, enabled)
+        val group = DynaNodeGroupImpl(name, source, this.enabled && enabled)
         group.block()
         children.add(group)
     }

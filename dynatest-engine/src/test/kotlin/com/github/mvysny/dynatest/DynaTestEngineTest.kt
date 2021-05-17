@@ -452,4 +452,117 @@ class DynaTestEngineTest : DynaTest({
             expect(0) { called }
         }
     }
+
+    group("xtest") {
+        test("xtest body not called") {
+            var called = 0
+            runTests {
+                xtest("xtest") { called++ }
+            }
+            expect(0) { called }
+        }
+        test("beforeEach/afterEach not called") {
+            var called = 0
+            runTests {
+                beforeEach { called++ }
+                afterEach { called++ }
+                xtest("test") { called++ }
+            }
+            expect(0) { called }
+        }
+        test("parent beforeEach/afterEach not called") {
+            var called = 0
+            runTests {
+                beforeEach { called++ }
+                afterEach { called++ }
+                group("foo") {
+                    xtest("test") { called++ }
+                }
+            }
+            expect(0) { called }
+        }
+        test("beforeGroup/afterGroup still called since the group is enabled") {
+            var called = 0
+            runTests {
+                beforeGroup { called++ }
+                afterGroup { called++ }
+                xtest("test") { called++ }
+            }
+            expect(2) { called }
+        }
+        test("parent beforeGroup/afterGroup still called since the group is enabled") {
+            var called = 0
+            runTests {
+                beforeGroup { called++ }
+                afterGroup { called++ }
+                group("foo") {
+                    xtest("test") { called++ }
+                }
+            }
+            expect(2) { called }
+        }
+        xtest("this test must be marked in intellij as skipped") {
+            fail("should be skipped")
+        }
+    }
+    group("xgroup") {
+        test("tests not called") {
+            var called = 0
+            runTests {
+                xgroup("xgroup") {
+                    test("should be skipped") { called++ }
+                }
+            }
+            expect(0) { called }
+        }
+        test("beforeEach/afterEach not called") {
+            var called = 0
+            runTests {
+                xgroup("disabled") {
+                    beforeEach { called++; fail("x") }
+                    afterEach { called++; fail("x") }
+                    test("test") { called++; fail("x") }
+                }
+            }
+            expect(0) { called }
+        }
+        test("parent beforeEach/afterEach not called") {
+            var called = 0
+            runTests {
+                beforeEach { called++; fail("x") }
+                afterEach { called++; fail("x") }
+                xgroup("disabled") {
+                    test("test") { called++; fail("x") }
+                }
+            }
+            expect(0) { called }
+        }
+        test("beforeGroup/afterGroup still called since the group is enabled") {
+            var called = 0
+            runTests {
+                beforeGroup { called++ }
+                afterGroup { called++ }
+                xgroup("disabled") {
+                    test("test") { called++ }
+                }
+            }
+            expect(2) { called }
+        }
+        test("beforeGroup/afterGroup not called for disabled group") {
+            var called = 0
+            runTests {
+                xgroup("disabled") {
+                    beforeGroup { called++ }
+                    afterGroup { called++ }
+                    test("test") { called++ }
+                }
+            }
+            expect(0) { called }
+        }
+        xgroup("group must be marked in intellij as skipped") {
+            test("test must be marked in intellij as skipped") {
+                fail("should be skipped")
+            }
+        }
+    }
 })

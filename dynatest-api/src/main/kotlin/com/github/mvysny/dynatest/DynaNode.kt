@@ -46,7 +46,7 @@ public interface DynaNodeGroup {
     public fun xtest(name: String, body: DynaNodeTest.() -> Unit)
 
     /**
-     * Creates a nested group with given [name] and runs given [block].
+     * Creates a nested disabled group with given [name] and runs given [block].
      * In the block, you can create both sub-groups and tests, and you can
      * mix those freely as you like.
      *
@@ -57,8 +57,12 @@ public interface DynaNodeGroup {
     public fun xgroup(name: String, block: DynaNodeGroup.() -> Unit)
 
     /**
-     * Registers a block which will be run exactly once before any of the tests in the current group are run. Only the tests nested in this group and its subgroups are
+     * Registers a block which will be run exactly once before any of the tests in the current group are run.
+     * Only the tests nested in this group and its subgroups are
      * considered.
+     *
+     * If this group is enabled, these blocks will be run regardless of whether there
+     * are any child tests/groups in this group or not.
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
@@ -70,6 +74,8 @@ public interface DynaNodeGroup {
      *
      * If any of the `beforeEach` blocks fails, no further `beforeEach` blocks are executed; furthermore the test itself is not executed as well.
      * However, all of the [afterEach] blocks for the corresponding group and all parent groups still *are* executed.
+     *
+     * If this test or any parent group is disabled, these blocks will not run.
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
@@ -85,6 +91,8 @@ public interface DynaNodeGroup {
      * If any of the `afterEach` blocks throws an exception, those exceptions are added as [Throwable.getSuppressed] to the main exception (as thrown
      * by the `beforeEach` block or the test itself); or just rethrown if there is no main exception. Any exception thrown by the `afterEach`
      * block will cause the test to fail.
+     *
+     * If this test or any parent group is disabled, these blocks will not run.
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
      * The block receives an [Outcome] of the test run.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
@@ -94,6 +102,9 @@ public interface DynaNodeGroup {
     /**
      * Registers a block which will be run only once after all of the tests are run in the current group. Only the tests nested in this group and its subgroups are
      * considered.
+     *
+     * If this group is enabled, these blocks will be run regardless of whether there
+     * are any child tests/groups in this group or not.
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
      * The block receives an [Outcome] of the test run.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.

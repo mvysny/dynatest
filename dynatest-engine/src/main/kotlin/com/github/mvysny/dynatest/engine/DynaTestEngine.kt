@@ -83,6 +83,21 @@ public class DynaTestEngine : TestEngine {
 
     override fun execute(request: ExecutionRequest) {
 
+        fun TestDescriptor.engineExecutionListenerExecutionSuccess() {
+            val skipped = (this as? DynaNodeTestDescriptor)?.isEnabled == false
+            if (!skipped) {
+                request.engineExecutionListener.executionFinished(
+                    this,
+                    TestExecutionResult.successful()
+                )
+            } else {
+                request.engineExecutionListener.executionSkipped(
+                    this,
+                    "x"
+                )
+            }
+        }
+
         /**
          * Runs all tests defined in this descriptor. This function does not throw exception if any of the
          * test/beforeEach/beforeAll/afterEach/afterAll fails.
@@ -113,7 +128,7 @@ public class DynaTestEngine : TestEngine {
                     throw RuntimeException(failure)
                 }
                 (this as? DynaNodeTestDescriptor)?.runAfterGroup(null)
-                request.engineExecutionListener.executionFinished(this, TestExecutionResult.successful())
+                engineExecutionListenerExecutionSuccess()
             } catch (t: Throwable) {
                 request.engineExecutionListener.executionFinished(this, TestExecutionResult.failed(t))
             }
@@ -146,7 +161,9 @@ private fun UniqueId.append(node: DynaNodeImpl): UniqueId {
 internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl) :
     AbstractTestDescriptor(parentId.append(node), node.name, node.toTestSource()), Node<EngineExecutionContext> {
     init {
-        if (node is DynaNodeGroup && isEnabled) {
+        if (node is DynaNodeGroup) {
+            // register children even if this group is disabled
+            // this will cause Intellij to display those tests
             (node as DynaNodeGroupImpl).children.forEach { addChild(DynaNodeTestDescriptor(uniqueId, it)) }
         }
     }

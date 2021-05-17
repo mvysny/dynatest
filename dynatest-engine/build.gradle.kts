@@ -34,7 +34,8 @@ tasks.named<Task>("test") { doLast {
     val testXmlPath = "build/test-results/test/TEST-com.github.mvysny.dynatest.DynaTestEngineTest.xml"
     val xml = file(testXmlPath).readText()
     val testcases = xml.countSubstrings("<testcase")
-    if (testcases != 33) {
-        throw RuntimeException("build.gradle.kts: Expected 33 testcases in $testXmlPath but got $testcases")
+    val expectedTestCaseCount = 45
+    if (testcases != expectedTestCaseCount) {
+        throw RuntimeException("build.gradle.kts: Expected $expectedTestCaseCount testcases in $testXmlPath but got $testcases")
     }
 } }
