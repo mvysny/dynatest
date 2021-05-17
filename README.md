@@ -294,15 +294,29 @@ not created. For example:
 
 ```kotlin
 class NativesTest : DynaTest({
-    if (OS.isLinux()) {
-        test("linux-based test") {
-            // run tests only on Linux.
-        }
+  if (OS.isLinux()) {
+    test("linux-based test") {
+      // run tests only on Linux.
     }
+  }
 })
 ```
 
 The `if (OS.isLinux())` is just a simple Kotlin `if()` followed by a call to the `isLinux()` function.
+
+### Disabling tests temporarily
+
+Use `xtest{}` or `xgroup{}` to temporarily disable a test (since dynatest 0.20):
+
+```kotlin
+class DisabledTest : DynaTest({
+  xtest("not run") {}
+  xgroup("no child tests are run") {
+    xtest("not run") {}
+    test("also not run")
+  }
+})
+```
 
 ### Reusable test battery
 
