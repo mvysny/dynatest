@@ -11,7 +11,9 @@ we let you create your test methods using Kotlin - an actual programming languag
 
 We don't program in annotations, after all. We program in Kotlin.
 
-Requires Java 8 or higher.
+Java compatibility matrix:
+* DynaTest 0.19 and lower require Java 7+
+* DynaTest 0.20+ require Java 8+
 
 ## Example Code
 
