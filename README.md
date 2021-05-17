@@ -313,7 +313,7 @@ class DisabledTest : DynaTest({
   xtest("not run") {}
   xgroup("no child tests are run") {
     xtest("not run") {}
-    test("also not run")
+    test("also not run") {}
   }
 })
 ```
