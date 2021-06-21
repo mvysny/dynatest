@@ -12,10 +12,13 @@ kotlin {
 val configureBintray = ext["configureBintray"] as (artifactId: String) -> Unit
 configureBintray("dynatest-engine")
 
-// verify that Gradle ran tests for all test classes and didn't ignore DynaTests
-fun String.countSubstrings(substring: String) =
+/**
+ * Counts all occurrences of [substring] within the receiver string.
+ */
+fun String.countOccurrences(substring: String) =
     indices.count { substring(it).startsWith(substring) }
 
+// verify that Gradle ran tests for all test classes and didn't ignore DynaTests
 tasks.named<Task>("test") { doLast {
     val testClasses: Array<String> = file("src/test/kotlin/com/github/mvysny/dynatest").list()!!
     val expectedTests: List<String> = testClasses
@@ -33,7 +36,7 @@ tasks.named<Task>("test") { doLast {
     // verify that Gradle runs all tests even if they are same-named (but different UniqueId)
     val testXmlPath = "build/test-results/test/TEST-com.github.mvysny.dynatest.DynaTestEngineTest.xml"
     val xml = file(testXmlPath).readText()
-    val testcases = xml.countSubstrings("<testcase")
+    val testcases = xml.countOccurrences("<testcase")
     val expectedTestCaseCount = 45
     if (testcases != expectedTestCaseCount) {
         throw RuntimeException("build.gradle.kts: Expected $expectedTestCaseCount testcases in $testXmlPath but got $testcases")
