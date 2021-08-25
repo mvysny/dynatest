@@ -25,6 +25,11 @@ subprojects {
         plugin("kotlin")
         plugin("org.gradle.signing")
     }
+    
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
 
     // creates a reusable function which configures proper deployment to Bintray
     ext["configureBintray"] = { artifactId: String ->
@@ -32,8 +37,6 @@ subprojects {
         java {
             withJavadocJar()
             withSourcesJar()
-            sourceCompatibility = JavaVersion.VERSION_1_8
-            targetCompatibility = JavaVersion.VERSION_1_8
         }
 
         tasks.withType<Javadoc> {
