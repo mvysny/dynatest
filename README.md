@@ -2,6 +2,7 @@
 
 [![GitHub tag](https://img.shields.io/github/tag/mvysny/dynatest.svg)](https://github.com/mvysny/dynatest/tags)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.mvysny.dynatest/dynatest-engine/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.mvysny.dynatest/dynatest-engine)
+[![Build Status](https://github.com/mvysny/dynatest/actions/workflows/gradle.yml/badge.svg)](https://github.com/mvysny/dynatest/actions/workflows/gradle.yml)
 
 The simplest and most powerful testing framework for Kotlin.
 
