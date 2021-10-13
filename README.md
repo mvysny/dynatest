@@ -287,6 +287,37 @@ group("source generator tests") {
 Make sure to never return `sources` since that would query the value of the `sourcesProperty`
 right away, failing with `unitialized` `RuntimeException`.
 
+### Lazy-init variables in general
+
+The above examples served only for a specific case of having a temporary dir accessible
+to a bunch of tests. However, you can take advantage of the `LateinitProperty` class
+to create any kind of variable. For example, say that we have a `TestProject`
+class which internally creates a temp folder and sets up some kind of a test project, then deletes it afterwards:
+
+```kotlin
+fun DynaNodeGroup.withTestProject(): ReadWriteProperty<Any?, TestProject> {
+    val testProjectProperty = LateinitProperty<TestProject>("testproject")
+    var testProject: TestProject by testProjectProperty
+    beforeEach {
+        testProject = TestProject()
+        println("Test project directory: ${testProject.dir}")
+    }
+    afterEach {
+        // comment out if a test is failing and you need to investigate the project files.
+        testProject.delete()
+    }
+    return testProjectProperty
+}
+
+class MiscSingleModuleTest : DynaTest({
+  val testProject: TestProject by withTestProject()
+
+  test("testVaadin8Vaadin14MPRProject") {
+    testProject.buildFile.writeText("something")
+  }
+})
+```
+
 ## Advanced Topics
 
 ### Conditional tests

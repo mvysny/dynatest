@@ -6,8 +6,12 @@ import kotlin.reflect.KProperty
 
 /**
  * A very simple implementation of [ReadWriteProperty] which implements the semantics of `lateinit`.
+ *
+ * Allows you to create a reusable `withXYZ()` function. See README.md for more details.
+ *
+ * Used in [withTempDir].
  */
-internal data class LateinitProperty<V: Any>(val name: String, private var value: V? = null) : ReadWriteProperty<Any?, V> {
+public data class LateinitProperty<V: Any>(val name: String, private var value: V? = null) : ReadWriteProperty<Any?, V> {
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: V) {
         this.value = value
     }
@@ -29,7 +33,13 @@ public class LateinitPropertyProvider<V: Any> {
  * Allows you to write lateinit variables as follows:
  * ```
  * var file: File by late()
+ * beforeEach { file = File.createTempFile("foo", "bar") }
+ * afterEach { file.delete() }
+ * test("something") {
+ *   file.expectExists()
+ * }
  * ```
- * Used in [withTempDir].
+ *
+ * However, to create a reusable `withXYZ()` function, see [LateinitProperty] directly.
  */
 public fun <V: Any> late(): LateinitPropertyProvider<V> = LateinitPropertyProvider()
