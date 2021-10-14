@@ -287,6 +287,20 @@ group("source generator tests") {
 Make sure to never return `sources` since that would query the value of the `sourcesProperty`
 right away, failing with `unitialized` `RuntimeException`.
 
+Alternatively, since DynaTest 0.22 you can take advantage of `withTempDir()`'s init block:
+
+```kotlin
+fun DynaNodeGroup.withSources(): ReadWriteProperty<Any?, File> =
+  withTempDir("sources") { dir -> generateSourcesTo(dir) }
+
+group("source generator tests") {
+  val sources: File by withSources()
+  test("simple") {
+    sources.expectFiles("*.java", 10..10)
+  }
+}
+```
+
 ### Lazy-init variables in general
 
 The above examples served only for a specific case of having a temporary dir accessible
@@ -309,13 +323,34 @@ fun DynaNodeGroup.withTestProject(): ReadWriteProperty<Any?, TestProject> {
     return testProjectProperty
 }
 
-class MiscSingleModuleTest : DynaTest({
+class MiscTest : DynaTest({
   val testProject: TestProject by withTestProject()
 
-  test("testVaadin8Vaadin14MPRProject") {
+  test("something") {
     testProject.buildFile.writeText("something")
   }
 })
+```
+
+To build upon such lazy-init variable (for example to create a test project which comes
+pre-populated with some testing files), you have to use the following construct:
+
+```kotlin
+fun DynaNodeGroup.withHelloWorldJavaTestProject(): ReadWriteProperty<Any?, File> {
+  val testProjectProperty = withTestProject()
+  val testProject: TestProject by testProjectProperty
+  beforeEach {
+    testProject.buildFile.writeText("""plugins { id 'java' }""")
+  }
+  return testProject
+}
+
+group("hello world java examples") {
+  val project: TestProject by withHelloWorldJavaTestProject()
+  test("simple") {
+    project.build("jar")
+  }
+}
 ```
 
 ## Advanced Topics

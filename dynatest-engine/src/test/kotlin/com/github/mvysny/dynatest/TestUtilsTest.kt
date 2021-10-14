@@ -147,14 +147,8 @@ private fun DynaNodeGroup.expectThrowsTestBatch() {
     group("withTempDir()") {
 
         // a demo of a function which uses `withTempDir` and populates/inits the folder further.
-        fun DynaNodeGroup.reusable(): ReadWriteProperty<Any?, File> {
-            val sourcesProperty: ReadWriteProperty<Any?, File> = withTempDir("sources")
-            val sources by sourcesProperty
-            beforeEach {
-                File(sources, "foo.txt").writeText("")
-            }
-            return sourcesProperty
-        }
+        fun DynaNodeGroup.reusable(): ReadWriteProperty<Any?, File> =
+            withTempDir("sources") { dir -> File(dir, "foo.txt").writeText("") }
 
         group("simple") {
             val tempDir: File by withTempDir()

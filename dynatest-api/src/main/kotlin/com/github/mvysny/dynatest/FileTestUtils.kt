@@ -128,9 +128,14 @@ public fun Path.expectWritableFile() {
  * @param name an optional tempdir name as passed into [createTempDir].
  * Defaults to "dir".
  * @param keepOnFailure if true (default), the directory is not deleted on test failure so that you
- * can take a look what went wrong. Set this to false to always delete the directory.
+ * can take a look what went wrong. Set this to `false` to always delete the directory.
+ * @param init optionally populate the temp folder with some test files.
  */
-public fun DynaNodeGroup.withTempDir(name: String = "dir", keepOnFailure: Boolean = true): ReadWriteProperty<Any?, File> {
+public fun DynaNodeGroup.withTempDir(
+    name: String = "dir",
+    keepOnFailure: Boolean = true,
+    init: (File) -> Unit = {}
+): ReadWriteProperty<Any?, File> {
     // don't use a Provider class with 'public operator fun provideDelegate' since it makes it really
     // hard to wrap `withTempDir()` in another utility function.
 
@@ -138,6 +143,7 @@ public fun DynaNodeGroup.withTempDir(name: String = "dir", keepOnFailure: Boolea
     var dir: File by property
     beforeEach {
         dir = Files.createTempDirectory("tmp-$name").toFile()
+        init(dir)
     }
     afterEach { outcome: Outcome ->
         if (!keepOnFailure || outcome.isSuccess) {
