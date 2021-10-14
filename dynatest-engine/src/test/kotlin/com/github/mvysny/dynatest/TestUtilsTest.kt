@@ -181,4 +181,9 @@ private fun DynaNodeGroup.expectThrowsTestBatch() {
             test("dummy") {}
         }
     }
+
+    test("jvmVersion") {
+        // test that the JVM version parsing doesn't throw
+        jvmVersion
+    }
 }

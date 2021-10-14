@@ -353,6 +353,10 @@ group("hello world java examples") {
 }
 ```
 
+## Other utility functions
+
+* `jvmVersion` variable will return the major JVM version of the current JRE, e.g. 6 for Java 1.6, 8 for Java 8, 11 for Java 11 etc.
+
 ## Advanced Topics
 
 ### Conditional tests
