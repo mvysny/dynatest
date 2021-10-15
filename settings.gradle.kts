@@ -1,1 +1,1 @@
-include("dynatest-api", "dynatest-engine")
+include("dynatest-api", "dynatest-engine", "dynatest")

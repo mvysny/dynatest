@@ -109,7 +109,7 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    testCompile("com.github.mvysny.dynatest:dynatest-engine:x.y")
+    testCompile("com.github.mvysny.dynatest:dynatest:x.y")
 }
 ```
 
@@ -537,6 +537,18 @@ What this framework is not:
   a lousy way of writing test programs. If you want spec, use [Spek](http://spekframework.org/).
 
 With DynaTest, you give any meaning you need to groups and tests you need.
+
+## Project Structure
+
+The project consists of three modules.  First two modules are as thin as possible,
+only focus on getting the most basic test DSL machinery in place, and makes sure
+the basics run solidly with Gradle and the JUnit plugin:
+
+* [dynatest-api](dynatest-api) defines the basic test DSL functions like `test{}` and `group{}`.
+* [dynatest-engine](dynatest-engine) focuses on getting the tests created by the DSL to run on top of JUnit.
+
+The third and final module, [dynatest](dynatest), provides all of the utility functions and helpers,
+and tests itself using the dynatest-engine.
 
 ## Oh God Not Yet Another Testing Framework
 
