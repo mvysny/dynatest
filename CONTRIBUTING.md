@@ -2,6 +2,11 @@
 
 Please feel free to open bug reports to discuss new features; PRs are welcome as well :)
 
+All utility methods should go into the [dynatest](dynatest) project. Only contribute
+to [dynatest-api](dynatest-api) and [dynatest-engine](dynatest-engine) if there is
+something wrong with the engine itself. The goal is to keep the `-api` and `-engine`
+projects as small as possible, placing all utility methods into the `dynatest` project.
+
 # Releasing
 
 To release the library to Maven Central:
