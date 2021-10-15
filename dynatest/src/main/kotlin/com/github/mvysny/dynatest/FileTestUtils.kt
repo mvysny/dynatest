@@ -61,3 +61,33 @@ public fun File.expectFile() {
 public fun Path.expectFile() {
     toFile().expectFile()
 }
+
+/**
+ * Expects that this file or directory is a file [expectFile] and is readable ([File.canRead]).
+ */
+public fun File.expectReadableFile() {
+    expectFile()
+    expect(true, "file $absoluteFile is not readable") { canRead() }
+}
+
+/**
+ * Expects that this file or directory is a file [expectFile] and is readable ([File.canRead]).
+ */
+public fun Path.expectReadableFile() {
+    toFile().expectReadableFile()
+}
+
+/**
+ * Expects that this file or directory is a file [expectFile] and is readable ([File.canRead]).
+ */
+public fun File.expectWritableFile() {
+    expectFile()
+    expect(true, "file $absoluteFile is not readable") { canWrite() }
+}
+
+/**
+ * Expects that this file or directory is a file [expectFile] and is readable ([File.canRead]).
+ */
+public fun Path.expectWritableFile() {
+    toFile().expectWritableFile()
+}

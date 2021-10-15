@@ -157,7 +157,7 @@ class DynaTestEngineTest : DynaTest({
             }) {
                 expectStats(0, 1, 0)
                 expectFailure<RuntimeException>("dummy")
-                expectList() { getFailure("dummy").suppressed.toList() }
+                expect(listOf()) { getFailure("dummy").suppressed.toList() }
             }
             expect(false) { called }
         }
