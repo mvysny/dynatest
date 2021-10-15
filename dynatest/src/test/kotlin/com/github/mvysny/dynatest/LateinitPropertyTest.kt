@@ -1,23 +1,19 @@
 package com.github.mvysny.dynatest
 
-import org.junit.jupiter.api.Test
 import java.io.File
 import kotlin.test.expect
 
-// can't use dynatest yet :-D
-class LateinitPropertyTest {
-    @Test
-    fun testFailsIfNoValue() {
+class LateinitPropertyTest : DynaTest({
+    test("testFailsIfNoValue") {
         val file: File by late()
         expectThrows(RuntimeException::class, "LateinitProperty(name=file, value=null): not initialized") {
             file.name
         }
     }
 
-    @Test
-    fun testSimple() {
+    test("simple") {
         var file: File by late()
         file = File("foo.txt")
         expect("foo.txt") { file.name }
     }
-}
+})
