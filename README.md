@@ -561,11 +561,13 @@ Unfortunately, all other functional-style testing frameworks suck.
 ## Comparison With JUnit
 
 Traditional JUnit/TestNG approach is to have a bunch of test classes with `@Test`-annotated methods. That's not bad per se,
-but it would seem as if the ultimate JUnit's goal was that the test collection must be *pre-known* - computable by static-analyzing class files alone,
-without running any test generator code whatsoever. With such approach,
-the possibilities to create tests dynamically (e.g. creating a reusable test suite) are severely limited. I believe this requirement is not only
-useless in modern programming,
-it also *reduces the possibilities* of how to structure test code and *promotes bad practices*:
+but it would seem as if the ultimate JUnit's goal was that the test collection must be *pre-known* -
+computable by static-analyzing class files alone,
+without running any test generator code whatsoever. This is great for IDEs: IDE can immediately
+figure out all the test methods and will allow you an easy way to run individual tests.
+On the other side, with this approach,
+the possibilities to create tests dynamically (e.g. creating a reusable test suite) are severely limited.
+I believe this requirement *reduces the possibilities* of how to structure test code and *promotes bad practices*:
 
 With JUnit:
 * You simply can't create a parametrized test suite class as a component, instantiating it with various parameters and running it as needed,
