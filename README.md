@@ -228,11 +228,12 @@ Now we move to advanced topics on how to put this machinery to good use for more
 
 dynatest 0.18 and later contains support for filesystem-related assertions and ops:
 
-* File.expectExists()
-* File.expectFile()
-* File.expectDirectory()
-* File.expectReadableFile()
-* File.expectWritableFile()
+* `File.expectExists()`
+* `File.expectNotExists()`
+* `File.expectFile()`
+* `File.expectDirectory()`
+* `File.expectReadableFile()`
+* `File.expectWritableFile()`
 
 You can use Kotlin built-in `createTempDir()` and `createTempFile()` global functions to create temporary
 folders and files; use Kotlin built-in `copyRecursively()` to copy entire folders.
