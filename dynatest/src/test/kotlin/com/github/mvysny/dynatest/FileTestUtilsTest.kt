@@ -93,11 +93,14 @@ class FileTestUtilsTest : DynaTest({
             }
         }
 
-        test("fails on unreadable file") {
-            expectThrows(AssertionError::class, " is not readable") {
-                val f = File.createTempFile("foooo", "bar")
-                f.setReadable(false)
-                f.expectReadableFile()
+        if (!OsUtils.isWindows) {
+            // this test doesn't work on Windows
+            test("fails on unreadable file") {
+                expectThrows(AssertionError::class, " is not readable") {
+                    val f = File.createTempFile("foooo", "bar")
+                    f.setReadable(false)
+                    f.expectReadableFile()
+                }
             }
         }
 
