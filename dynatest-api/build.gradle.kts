@@ -1,7 +1,6 @@
 dependencies {
     api(kotlin("stdlib-jdk8"))
     api(kotlin("test"))
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:${properties["junit_jupiter_version"]}")
 }
 
 kotlin {
