@@ -12,6 +12,7 @@ import kotlin.test.fail
  * @return the exception thrown, so that you can assert on it.
  */
 public fun <T: Throwable> expectThrows(clazz: KClass<out T>, message: String = "", block: ()->Unit): T {
+    // tests for this function are present in the dynatest-engine project
     val ex: T? = try {
         block()
         null
