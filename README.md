@@ -547,8 +547,8 @@ the basics run solidly with Gradle and the JUnit plugin:
 * [dynatest-api](dynatest-api) defines the basic test DSL functions like `test{}` and `group{}`.
 * [dynatest-engine](dynatest-engine) focuses on getting the tests created by the DSL to run on top of JUnit.
 
-The third and final module, [dynatest](dynatest), provides all of the utility functions and helpers,
-and tests itself using the dynatest-engine.
+The third and final module, [dynatest](dynatest), provides all of the utility functions and helpers.
+Since we can now rely on the fact that the dynatest-engine works properly, this module tests itself using the dynatest-engine.
 
 ## Oh God Not Yet Another Testing Framework
 

@@ -87,7 +87,7 @@ public fun Path.expectReadableFile() {
  */
 public fun File.expectWritableFile() {
     expectFile()
-    expect(true, "file $absoluteFile is not readable") { canWrite() }
+    expect(true, "file $absoluteFile is not writable") { canWrite() }
 }
 
 /**

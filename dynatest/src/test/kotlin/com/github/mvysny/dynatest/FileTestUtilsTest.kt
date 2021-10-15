@@ -24,13 +24,13 @@ class FileTestUtilsTest : DynaTest({
 
     group("expectNotExists()") {
         test("fails on existing file") {
-            expectThrows(AssertionError::class, "asdasd") {
+            expectThrows(AssertionError::class, "bar exists") {
                 File.createTempFile("foooo", "bar").expectNotExists()
             }
         }
 
         test("fails on existing dir") {
-            expectThrows(AssertionError::class, "asdasd") {
+            expectThrows(AssertionError::class, " exists") {
                 Files.createTempDirectory("foo").expectNotExists()
             }
         }

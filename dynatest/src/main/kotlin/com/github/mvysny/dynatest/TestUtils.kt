@@ -8,28 +8,6 @@ import kotlin.test.expect
 import kotlin.test.fail
 
 /**
- * Expects that given block fails with an exception of given [clazz] (or its subtype).
- * @param message optional substring which the exception message must contain.
- * @throws AssertionError if the block completed successfully or threw some other exception.
- * @return the exception thrown, so that you can assert on it.
- */
-public fun <T: Throwable> expectThrows(clazz: KClass<out T>, message: String = "", block: ()->Unit): T {
-    val ex: T? = try {
-        block()
-        null
-    } catch (t: Throwable) {
-        if (!clazz.java.isInstance(t)) {
-            throw AssertionError("Expected to fail with ${clazz.javaObjectType.name} but failed with $t", t)
-        }
-        if (!(t.message ?: "").contains(message)) {
-            throw AssertionError("${clazz.javaObjectType.name} message: Expected '$message' but was '${t.message}'", t)
-        }
-        clazz.java.cast(t)
-    }
-    return ex ?: fail("Expected to fail with ${clazz.javaObjectType.name} but completed successfully")
-}
-
-/**
  * Expects that [actual] list of objects matches [expected] list of objects. Fails otherwise.
  */
 public fun <T> expectList(vararg expected: T, actual: ()->List<T>) {
@@ -56,17 +34,6 @@ public inline fun <reified T: Serializable> ByteArray.deserialize(): T? = T::cla
  * @return the clone of this
  */
 public fun <T : Serializable> T.cloneBySerialization(): T = javaClass.cast(serializeToBytes().deserialize())
-
-/**
- * Handy function to get a stack trace from receiver.
- */
-public fun Throwable.getStackTraceAsString(): String {
-    val sw = StringWriter()
-    val pw = PrintWriter(sw)
-    printStackTrace(pw)
-    pw.flush()
-    return sw.toString()
-}
 
 /**
  * Similar to [File.deleteRecursively] but throws informative [IOException] instead of
