@@ -20,7 +20,7 @@ class TestUtilsTest : DynaTest({
                 throw RuntimeException("Should have failed")
             } catch (e: AssertionError) {
                 // okay
-                expect("Expected to fail with java.lang.RuntimeException but completed successfully") { e.message }
+                expect("Expected an exception of class java.lang.RuntimeException to be thrown, but was completed successfully.") { e.message }
                 expect(null) { e.cause }
             }
         }
@@ -34,7 +34,7 @@ class TestUtilsTest : DynaTest({
                 throw RuntimeException("Should have failed")
             } catch (e: AssertionError) {
                 // okay
-                expect("Expected to fail with java.lang.RuntimeException but failed with java.io.IOException: simulated") { e.message }
+                expect("Expected an exception of class java.lang.RuntimeException to be thrown, but was java.io.IOException: simulated") { e.message }
                 expect<Class<*>?>(IOException::class.java) { e.cause?.javaClass }
             }
         }
@@ -60,12 +60,12 @@ class TestUtilsTest : DynaTest({
                     throw RuntimeException("Should have failed")
                 } catch (e: AssertionError) {
                     // okay
-                    expect("Expected to fail with java.lang.RuntimeException but completed successfully") { e.message }
+                    expect("Expected an exception of class java.lang.RuntimeException to be thrown, but was completed successfully.") { e.message }
                 }
             }
 
             test("fails if block throws something else") {
-                expectThrows(AssertionError::class, "Expected to fail with java.lang.RuntimeException but failed with java.io.IOException: simulated") {
+                expectThrows(AssertionError::class, "Expected an exception of class java.lang.RuntimeException to be thrown, but was java.io.IOException: simulated") {
                     // this should fail with AssertionError since some other exception has been thrown
                     expectThrows(RuntimeException::class, "simulated") {
                         throw IOException("simulated")

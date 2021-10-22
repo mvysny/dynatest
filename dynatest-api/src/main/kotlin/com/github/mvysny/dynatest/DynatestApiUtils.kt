@@ -3,29 +3,24 @@ package com.github.mvysny.dynatest
 import java.io.PrintWriter
 import java.io.StringWriter
 import kotlin.reflect.KClass
-import kotlin.test.fail
+import kotlin.test.assertFailsWith
 
 /**
  * Expects that given block fails with an exception of given [clazz] (or its subtype).
- * @param message optional substring which the exception message must contain.
+ *
+ * Note that this is different from [assertFailsWith] since this function
+ * also asserts on [Throwable.message].
+ * @param expectMessage optional substring which the [Throwable.message] must contain.
  * @throws AssertionError if the block completed successfully or threw some other exception.
  * @return the exception thrown, so that you can assert on it.
  */
-public fun <T: Throwable> expectThrows(clazz: KClass<out T>, message: String = "", block: ()->Unit): T {
+public fun <T: Throwable> expectThrows(clazz: KClass<out T>, expectMessage: String = "", block: ()->Unit): T {
     // tests for this function are present in the dynatest-engine project
-    val ex: T? = try {
-        block()
-        null
-    } catch (t: Throwable) {
-        if (!clazz.java.isInstance(t)) {
-            throw AssertionError("Expected to fail with ${clazz.javaObjectType.name} but failed with $t", t)
-        }
-        if (!(t.message ?: "").contains(message)) {
-            throw AssertionError("${clazz.javaObjectType.name} message: Expected '$message' but was '${t.message}'", t)
-        }
-        clazz.java.cast(t)
+    val ex = assertFailsWith(clazz, block)
+    if (!(ex.message ?: "").contains(expectMessage)) {
+        throw AssertionError("${clazz.javaObjectType.name} message: Expected '$expectMessage' but was '${ex.message}'", ex)
     }
-    return ex ?: fail("Expected to fail with ${clazz.javaObjectType.name} but completed successfully")
+    return ex
 }
 
 /**
