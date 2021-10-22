@@ -6,7 +6,7 @@ import kotlin.reflect.KClass
 import kotlin.test.assertFailsWith
 
 /**
- * Expects that given block fails with an exception of given [clazz] (or its subtype).
+ * Expects that given block fails with an exception of type [clazz] (or its subtype).
  *
  * Note that this is different from [assertFailsWith] since this function
  * also asserts on [Throwable.message].
@@ -24,7 +24,7 @@ public fun <T: Throwable> expectThrows(clazz: KClass<out T>, expectMessage: Stri
 }
 
 /**
- * Expects that given block fails with an exception of given [clazz] (or its subtype).
+ * Expects that given block fails with an exception of type [T] (or its subtype).
  *
  * Note that this is different from [assertFailsWith] since this function
  * also asserts on [Throwable.message].
