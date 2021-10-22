@@ -413,7 +413,7 @@ class DynaTestEngineTest : DynaTest({
     group("prohibit same-named tests/groups in the same group") {
         test("test/test") {
             var called = 0
-            expectThrows(IllegalArgumentException::class, "test/group with name 'duplicite' is already present: duplicite") {
+            expectThrows<IllegalArgumentException>("test/group with name 'duplicite' is already present: duplicite") {
                 runTests {
                     test("duplicite") { called++; fail("shouldn't be called") }
                     test("duplicite") { called++; fail("shouldn't be called") }
@@ -423,7 +423,7 @@ class DynaTestEngineTest : DynaTest({
         }
         test("test/group") {
             var called = 0
-            expectThrows(IllegalArgumentException::class, "test/group with name 'duplicite' is already present: duplicite") {
+            expectThrows<IllegalArgumentException>("test/group with name 'duplicite' is already present: duplicite") {
                 runTests {
                     test("duplicite") { called++; fail("shouldn't be called") }
                     group("duplicite") { called++; fail("shouldn't be called") }
@@ -433,7 +433,7 @@ class DynaTestEngineTest : DynaTest({
         }
         test("group/test") {
             var called = 0
-            expectThrows(IllegalArgumentException::class, "test/group with name 'duplicite' is already present: duplicite") {
+            expectThrows<IllegalArgumentException>("test/group with name 'duplicite' is already present: duplicite") {
                 runTests {
                     group("duplicite") { }
                     test("duplicite") { called++; fail("shouldn't be called") }

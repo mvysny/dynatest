@@ -24,6 +24,18 @@ public fun <T: Throwable> expectThrows(clazz: KClass<out T>, expectMessage: Stri
 }
 
 /**
+ * Expects that given block fails with an exception of given [clazz] (or its subtype).
+ *
+ * Note that this is different from [assertFailsWith] since this function
+ * also asserts on [Throwable.message].
+ * @param expectMessage optional substring which the [Throwable.message] must contain.
+ * @throws AssertionError if the block completed successfully or threw some other exception.
+ * @return the exception thrown, so that you can assert on it.
+ */
+public inline fun <reified T: Throwable> expectThrows(expectMessage: String = "", noinline block: ()->Unit): T =
+    expectThrows(T::class, expectMessage, block)
+
+/**
  * Handy function to get a stack trace from receiver.
  */
 public fun Throwable.getStackTraceAsString(): String {
