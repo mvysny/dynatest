@@ -177,7 +177,7 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
 
     fun runBeforeGroup() {
         if (node is DynaNodeGroup && isEnabled) {
-            (node as DynaNodeGroupImpl).beforeGroup.forEach { it() }
+            (node as DynaNodeGroupImpl).beforeGroup.forEach { it(Unit) }
         }
     }
 
@@ -191,7 +191,7 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
         if (node is DynaNodeGroup && isEnabled) {
             (node as DynaNodeGroupImpl).afterGroup.forEach {
                 try {
-                    it(Outcome(null, tf))
+                    it(Unit, Outcome(null, tf))
                 } catch (ex: Throwable) {
                     if (tf == null) tf = ex else tf!!.addSuppressed(ex)
                 }
@@ -210,7 +210,7 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
             getPathFromRoot().forEach { descriptor ->
                 lastNodeWithBeforeEachRan = descriptor
                 if (descriptor.node is DynaNodeGroup) {
-                    (descriptor.node as DynaNodeGroupImpl).beforeEach.forEach { it() }
+                    (descriptor.node as DynaNodeGroupImpl).beforeEach.forEach { it(Unit) }
                 }
             }
             block()
@@ -243,9 +243,9 @@ internal class DynaNodeTestDescriptor(parentId: UniqueId, val node: DynaNodeImpl
         var tf: Throwable? = testFailure
         if (isEnabled) {
             if (node is DynaNodeGroup) {
-                (node as DynaNodeGroupImpl).afterEach.forEach { afterEachBlock: (Outcome) -> Unit ->
+                (node as DynaNodeGroupImpl).afterEach.forEach { afterEachBlock: Unit.(Outcome) -> Unit ->
                     try {
-                        afterEachBlock(Outcome(testName, tf))
+                        afterEachBlock(Unit, Outcome(testName, tf))
                     } catch (t: Throwable) {
                         if (tf == null) tf = t else tf!!.addSuppressed(t)
                     }

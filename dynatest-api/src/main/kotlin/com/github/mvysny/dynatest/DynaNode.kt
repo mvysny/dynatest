@@ -3,6 +3,7 @@ package com.github.mvysny.dynatest
 /**
  * Makes sure to not to call [DynaNodeGroup] methods from the scope of the [DynaNodeTest].
  */
+@Target(AnnotationTarget.CLASS, AnnotationTarget.TYPE, AnnotationTarget.FUNCTION)
 @DslMarker
 public annotation class DynaNodeDsl
 
@@ -16,6 +17,10 @@ public annotation class DynaNodeDsl
  *
  * *Warning*: the methods may only be called when the `DynaTest` class is constructed. None of these methods can be called when the
  * tests are being run. Doing so will throw [IllegalStateException].
+ *
+ * **Implementation note:** The weird `(@DynaNodeDsl Unit)` receiver is only used to prevent
+ * calling e.g. `test {}` from `beforeGroup {}`. Whenever messing around with the DSL annotations,
+ * please make sure to look at the `UncompilableTest.kt` file.
  */
 @DynaNodeDsl
 public interface DynaNodeGroup {
@@ -25,6 +30,7 @@ public interface DynaNodeGroup {
      * @param body the implementation of the test; does not run immediately but only when the test case is run
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
+    @DynaNodeDsl
     public fun test(name: String, body: DynaNodeTest.() -> Unit)
 
     /**
@@ -33,6 +39,7 @@ public interface DynaNodeGroup {
      * @param block the block, runs immediately.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
+    @DynaNodeDsl
     public fun group(name: String, block: DynaNodeGroup.() -> Unit)
 
     /**
@@ -43,6 +50,7 @@ public interface DynaNodeGroup {
      * @param body the implementation of the test; does not run immediately but only when the test case is run
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
+    @DynaNodeDsl
     public fun xtest(name: String, body: DynaNodeTest.() -> Unit)
 
     /**
@@ -54,6 +62,7 @@ public interface DynaNodeGroup {
      * @param block the block, runs immediately.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
+    @DynaNodeDsl
     public fun xgroup(name: String, block: DynaNodeGroup.() -> Unit)
 
     /**
@@ -66,7 +75,8 @@ public interface DynaNodeGroup {
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
-    public fun beforeGroup(block: () -> Unit)
+    @DynaNodeDsl
+    public fun beforeGroup(block: (@DynaNodeDsl Unit).() -> Unit)
 
     /**
      * Registers a block which will be run before every test registered to this group and to any nested groups.
@@ -79,7 +89,8 @@ public interface DynaNodeGroup {
      * @param block the block to run. Any exceptions thrown by the block will make the test fail.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
-    public fun beforeEach(block: () -> Unit)
+    @DynaNodeDsl
+    public fun beforeEach(block: (@DynaNodeDsl Unit).() -> Unit)
 
     /**
      * Registers a [block] which will be run after every test registered to this group and to any nested groups.
@@ -97,7 +108,8 @@ public interface DynaNodeGroup {
      * The block receives an [Outcome] of the test run.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
-    public fun afterEach(block: (outcome: Outcome) -> Unit)
+    @DynaNodeDsl
+    public fun afterEach(block: (@DynaNodeDsl Unit).(outcome: @DynaNodeDsl Outcome) -> Unit)
 
     /**
      * Registers a block which will be run only once after all of the tests are run in the current group. Only the tests nested in this group and its subgroups are
@@ -109,7 +121,8 @@ public interface DynaNodeGroup {
      * The block receives an [Outcome] of the test run.
      * @throws IllegalStateException if this method is called when the tests are being run by JUnit.
      */
-    public fun afterGroup(block: (outcome: Outcome) -> Unit)
+    @DynaNodeDsl
+    public fun afterGroup(block: (@DynaNodeDsl Unit).(outcome: @DynaNodeDsl Outcome) -> Unit)
 }
 
 /**

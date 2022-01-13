@@ -1,9 +1,6 @@
 package com.github.mvysny.dynatest.engine
 
-import com.github.mvysny.dynatest.DynaNodeGroup
-import com.github.mvysny.dynatest.DynaNodeTest
-import com.github.mvysny.dynatest.DynaTest
-import com.github.mvysny.dynatest.Outcome
+import com.github.mvysny.dynatest.*
 import org.junit.platform.engine.TestSource
 
 /**
@@ -58,19 +55,19 @@ internal class DynaNodeGroupImpl internal constructor(
     /**
      * What to run before every test.
      */
-    internal val beforeEach = mutableListOf<()->Unit>()
+    internal val beforeEach = mutableListOf<Unit.()->Unit>()
     /**
      * What to run after every test.
      */
-    internal val afterEach = mutableListOf<(Outcome)->Unit>()
+    internal val afterEach = mutableListOf<Unit.(Outcome)->Unit>()
     /**
      * What to run before any of the test is started in this group.
      */
-    internal val beforeGroup = mutableListOf<()->Unit>()
+    internal val beforeGroup = mutableListOf<Unit.()->Unit>()
     /**
      * What to run after all tests are done in this group.
      */
-    internal val afterGroup = mutableListOf<(Outcome)->Unit>()
+    internal val afterGroup = mutableListOf<Unit.(Outcome)->Unit>()
 
     internal fun onDesignPhaseEnd() {
         inDesignPhase = false
@@ -113,22 +110,22 @@ internal class DynaNodeGroupImpl internal constructor(
         group(name, block, false)
     }
 
-    override fun beforeEach(block: ()->Unit) {
+    override fun beforeEach(block: (@DynaNodeDsl Unit).()->Unit) {
         checkInDesignPhase("beforeEach")
         beforeEach.add(block)
     }
 
-    override fun afterEach(block: (Outcome)->Unit) {
+    override fun afterEach(block: (@DynaNodeDsl Unit).(Outcome)->Unit) {
         checkInDesignPhase("afterEach")
         afterEach.add(block)
     }
 
-    override fun beforeGroup(block: ()->Unit) {
+    override fun beforeGroup(block: (@DynaNodeDsl Unit).()->Unit) {
         checkInDesignPhase("beforeGroup")
         beforeGroup.add(block)
     }
 
-    override fun afterGroup(block: (Outcome)->Unit) {
+    override fun afterGroup(block: (@DynaNodeDsl Unit).(Outcome)->Unit) {
         checkInDesignPhase("afterGroup")
         afterGroup.add(block)
     }
