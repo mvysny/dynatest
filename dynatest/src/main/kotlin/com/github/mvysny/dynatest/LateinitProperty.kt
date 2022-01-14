@@ -22,7 +22,7 @@ public data class LateinitProperty<V: Any>(val name: String, private var value: 
 }
 
 /**
- * Internal.
+ * Internal, used by [late].
  */
 public class LateinitPropertyProvider<V: Any> {
     public operator fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadWriteProperty<Any?, V> =
