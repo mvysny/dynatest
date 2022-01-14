@@ -143,7 +143,8 @@ public fun Path.expectWritableFile() {
  * Defaults to "dir".
  * @param keepOnFailure if true (default), the directory is not deleted on test failure so that you
  * can take a look what went wrong. Set this to `false` to always delete the directory.
- * @param init optionally populate the temp folder with some test files.
+ * @param init called right after the directory has been created, before any tests are executed.
+ * Allows you to for example populate the temp folder with some test files.
  */
 @DynaTestDsl
 public fun DynaNodeGroup.withTempDir(
