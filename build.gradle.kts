@@ -9,7 +9,7 @@ plugins {
 
 allprojects {
     group = "com.github.mvysny.dynatest"
-    version = "0.24"
+    version = "0.25-SNAPSHOT"
 
     repositories {
         mavenCentral()
