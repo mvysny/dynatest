@@ -45,7 +45,7 @@ class CalculatorTest : DynaTest({
  * when launched by JUnit5
  * @param range parametrized battery demo
  */
-@DynaNodeDsl
+@DynaTestDsl
 fun DynaNodeGroup.calculatorBattery(range: IntRange) {
     require(!range.isEmpty())
 

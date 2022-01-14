@@ -110,22 +110,22 @@ internal class DynaNodeGroupImpl internal constructor(
         group(name, block, false)
     }
 
-    override fun beforeEach(block: (@DynaNodeDsl Unit).()->Unit) {
+    override fun beforeEach(block: (@DynaTestDsl Unit).()->Unit) {
         checkInDesignPhase("beforeEach")
         beforeEach.add(block)
     }
 
-    override fun afterEach(block: (@DynaNodeDsl Unit).(Outcome)->Unit) {
+    override fun afterEach(block: (@DynaTestDsl Unit).(Outcome)->Unit) {
         checkInDesignPhase("afterEach")
         afterEach.add(block)
     }
 
-    override fun beforeGroup(block: (@DynaNodeDsl Unit).()->Unit) {
+    override fun beforeGroup(block: (@DynaTestDsl Unit).()->Unit) {
         checkInDesignPhase("beforeGroup")
         beforeGroup.add(block)
     }
 
-    override fun afterGroup(block: (@DynaNodeDsl Unit).(Outcome)->Unit) {
+    override fun afterGroup(block: (@DynaTestDsl Unit).(Outcome)->Unit) {
         checkInDesignPhase("afterGroup")
         afterGroup.add(block)
     }
