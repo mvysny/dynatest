@@ -9,7 +9,7 @@ import kotlin.reflect.KProperty
  *
  * Allows you to create a reusable `withXYZ()` function. See README.md for more details.
  *
- * Used in [withTempDir].
+ * See [withTempDir] and the DynaTest documentation on how to use this class in your projects.
  */
 public data class LateinitProperty<V: Any>(val name: String, private var value: V? = null) : ReadWriteProperty<Any?, V> {
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: V) {
