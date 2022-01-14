@@ -146,6 +146,7 @@ class FileTestUtilsTest : DynaTest({
     group("withTempDir()") {
 
         // a demo of a function which uses `withTempDir` and populates/inits the folder further.
+        @DynaTestDsl
         fun DynaNodeGroup.reusable(): ReadWriteProperty<Any?, File> =
             withTempDir("sources") { dir -> File(dir, "foo.txt").writeText("") }
 

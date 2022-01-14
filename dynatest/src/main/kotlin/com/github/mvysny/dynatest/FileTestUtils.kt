@@ -145,6 +145,7 @@ public fun Path.expectWritableFile() {
  * can take a look what went wrong. Set this to `false` to always delete the directory.
  * @param init optionally populate the temp folder with some test files.
  */
+@DynaTestDsl
 public fun DynaNodeGroup.withTempDir(
     name: String = "dir",
     keepOnFailure: Boolean = true,
