@@ -66,6 +66,7 @@ class CalculatorTest : DynaTest({
  * when launched by JUnit5
  * @param range parametrized battery demo
  */
+@DynaTestDsl
 fun DynaNodeGroup.calculatorBattery(range: IntRange) {
     require(!range.isEmpty())
 
@@ -268,6 +269,7 @@ To create a reusable utility function which e.g. pre-populates the directory, yo
 to use a different syntax:
 
 ```kotlin
+@DynaTestDsl
 fun DynaNodeGroup.withSources(): ReadWriteProperty<Any?, File> {
   val sourcesProperty: ReadWriteProperty<Any?, File> = withTempDir("sources")
   val sources by sourcesProperty
@@ -291,6 +293,7 @@ right away, failing with `unitialized` `RuntimeException`.
 Alternatively, since DynaTest 0.22 you can take advantage of `withTempDir()`'s init block:
 
 ```kotlin
+@DynaTestDsl
 fun DynaNodeGroup.withSources(): ReadWriteProperty<Any?, File> =
   withTempDir("sources") { dir -> generateSourcesTo(dir) }
 
@@ -310,6 +313,7 @@ to create any kind of variable. For example, say that we have a `TestProject`
 class which internally creates a temp folder and sets up some kind of a test project, then deletes it afterwards:
 
 ```kotlin
+@DynaTestDsl
 fun DynaNodeGroup.withTestProject(): ReadWriteProperty<Any?, TestProject> {
     val testProjectProperty = LateinitProperty<TestProject>("testproject")
     var testProject: TestProject by testProjectProperty
@@ -337,6 +341,7 @@ To build upon such lazy-init variable (for example to create a test project whic
 pre-populated with some testing files), you have to use the following construct:
 
 ```kotlin
+@DynaTestDsl
 fun DynaNodeGroup.withHelloWorldJavaTestProject(): ReadWriteProperty<Any?, File> {
   val testProjectProperty = withTestProject()
   val testProject: TestProject by testProjectProperty
@@ -405,6 +410,7 @@ runs in the context of the
 `DynaNodeGroup`. That allows the function to create test groups and tests as necessary:
 
 ```kotlin
+@DynaTestDsl
 fun DynaNodeGroup.layoutTestBattery(clazz: Class<out ComponentContainer>) {
   group("tests for ${clazz.simpleName}") {
     lateinit var layout: ComponentContainer
@@ -431,6 +437,7 @@ Say that you want to mock the database and clean it before and after every test.
 lifecycle-controlling functions into a separate function:
 
 ```kotlin
+@DynaTestDsl
 fun DynaNodeGroup.usingDatabase() {
 
     beforeGroup {
