@@ -92,6 +92,14 @@ Running this in your IDE will produce:
 
 ![DynaTest CalculatorTest screenshot](images/dynatest.png)
 
+## Tips & Tricks
+
+Intellij by default runs tests using Gradle. Dynatest contains workaround around
+Gradle and Intellij bugs, disabling navigation to the test source code from the
+*Run Tests* Intellij window. To fix this issue, head to *File* / *Settings* /
+*Build, Execution, Deployment* / *Build Tools* / *Gradle* and make sure that
+the *Run tests using* option is set to Intellij.
+
 ## Using DynaTest In Your Projects
 
 ### Example Project
@@ -143,7 +151,7 @@ If you want to run JUnit5 tests along the DynaTest tests as well, you can run bo
 
 ```groovy
 dependencies {
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.4.0")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 }
 ```
 
@@ -558,7 +566,7 @@ the basics run solidly with Gradle and the JUnit plugin:
 The third and final module, [dynatest](dynatest), provides all of the utility functions and helpers.
 Since we can now rely on the fact that the dynatest-engine works properly, this module tests itself using the dynatest-engine.
 
-## Oh God Not Yet Another Testing Framework
+# Oh God Not Yet Another Testing Framework
 
 I feel you. I hate creating frameworks. It takes a lot of time and
 energy to create DynaTest, maintain it, test it, document it, find workarounds
