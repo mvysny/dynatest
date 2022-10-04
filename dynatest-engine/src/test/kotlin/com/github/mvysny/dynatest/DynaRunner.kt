@@ -127,6 +127,8 @@ internal data class TestResults(val testsRan: MutableMap<UniqueId, TestExecution
 
 internal object EmptyConfigParameters : ConfigurationParameters {
     override fun getBoolean(key: String?): Optional<Boolean> = Optional.ofNullable(null)
+    @Deprecated("Deprecated in Java")
     override fun size(): Int = 0
+    override fun keySet(): MutableSet<String> = mutableSetOf()
     override fun get(key: String?): Optional<String> = Optional.ofNullable(null)
 }
