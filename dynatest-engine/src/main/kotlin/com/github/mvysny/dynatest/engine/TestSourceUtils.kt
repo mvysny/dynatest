@@ -16,6 +16,7 @@ private val slash: Char = File.separatorChar
 
 /**
  * Computes the pointer to the source of the test and returns it. Tries to compute at least inaccurate pointer.
+ * @param testName the test name, used as a hint. null for `group{}`.
  * @return the pointer to the test source; returns null if the source can not be computed by any means.
  */
 internal fun StackTraceElement.toTestSource(testName: String? = null): TestSource {
@@ -26,7 +27,7 @@ internal fun StackTraceElement.toTestSource(testName: String? = null): TestSourc
     if (isRunningInsideGradle) {
         // return null  // WARNING THIS WILL MAKE GRADLE SKIP TESTS!!!!!
 //        throw RuntimeException("Unsupported")   // THIS WILL MAKE GRADLE FREEZE!!! Retarded.
-        // just returning ClassSource always will make gradle freeze. dpc
+        // just returning ClassSource always will make gradle freeze. for fk's sake
 
         // strip $ to avoid having Test$1.xml, Test$1$5.xml with tests scattered in them
         var bareClassName: String = caller.className

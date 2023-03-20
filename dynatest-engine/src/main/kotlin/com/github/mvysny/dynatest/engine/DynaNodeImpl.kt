@@ -10,12 +10,18 @@ import org.junit.platform.engine.TestSource
  *
  * Every [DynaNodeGroup.test] and [DynaNodeGroup.group] call
  * creates this node which in turn can be converted to JUnit5 structures eligible for execution.
+ * @property name the test/group name, as passed to the [DynaNodeGroup.test]/[DynaNodeGroup.group] function.
+ * @property src points to the source file which called [DynaNodeGroup.test]/[DynaNodeGroup.group] function. Used to construct [toTestSource].
+ * @property enabled whether this group/test is enabled. Usually `true` unless [DynaNodeGroup.xtest] and friends are used.
  */
 internal sealed class DynaNodeImpl(
     internal val name: String,
     internal val src: StackTraceElement?,
     internal val enabled: Boolean
 ) {
+    /**
+     * Returns a JUnit pointer towards the source of this test method/group. Calculated from [src].
+     */
     abstract fun toTestSource(): TestSource?
 }
 
