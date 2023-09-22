@@ -14,6 +14,10 @@ allprojects {
     repositories {
         mavenCentral()
     }
+
+    tasks.withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = "1.8"
+    }
 }
 
 defaultTasks("clean", "build")
@@ -88,10 +92,6 @@ subprojects {
         signing {
             sign(publishing.publications["mavenJava"])
         }
-    }
-
-    tasks.withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
     }
 
     tasks.withType<Test> {
