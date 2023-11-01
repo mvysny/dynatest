@@ -63,25 +63,25 @@ subprojects {
                     this.artifactId = artifactId
                     version = project.version.toString()
                     pom {
-                        description.set("Simple Dynamic Testing Framework piggybacking on JUnit5")
-                        name.set(artifactId)
-                        url.set("https://github.com/mvysny/dynatest")
+                        description = "Simple Dynamic Testing Framework piggybacking on JUnit5"
+                        name = artifactId
+                        url = "https://github.com/mvysny/dynatest"
                         licenses {
                             license {
-                                name.set("The Apache Software License, Version 2.0")
-                                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                                distribution.set("repo")
+                                name = "The Apache Software License, Version 2.0"
+                                url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                                distribution = "repo"
                             }
                         }
                         developers {
                             developer {
-                                id.set("mavi")
-                                name.set("Martin Vysny")
-                                email.set("martin@vysny.me")
+                                id = "mavi"
+                                name = "Martin Vysny"
+                                email = "martin@vysny.me"
                             }
                         }
                         scm {
-                            url.set("https://github.com/mvysny/dynatest")
+                            url = "https://github.com/mvysny/dynatest"
                         }
                     }
                     from(components["java"])
@@ -97,7 +97,7 @@ subprojects {
     tasks.withType<Test> {
         useJUnitPlatform()
         testLogging {
-            // to see the exceptions of failed tests in Travis-CI console.
+            // to see the stacktraces of failed tests in the CI console.
             exceptionFormat = TestExceptionFormat.FULL
         }
     }
