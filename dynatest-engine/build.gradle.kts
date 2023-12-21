@@ -9,8 +9,8 @@ kotlin {
     explicitApi()
 }
 
-val configureBintray = ext["configureBintray"] as (artifactId: String) -> Unit
-configureBintray("dynatest-engine")
+val publishing = ext["publishing"] as (artifactId: String) -> Unit
+publishing("dynatest-engine")
 
 /**
  * Counts all occurrences of [substring] within the receiver string.

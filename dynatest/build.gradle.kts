@@ -6,5 +6,5 @@ kotlin {
     explicitApi()
 }
 
-val configureBintray = ext["configureBintray"] as (artifactId: String) -> Unit
-configureBintray("dynatest")
+val publishing = ext["publishing"] as (artifactId: String) -> Unit
+publishing("dynatest")
