@@ -1,8 +1,8 @@
 dependencies {
     api(project(":dynatest-api"))
-    api("org.junit.jupiter:junit-jupiter-api:${properties["junit_jupiter_version"]}")
-    api("org.junit.platform:junit-platform-engine:${properties["junit_platform_version"]}")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${properties["junit_jupiter_version"]}")
+    api(libs.junit.jupiter.api)
+    api(libs.junit.platform.engine)
+    testRuntimeOnly(libs.junit.jupiter.engine)
 }
 
 kotlin {
