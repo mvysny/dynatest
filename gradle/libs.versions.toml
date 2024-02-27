@@ -1,6 +1,6 @@
 [versions]
-junit-jupiter = "5.9.3"    # https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-engine/
-junit-platform = "1.9.3"   # https://repo1.maven.org/maven2/org/junit/platform/junit-platform-engine/
+junit-jupiter = "5.10.2"    # https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-engine/
+junit-platform = "1.10.2"   # https://repo1.maven.org/maven2/org/junit/platform/junit-platform-engine/
 
 [libraries]
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
