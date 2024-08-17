@@ -4,6 +4,9 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.mvysny.dynatest/dynatest-engine/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.mvysny.dynatest/dynatest-engine)
 [![Build Status](https://github.com/mvysny/dynatest/actions/workflows/gradle.yml/badge.svg)](https://github.com/mvysny/dynatest/actions/workflows/gradle.yml)
 
+> DEPRECATED, will no longer be maintained. Leaving the README file as reference. See at the bottom of this file
+> for reasons to deprecate, and for migration tips.
+
 The simplest and most powerful testing framework for Kotlin.
 
 We promote builders over annotations. Instead of having annotations forming an unfamiliar
@@ -669,3 +672,33 @@ limitations under the License.
 # Contributing / Developing
 
 See [Contributing](CONTRIBUTING.md).
+
+# Deprecated
+
+This library is now deprecated. The integration with Intellij IDEA was always quite weak:
+
+1. I have no time to develop a plugin for IDEA
+2. IDEA always contained a couple of bugs that prevented test filtering, or running individual tests;
+   sometimes navigation to test source wouldn't work.
+
+Moreover, the `@Nested` JUnit5 feature fully replaces DynaTest groups, which means that
+DynaTest doesn't bring huge advantages to the table anymore.
+
+To migrate your project:
+
+1. Change `DynaTest` classes to regular Java classes
+2. Change `test{}` to `@Test`-annotated functions
+3. Change `group{}` to a `@Nested inner class FooTests {}`
+4. Change `DynaNodeGroup.reusableTests()` to `abstract class AbstractReusableTests{}`,
+   then use it in other test classes as `@Nested inner class ReusableTests : AbstractReusableTests()`.
+   Parameters passed to `reusableTests()` can be converted to class properties.
+5. Change `beforeGroup{}` to `@BeforeAll`-annotated function within respective `@Nested` class. The function needs to be static which
+   would require you to use cumbersome `companion object{}`; as a workaround you can
+   use `@TestInstance(TestInstance.Lifecycle.PER_CLASS)` which modifies the test behavior a bit, but
+   the `@BeforeAll` functions no longer need to be static.
+6. Replace `if() { test("foo"){} }` conditional tests with `Assumptions`.
+7. Replace `if() { group("foo"){} }` conditional groups with `Assumptions` called from `@Nested` class constructor.
+   If the assumption fails, the entire class is skipped.
+
+Please experiment with the `@Nested` class concept - it is very powerful and strongly supported by
+Intellij IDEA. Please consult JUnit 5 documentation for more details.
