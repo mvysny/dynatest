@@ -4,8 +4,14 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.mvysny.dynatest/dynatest-engine/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.mvysny.dynatest/dynatest-engine)
 [![Build Status](https://github.com/mvysny/dynatest/actions/workflows/gradle.yml/badge.svg)](https://github.com/mvysny/dynatest/actions/workflows/gradle.yml)
 
-> DEPRECATED, will no longer be maintained. Leaving the README file as reference. See at the bottom of this file
-> for reasons to deprecate, and for migration tips.
+## DEPRECATED
+
+This framework is DEPRECATED, will no longer be maintained. Leaving the source code on GitHub as a reference.
+See at the bottom of this file for reasons to deprecate, and for migration tips.
+
+The original README follows.
+
+## DynaTest
 
 The simplest and most powerful testing framework for Kotlin.
 
