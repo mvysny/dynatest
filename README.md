@@ -702,3 +702,17 @@ To migrate your project:
 
 Please experiment with the `@Nested` class concept - it is very powerful and strongly supported by
 Intellij IDEA. Please consult JUnit 5 documentation for more details.
+
+Now, why am I endorsing an annotation-based framework when I [hate annotations](https://mvysny.github.io/post-annotation-programming/)?
+Excellent question. True, runtime annotations are evil since the annotation processor is detached from the definition of annotations.
+But, similarly the test runtime is detached from the place where tests are defined, both with annotations
+and with the `test{}` function. Also, JUnit is a well-tested industry standard with excellent IDEA plugin,
+so there's (hopefully) little room for error on programmer side. Also - and this is crucial - JUnit the framework,
+the documentation and the community is someone else's responsibility. I still think that
+Dynatest's functional approach is much more ellegant than thousands of JUnit annotations (especially the parametrized tests),
+but the IDE support is just as important and is much better at JUnit's side.
+
+There's one thing that JUnit got better - see the JUnit comparison, the 'disadvantages' section for more details.
+
+Therefore, with heavy heart, I'm deprecating Dynatest.
+
